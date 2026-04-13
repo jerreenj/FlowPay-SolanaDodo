@@ -1,0 +1,1203 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: FlowPay API - India's stablecoin payment super-layer
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: dashboard
+    description: Dashboard stats and activity
+  - name: wallet
+    description: Wallet and transactions
+  - name: payroll
+    description: Payroll payments module
+  - name: remittance
+    description: Remittance module
+  - name: escrow
+    description: Escrow module
+  - name: creator
+    description: Creator commerce module
+  - name: agents
+    description: AI agent payments module
+  - name: rates
+    description: Exchange rates
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Bad request
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # DASHBOARD
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Recent activity feed across all modules
+      responses:
+        "200":
+          description: Activity items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  # WALLET
+  /wallet:
+    get:
+      operationId: getWallet
+      tags: [wallet]
+      summary: Get wallet balance and info
+      responses:
+        "200":
+          description: Wallet info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+
+  /wallet/transactions:
+    get:
+      operationId: listWalletTransactions
+      tags: [wallet]
+      summary: List wallet transactions
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletTransaction"
+
+  # PAYROLL
+  /payroll/payments:
+    get:
+      operationId: listPayrollPayments
+      tags: [payroll]
+      summary: List payroll payments
+      responses:
+        "200":
+          description: Payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PayrollPayment"
+    post:
+      operationId: createPayrollPayment
+      tags: [payroll]
+      summary: Create a payroll payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePayrollPaymentBody"
+      responses:
+        "201":
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayrollPayment"
+
+  /payroll/payments/{id}:
+    get:
+      operationId: getPayrollPayment
+      tags: [payroll]
+      summary: Get a payroll payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayrollPayment"
+        "404":
+          description: Not found
+
+  /payroll/stats:
+    get:
+      operationId: getPayrollStats
+      tags: [payroll]
+      summary: Get payroll module stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayrollStats"
+
+  # REMITTANCE
+  /remittances:
+    get:
+      operationId: listRemittances
+      tags: [remittance]
+      summary: List remittances
+      responses:
+        "200":
+          description: Remittances
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Remittance"
+    post:
+      operationId: createRemittance
+      tags: [remittance]
+      summary: Create a remittance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRemittanceBody"
+      responses:
+        "201":
+          description: Remittance created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Remittance"
+
+  /remittances/{id}:
+    get:
+      operationId: getRemittance
+      tags: [remittance]
+      summary: Get a remittance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Remittance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Remittance"
+        "404":
+          description: Not found
+
+  /remittances/stats:
+    get:
+      operationId: getRemittanceStats
+      tags: [remittance]
+      summary: Remittance stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RemittanceStats"
+
+  # ESCROW
+  /escrows:
+    get:
+      operationId: listEscrows
+      tags: [escrow]
+      summary: List escrows
+      responses:
+        "200":
+          description: Escrows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Escrow"
+    post:
+      operationId: createEscrow
+      tags: [escrow]
+      summary: Create an escrow contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEscrowBody"
+      responses:
+        "201":
+          description: Escrow created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Escrow"
+
+  /escrows/{id}:
+    get:
+      operationId: getEscrow
+      tags: [escrow]
+      summary: Get an escrow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Escrow
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Escrow"
+        "404":
+          description: Not found
+
+  /escrows/{id}/release:
+    patch:
+      operationId: releaseEscrow
+      tags: [escrow]
+      summary: Release escrow funds
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Escrow"
+
+  /escrows/{id}/dispute:
+    patch:
+      operationId: disputeEscrow
+      tags: [escrow]
+      summary: Open a dispute on escrow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Disputed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Escrow"
+
+  # CREATOR
+  /creator/products:
+    get:
+      operationId: listCreatorProducts
+      tags: [creator]
+      summary: List creator products
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreatorProduct"
+    post:
+      operationId: createCreatorProduct
+      tags: [creator]
+      summary: Create a creator product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCreatorProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorProduct"
+
+  /creator/products/{id}:
+    get:
+      operationId: getCreatorProduct
+      tags: [creator]
+      summary: Get a creator product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorProduct"
+        "404":
+          description: Not found
+
+  /creator/products/{id}/purchase:
+    post:
+      operationId: purchaseCreatorProduct
+      tags: [creator]
+      summary: Purchase a creator product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseProductBody"
+      responses:
+        "201":
+          description: Purchase complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorSale"
+
+  /creator/sales:
+    get:
+      operationId: listCreatorSales
+      tags: [creator]
+      summary: List creator sales
+      responses:
+        "200":
+          description: Sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreatorSale"
+
+  /creator/stats:
+    get:
+      operationId: getCreatorStats
+      tags: [creator]
+      summary: Creator module stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorStats"
+
+  # AI AGENTS
+  /agents:
+    get:
+      operationId: listAgents
+      tags: [agents]
+      summary: List AI payment agents
+      responses:
+        "200":
+          description: Agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Agent"
+    post:
+      operationId: createAgent
+      tags: [agents]
+      summary: Create an AI payment agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentBody"
+      responses:
+        "201":
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+
+  /agents/{id}:
+    get:
+      operationId: getAgent
+      tags: [agents]
+      summary: Get an agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Agent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+        "404":
+          description: Not found
+
+  /agents/{id}/fund:
+    post:
+      operationId: fundAgent
+      tags: [agents]
+      summary: Fund an agent wallet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FundAgentBody"
+      responses:
+        "200":
+          description: Agent funded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Agent"
+
+  /agents/{id}/pay:
+    post:
+      operationId: agentPay
+      tags: [agents]
+      summary: Agent makes an autonomous payment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentPayBody"
+      responses:
+        "201":
+          description: Payment executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentTransaction"
+
+  /agents/{id}/transactions:
+    get:
+      operationId: listAgentTransactions
+      tags: [agents]
+      summary: List agent transactions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentTransaction"
+
+  # RATES
+  /rates:
+    get:
+      operationId: getRates
+      tags: [rates]
+      summary: Get current exchange rates (USDG to INR, USD, AED)
+      responses:
+        "200":
+          description: Exchange rates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExchangeRates"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    # AUTH
+    RegisterBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        userType:
+          type: string
+          enum: [freelancer, company, creator, migrant, developer]
+        country:
+          type: string
+      required: [name, email, password, userType]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required: [token, user]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        userType:
+          type: string
+        country:
+          type: string
+        walletAddress:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email, userType, createdAt]
+
+    # DASHBOARD
+    DashboardStats:
+      type: object
+      properties:
+        totalVolume:
+          type: string
+        totalTransactions:
+          type: integer
+        totalFees:
+          type: string
+        activeUsers:
+          type: integer
+        payrollVolume:
+          type: string
+        remittanceVolume:
+          type: string
+        escrowVolume:
+          type: string
+        creatorVolume:
+          type: string
+        agentVolume:
+          type: string
+        solanaTransactions:
+          type: integer
+        avgSettlementSeconds:
+          type: number
+      required: [totalVolume, totalTransactions, totalFees, activeUsers, payrollVolume, remittanceVolume, escrowVolume, creatorVolume, agentVolume, solanaTransactions, avgSettlementSeconds]
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [payroll, remittance, escrow, creator, agent]
+        description:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, description, amount, currency, status, createdAt]
+
+    # WALLET
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        address:
+          type: string
+        usdgBalance:
+          type: string
+        inrBalance:
+          type: string
+        totalReceived:
+          type: string
+        totalSent:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, userId, address, usdgBalance, inrBalance, totalReceived, totalSent, createdAt]
+
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [receive, send, fee]
+        amount:
+          type: string
+        currency:
+          type: string
+        description:
+          type: string
+        solanaSignature:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, type, amount, currency, description, createdAt]
+
+    # PAYROLL
+    PayrollPayment:
+      type: object
+      properties:
+        id:
+          type: integer
+        senderName:
+          type: string
+        senderCompany:
+          type: string
+        recipientName:
+          type: string
+        recipientEmail:
+          type: string
+        amountUsdg:
+          type: string
+        feeUsdg:
+          type: string
+        amountInr:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        solanaSignature:
+          type: ["string", "null"]
+        settlementSeconds:
+          type: ["number", "null"]
+        dodoPaymentId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, senderName, senderCompany, recipientName, recipientEmail, amountUsdg, feeUsdg, amountInr, status, createdAt]
+
+    CreatePayrollPaymentBody:
+      type: object
+      properties:
+        senderName:
+          type: string
+        senderCompany:
+          type: string
+        recipientName:
+          type: string
+        recipientEmail:
+          type: string
+        amountUsdg:
+          type: string
+        recipientUpiId:
+          type: string
+      required: [senderName, senderCompany, recipientName, recipientEmail, amountUsdg]
+
+    PayrollStats:
+      type: object
+      properties:
+        totalPayments:
+          type: integer
+        totalVolume:
+          type: string
+        totalFees:
+          type: string
+        avgSettlementSeconds:
+          type: number
+        completedCount:
+          type: integer
+        pendingCount:
+          type: integer
+      required: [totalPayments, totalVolume, totalFees, avgSettlementSeconds, completedCount, pendingCount]
+
+    # REMITTANCE
+    Remittance:
+      type: object
+      properties:
+        id:
+          type: integer
+        senderName:
+          type: string
+        senderCountry:
+          type: string
+        recipientName:
+          type: string
+        recipientUpiId:
+          type: string
+        amountUsdg:
+          type: string
+        feeUsdg:
+          type: string
+        amountInr:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        solanaSignature:
+          type: ["string", "null"]
+        settlementSeconds:
+          type: ["number", "null"]
+        dodoPaymentId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, senderName, senderCountry, recipientName, recipientUpiId, amountUsdg, feeUsdg, amountInr, status, createdAt]
+
+    CreateRemittanceBody:
+      type: object
+      properties:
+        senderName:
+          type: string
+        senderCountry:
+          type: string
+        recipientName:
+          type: string
+        recipientUpiId:
+          type: string
+        amountUsdg:
+          type: string
+      required: [senderName, senderCountry, recipientName, recipientUpiId, amountUsdg]
+
+    RemittanceStats:
+      type: object
+      properties:
+        totalRemittances:
+          type: integer
+        totalVolume:
+          type: string
+        totalFees:
+          type: string
+        avgSettlementSeconds:
+          type: number
+        corridors:
+          type: array
+          items:
+            type: object
+            properties:
+              country:
+                type: string
+              count:
+                type: integer
+              volume:
+                type: string
+            required: [country, count, volume]
+      required: [totalRemittances, totalVolume, totalFees, avgSettlementSeconds, corridors]
+
+    # ESCROW
+    Escrow:
+      type: object
+      properties:
+        id:
+          type: integer
+        clientName:
+          type: string
+        clientEmail:
+          type: string
+        freelancerName:
+          type: string
+        freelancerEmail:
+          type: string
+        projectTitle:
+          type: string
+        description:
+          type: string
+        amountUsdg:
+          type: string
+        feeUsdg:
+          type: string
+        milestones:
+          type: integer
+        completedMilestones:
+          type: integer
+        status:
+          type: string
+          enum: [active, released, disputed, cancelled]
+        solanaAddress:
+          type: ["string", "null"]
+        solanaSignature:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, clientName, clientEmail, freelancerName, freelancerEmail, projectTitle, description, amountUsdg, feeUsdg, milestones, completedMilestones, status, createdAt]
+
+    CreateEscrowBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        clientEmail:
+          type: string
+        freelancerName:
+          type: string
+        freelancerEmail:
+          type: string
+        projectTitle:
+          type: string
+        description:
+          type: string
+        amountUsdg:
+          type: string
+        milestones:
+          type: integer
+      required: [clientName, clientEmail, freelancerName, freelancerEmail, projectTitle, description, amountUsdg, milestones]
+
+    # CREATOR
+    CreatorProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        creatorName:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [course, newsletter, ebook, template, other]
+        priceUsdg:
+          type: string
+        salesCount:
+          type: integer
+        totalRevenue:
+          type: string
+        isActive:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, creatorName, title, description, type, priceUsdg, salesCount, totalRevenue, isActive, createdAt]
+
+    CreateCreatorProductBody:
+      type: object
+      properties:
+        creatorName:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [course, newsletter, ebook, template, other]
+        priceUsdg:
+          type: string
+      required: [creatorName, title, description, type, priceUsdg]
+
+    PurchaseProductBody:
+      type: object
+      properties:
+        buyerEmail:
+          type: string
+        buyerName:
+          type: string
+      required: [buyerEmail, buyerName]
+
+    CreatorSale:
+      type: object
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productTitle:
+          type: string
+        creatorName:
+          type: string
+        buyerName:
+          type: string
+        buyerEmail:
+          type: string
+        amountUsdg:
+          type: string
+        feeUsdg:
+          type: string
+        creatorReceives:
+          type: string
+        solanaSignature:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, productId, productTitle, creatorName, buyerName, buyerEmail, amountUsdg, feeUsdg, creatorReceives, createdAt]
+
+    CreatorStats:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+        totalSales:
+          type: integer
+        totalRevenue:
+          type: string
+        totalFees:
+          type: string
+        topProducts:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              sales:
+                type: integer
+              revenue:
+                type: string
+            required: [title, sales, revenue]
+      required: [totalProducts, totalSales, totalRevenue, totalFees, topProducts]
+
+    # AGENTS
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        ownerName:
+          type: string
+        walletAddress:
+          type: string
+        usdgBalance:
+          type: string
+        totalPaid:
+          type: string
+        totalReceived:
+          type: string
+        transactionCount:
+          type: integer
+        isActive:
+          type: string
+        x402Enabled:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, description, ownerName, walletAddress, usdgBalance, totalPaid, totalReceived, transactionCount, isActive, x402Enabled, createdAt]
+
+    CreateAgentBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        ownerName:
+          type: string
+        x402Enabled:
+          type: boolean
+      required: [name, description, ownerName]
+
+    FundAgentBody:
+      type: object
+      properties:
+        amountUsdg:
+          type: string
+      required: [amountUsdg]
+
+    AgentPayBody:
+      type: object
+      properties:
+        recipientAddress:
+          type: string
+        recipientName:
+          type: string
+        amountUsdg:
+          type: string
+        purpose:
+          type: string
+      required: [recipientAddress, recipientName, amountUsdg, purpose]
+
+    AgentTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        agentId:
+          type: integer
+        agentName:
+          type: string
+        type:
+          type: string
+          enum: [outgoing, incoming, fund]
+        recipientName:
+          type: ["string", "null"]
+        recipientAddress:
+          type: ["string", "null"]
+        amountUsdg:
+          type: string
+        purpose:
+          type: string
+        solanaSignature:
+          type: ["string", "null"]
+        settlementMs:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, agentId, agentName, type, amountUsdg, purpose, createdAt]
+
+    # RATES
+    ExchangeRates:
+      type: object
+      properties:
+        usdgToInr:
+          type: number
+        usdgToUsd:
+          type: number
+        usdgToAed:
+          type: number
+        usdgToGbp:
+          type: number
+        updatedAt:
+          type: string
+          format: date-time
+      required: [usdgToInr, usdgToUsd, usdgToAed, usdgToGbp, updatedAt]
