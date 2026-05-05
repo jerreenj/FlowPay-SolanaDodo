@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pnpm --filter @workspace/flowpay run build",
+  "outputDirectory": "artifacts/flowpay/dist",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "env": {
+    "VITE_API_BASE": "https://flowpay-api.railway.app"
+  }
+}
