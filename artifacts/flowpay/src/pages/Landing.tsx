@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { Zap } from "lucide-react";
+
 import { useAuthStore } from "@/lib/auth";
 import WalletConnect from "@/components/WalletConnect";
 
@@ -136,35 +136,19 @@ export default function Landing() {
       <section className="relative h-screen w-full flex flex-col overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-        {/* Nav — logo only, no wallet button */}
-        <nav className="relative z-10 flex items-center justify-between px-8 py-5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-base tracking-tight">FlowPay</span>
+        {/* Nav — just a green dot + MAINNET */}
+        <nav className="relative z-10 flex items-center justify-end px-8 py-5">
+          <div className="flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-60" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00ff88]" />
+            </span>
+            <span className="text-[11px] font-mono text-white/30 tracking-widest">MAINNET</span>
           </div>
-          <span className="text-xs font-mono text-white/30 tracking-widest">SOLANA · MAINNET</span>
         </nav>
 
         {/* Centered hero content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
-          <motion.div
-            custom={0}
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 mb-8 backdrop-blur-sm"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-50" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-            </span>
-            <span className="text-xs font-mono text-white/60">
-              USDG · SOLANA MAINNET · &lt;3s settlement
-            </span>
-          </motion.div>
-
           <motion.h1
             custom={1}
             variants={fadeUp}

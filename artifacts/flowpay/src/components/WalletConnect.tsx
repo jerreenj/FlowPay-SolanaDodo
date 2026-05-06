@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Wallet, X, ChevronRight, Loader2, ExternalLink } from "lucide-react";
+import { X, ChevronRight, Loader2, ExternalLink } from "lucide-react";
 import { useAuthStore } from "@/lib/auth";
 
 declare global {
@@ -27,38 +27,13 @@ interface SolflareProvider {
   publicKey?: { toString: () => string } | null;
 }
 
-// Real brand logos as accurate SVG paths
-const PhantomLogo = () => (
-  <svg width="28" height="28" viewBox="0 0 128 128" fill="none">
-    <rect width="128" height="128" rx="22" fill="#9945FF"/>
-    <path fillRule="evenodd" clipRule="evenodd" d="M110.584 64.9142C110.584 86.0582 93.8938 103.197 73.2898 103.197H56.7102C51.1028 103.197 46.5521 98.5225 46.5521 92.7642C46.5521 86.0036 40.5499 80.4822 33.3489 80.4822C27.2014 80.4822 22.2162 75.8082 22.2162 70.0499V64.9142C22.2162 43.7702 38.9062 26.6313 59.5102 26.6313H73.2898C93.8938 26.6313 110.584 43.7702 110.584 64.9142ZM68.8182 52.5455C68.8182 55.6892 66.3529 58.2363 63.3013 58.2363C60.2496 58.2363 57.7843 55.6892 57.7843 52.5455C57.7843 49.4017 60.2496 46.8546 63.3013 46.8546C66.3529 46.8546 68.8182 49.4017 68.8182 52.5455ZM88.6494 52.5455C88.6494 55.6892 86.1841 58.2363 83.1325 58.2363C80.0808 58.2363 77.6156 55.6892 77.6156 52.5455C77.6156 49.4017 80.0808 46.8546 83.1325 46.8546C86.1841 46.8546 88.6494 49.4017 88.6494 52.5455Z" fill="white"/>
-  </svg>
-);
-
-const BackpackLogo = () => (
-  <svg width="28" height="28" viewBox="0 0 128 128" fill="none">
-    <rect width="128" height="128" rx="22" fill="#E33E3F"/>
-    <path d="M55 30C55 25.0294 59.0294 21 64 21C68.9706 21 73 25.0294 73 30V33H82C88.6274 33 94 38.3726 94 45V93C94 99.6274 88.6274 105 82 105H46C39.3726 105 34 99.6274 34 93V45C34 38.3726 39.3726 33 46 33H55V30Z" fill="white" fillOpacity="0.9"/>
-    <rect x="55" y="21" width="18" height="14" rx="6" fill="white" fillOpacity="0.9"/>
-    <rect x="34" y="60" width="60" height="5" rx="2.5" fill="#E33E3F"/>
-  </svg>
-);
-
-const SolflareLogo = () => (
-  <svg width="28" height="28" viewBox="0 0 128 128" fill="none">
-    <rect width="128" height="128" rx="22" fill="#FC8B27"/>
-    <path d="M64 18L74.5 44.5L102 42L82 62L90 89L64 74L38 89L46 62L26 42L53.5 44.5L64 18Z" fill="white" fillOpacity="0.95"/>
-    <circle cx="64" cy="65" r="14" fill="#FC8B27"/>
-    <circle cx="64" cy="65" r="8" fill="white" fillOpacity="0.9"/>
-  </svg>
-);
-
 const WALLETS = [
   {
     id: "phantom",
     name: "Phantom",
     description: "Most popular Solana wallet",
-    logo: <PhantomLogo />,
+    logo: "/wallets/phantom.png",
+    bgColor: "#ab9ff2",
     detect: () => !!(window.phantom?.solana?.isPhantom || window.solana?.isPhantom),
     connect: async (): Promise<string | null> => {
       const p = window.phantom?.solana ?? window.solana;
@@ -72,7 +47,8 @@ const WALLETS = [
     id: "backpack",
     name: "Backpack",
     description: "xNFT wallet by Coral",
-    logo: <BackpackLogo />,
+    logo: "/wallets/backpack.jpg",
+    bgColor: "#000",
     detect: () => !!window.backpack?.solana,
     connect: async (): Promise<string | null> => {
       const p = window.backpack?.solana;
@@ -86,7 +62,8 @@ const WALLETS = [
     id: "solflare",
     name: "Solflare",
     description: "Feature-rich Solana wallet",
-    logo: <SolflareLogo />,
+    logo: "/wallets/solflare.png",
+    bgColor: "#FBBF24",
     detect: () => !!(window.solflare?.isSolflare),
     connect: async (): Promise<string | null> => {
       const p = window.solflare;
@@ -98,10 +75,6 @@ const WALLETS = [
   },
 ];
 
-interface Props {
-  variant?: "default" | "hero" | "card";
-}
-
 async function safePost(url: string, body: object) {
   const res = await fetch(url, {
     method: "POST",
@@ -110,8 +83,12 @@ async function safePost(url: string, body: object) {
   });
   const text = await res.text();
   let data: Record<string, unknown> = {};
-  try { data = text ? JSON.parse(text) : {}; } catch { /* empty */ }
+  try { data = text ? JSON.parse(text) : {}; } catch { /* ignore */ }
   return { ok: res.ok, status: res.status, data };
+}
+
+interface Props {
+  variant?: "default" | "hero" | "card";
 }
 
 export default function WalletConnect({ variant = "default" }: Props) {
@@ -128,12 +105,14 @@ export default function WalletConnect({ variant = "default" }: Props) {
   useEffect(() => {
     if (!open) return;
     const d = new Set<string>();
-    WALLETS.forEach((w) => { if (w.detect()) d.add(w.id); });
+    WALLETS.forEach((w) => { try { if (w.detect()) d.add(w.id); } catch { /* ignore */ } });
     setDetected(d);
   }, [open]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); setShowUsername(false); } };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setOpen(false); setShowUsername(false); setError(null); }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -159,18 +138,28 @@ export default function WalletConnect({ variant = "default" }: Props) {
   async function handleConnect(walletId: string) {
     const wallet = WALLETS.find((w) => w.id === walletId);
     if (!wallet) return;
-    if (!wallet.detect()) {
-      window.open(wallet.installUrl, "_blank");
-      return;
-    }
+
     setLoading(walletId);
     setError(null);
+
     try {
+      if (!wallet.detect()) {
+        // Not installed — open install page but don't throw, just inform
+        window.open(wallet.installUrl, "_blank");
+        setError(`${wallet.name} not detected. Install it and refresh this page.`);
+        setLoading(null);
+        return;
+      }
       const address = await wallet.connect();
       if (!address) throw new Error("Connection cancelled or rejected");
       await attemptAuth(address);
     } catch (e: any) {
-      setError(e?.message ?? "Connection failed — try again");
+      const msg = e?.message ?? "";
+      if (msg.toLowerCase().includes("user rejected") || msg.toLowerCase().includes("cancelled")) {
+        setError("You cancelled the connection. Try again.");
+      } else {
+        setError(msg || "Connection failed — try again");
+      }
     } finally {
       setLoading(null);
     }
@@ -200,8 +189,7 @@ export default function WalletConnect({ variant = "default" }: Props) {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className={btnClass}>
-        <Wallet className="w-4 h-4" />
+      <button onClick={() => { setOpen(true); setError(null); }} className={btnClass}>
         Connect Wallet
         {variant === "hero" && <ChevronRight className="w-4 h-4" />}
       </button>
@@ -212,17 +200,19 @@ export default function WalletConnect({ variant = "default" }: Props) {
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => { setOpen(false); setShowUsername(false); setError(null); }}
           />
+
           <div className="relative z-10 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]">
             {showUsername ? (
+              /* ── Username prompt ── */
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-bold text-white">Choose a username</h2>
-                  <button onClick={() => setShowUsername(false)} className="text-white/30 hover:text-white transition-colors">
+                  <h2 className="font-bold text-white text-base">One last thing</h2>
+                  <button onClick={() => { setShowUsername(false); setError(null); }} className="text-white/30 hover:text-white transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="text-sm text-white/40 mb-4 leading-relaxed">
-                  Wallet connected. Pick a display name — the only information we store.
+                <p className="text-sm text-white/40 mb-5 leading-relaxed">
+                  Pick a display name. It's the only information we store — no email, no password.
                 </p>
                 <input
                   autoFocus
@@ -232,27 +222,32 @@ export default function WalletConnect({ variant = "default" }: Props) {
                   onKeyDown={(e) => { if (e.key === "Enter") submitUsername(); }}
                   placeholder="e.g. satoshi"
                   maxLength={32}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/30 focus:ring-1 focus:ring-white/10 mb-3 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/25 transition-all mb-3"
                 />
                 {error && <p className="text-xs text-red-400 mb-3">{error}</p>}
                 <button
                   onClick={submitUsername}
                   disabled={!username.trim() || loading === "username"}
-                  className="w-full bg-white text-black font-bold text-sm py-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/90 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-white text-black font-bold text-sm py-3 rounded-xl disabled:opacity-40 hover:bg-white/90 transition-all flex items-center justify-center gap-2"
                 >
                   {loading === "username" && <Loader2 className="w-4 h-4 animate-spin" />}
                   Enter FlowPay
                 </button>
               </div>
             ) : (
+              /* ── Wallet picker ── */
               <div className="p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-bold text-white">Connect a Solana wallet</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="font-bold text-white text-base">Connect your wallet</h2>
+                    <p className="text-xs text-white/30 mt-0.5">Choose a Solana wallet to continue</p>
+                  </div>
                   <button onClick={() => { setOpen(false); setError(null); }} className="text-white/30 hover:text-white transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="space-y-2">
+
+                <div className="space-y-2.5">
                   {WALLETS.map((wallet) => {
                     const isDetected = detected.has(wallet.id);
                     const isLoading = loading === wallet.id;
@@ -263,23 +258,39 @@ export default function WalletConnect({ variant = "default" }: Props) {
                         disabled={!!loading}
                         className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border border-white/8 bg-white/3 hover:bg-white/7 hover:border-white/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-left group"
                       >
-                        <div className="shrink-0 rounded-xl overflow-hidden">{wallet.logo}</div>
+                        {/* Real wallet logo */}
+                        <div className="shrink-0 w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center"
+                          style={{ background: wallet.bgColor }}>
+                          <img
+                            src={wallet.logo}
+                            alt={wallet.name}
+                            className="w-10 h-10 object-cover rounded-xl"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        </div>
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-white">{wallet.name}</span>
                             {isDetected && (
-                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/60">
-                                Detected
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/50">
+                                Ready
+                              </span>
+                            )}
+                            {!isDetected && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-white/25">
+                                Not installed
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-white/30">{wallet.description}</p>
+                          <p className="text-xs text-white/30 mt-0.5">{wallet.description}</p>
                         </div>
+
                         <div className="shrink-0">
                           {isLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin text-white/40" />
                           ) : isDetected ? (
-                            <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+                            <ChevronRight className="w-4 h-4 text-white/25 group-hover:text-white/60 transition-colors" />
                           ) : (
                             <ExternalLink className="w-3.5 h-3.5 text-white/20 group-hover:text-white/40 transition-colors" />
                           )}
@@ -288,7 +299,13 @@ export default function WalletConnect({ variant = "default" }: Props) {
                     );
                   })}
                 </div>
-                {error && <p className="text-xs text-red-400 mt-3 px-1">{error}</p>}
+
+                {error && (
+                  <div className="mt-3 px-3 py-2 rounded-lg bg-red-500/8 border border-red-500/15">
+                    <p className="text-xs text-red-400">{error}</p>
+                  </div>
+                )}
+
                 <p className="text-[10px] text-white/15 text-center mt-5 leading-relaxed">
                   Your wallet address is your identity. No email. No password.
                 </p>
