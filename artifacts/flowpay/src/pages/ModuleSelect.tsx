@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/auth";
-import { Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, LogOut, Copy, CheckCheck, ArrowRight } from "lucide-react";
+import { Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, LogOut, Copy, CheckCheck, ArrowRight, ArrowLeft } from "lucide-react";
 import RainingLetters from "@/components/RainingLetters";
 
 const modules = [
@@ -100,7 +100,14 @@ export default function ModuleSelect() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-end px-8 py-5 border-b border-white/[0.06]">
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+        <button
+          onClick={() => setLocation("/")}
+          className="flex items-center gap-2 text-xs text-white/35 hover:text-white/70 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back
+        </button>
         <div className="flex items-center gap-3">
           {user?.walletAddress && (
             <button
