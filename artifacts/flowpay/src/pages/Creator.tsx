@@ -113,6 +113,7 @@ function ShareModal({ productId, productTitle, onClose }: { productId: number; p
 
 export default function Creator() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -120,7 +121,7 @@ export default function Creator() {
   const [buyForm, setBuyForm] = useState({ buyerName: "", buyerEmail: "" });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [newProduct, setNewProduct] = useState({ creatorName: "", title: "", description: "", type: "course", priceUsdg: "" });
+  const [newProduct, setNewProduct] = useState({ creatorName: user?.name ?? "", title: "", description: "", type: "course", priceUsdg: "" });
   const [tab, setTab] = useState<"marketplace" | "sales">("marketplace");
   const [shareProduct, setShareProduct] = useState<Product | null>(null);
 
