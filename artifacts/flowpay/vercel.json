@@ -5,8 +5,5 @@
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "env": {
-    "VITE_API_BASE": "https://flowpay-api.railway.app"
-  }
+  ]
 }
