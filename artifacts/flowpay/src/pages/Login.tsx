@@ -6,7 +6,7 @@ import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [, navigate] = useLocation();
-  const setToken = useAuthStore((s) => s.setToken);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [email, setEmail] = useState("demo@flowpay.in");
   const [password, setPassword] = useState("demo123");
   const [showPw, setShowPw] = useState(false);
@@ -25,7 +25,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      setToken(data.token);
+      setAuth(data.token, data.user);
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);

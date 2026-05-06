@@ -35,8 +35,8 @@ export default function Profile() {
       setEditing(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError("Network error — please try again");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Network error — please try again");
     } finally {
       setSaving(false);
     }

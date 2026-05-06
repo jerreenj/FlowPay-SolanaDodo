@@ -3,12 +3,11 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth";
 import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
-  Wallet, LogOut, Grid2x2, Copy, CheckCheck, UserCircle,
+  Wallet, LogOut, Copy, CheckCheck, UserCircle,
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
-  { href: "/select",     label: "Go Back",      icon: Grid2x2,        accent: null },
   { href: "/payroll",    label: "PayRails",      icon: Users,          accent: "#00ff88" },
   { href: "/remittance", label: "RemitDirect",   icon: ArrowRightLeft, accent: "#38bdf8" },
   { href: "/escrow",     label: "EscrowX",       icon: ShieldCheck,    accent: "#a78bfa" },
@@ -40,7 +39,7 @@ export function Sidebar() {
   const initials = user?.name ? user.name.slice(0, 2).toUpperCase() : "FP";
 
   const activeItem = navItems.find(
-    (item) => item.href !== "/select" && location.startsWith(item.href)
+    (item) => location.startsWith(item.href)
   );
   const activeAccent = activeItem?.accent ?? null;
 
@@ -85,7 +84,7 @@ export function Sidebar() {
         {navItems.map(({ href, label, icon: Icon, accent }) => {
           const isActive =
             location === href ||
-            (href !== "/select" && location.startsWith(href));
+            location.startsWith(href);
           return (
             <Link
               key={href}

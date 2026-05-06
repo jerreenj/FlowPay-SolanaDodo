@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function Register() {
   const [, navigate] = useLocation();
-  const setToken = useAuthStore((s) => s.setToken);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const [form, setForm] = useState({ name: "", email: "", password: "", userType: "freelancer", country: "IN" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +25,7 @@ export default function Register() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed");
-      setToken(data.token);
+      setAuth(data.token, data.user);
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
