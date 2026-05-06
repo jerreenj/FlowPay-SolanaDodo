@@ -87,14 +87,14 @@ export default function Payroll() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Users className="w-5 h-5 text-blue-400" />
+              <Users className="w-5 h-5 text-white/60" />
               <h1 className="text-2xl font-bold text-white">PayRails</h1>
-              <span className="text-xs bg-blue-400/10 text-blue-400 border border-blue-400/20 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
+              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
             </div>
             <p className="text-white/50 text-sm">Stablecoin payroll for remote teams — settled on Solana in &lt;3s</p>
           </div>
           <button onClick={() => { setShowForm(true); setSuccess(null); }}
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> New Payment
           </button>
         </div>
@@ -118,16 +118,16 @@ export default function Payroll() {
 
         {/* Success notification */}
         {success && (
-          <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-xl p-5 mb-6">
+          <div className="bg-white/5 border border-white/15 rounded-xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-[#00ff88]" />
-              <span className="text-[#00ff88] font-semibold">Payment sent in {success.settlementSeconds}s!</span>
+              <CheckCircle className="w-5 h-5 text-white" />
+              <span className="text-white font-semibold">Payment sent in {success.settlementSeconds}s!</span>
             </div>
             <div className="text-sm text-white/60 space-y-1">
               <p>{success.recipientName} received <span className="text-white font-mono">${success.amountUsdg} USDG</span> (₹{parseFloat(success.amountInr).toLocaleString()})</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="font-mono text-xs text-white/40">Solana Sig:</span>
-                <span className="font-mono text-xs text-[#00ff88]/80">{truncateSig(success.solanaSignature)}</span>
+                <span className="font-mono text-xs text-white/50">{truncateSig(success.solanaSignature)}</span>
                 <button onClick={() => navigator.clipboard.writeText(success.solanaSignature ?? "")} className="text-white/30 hover:text-white/70">
                   <Copy className="w-3 h-3" />
                 </button>
@@ -144,27 +144,27 @@ export default function Payroll() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Sender Name</label>
                 <input value={form.senderName} onChange={(e) => set("senderName", e.target.value)} required
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Company</label>
                 <input value={form.senderCompany} onChange={(e) => set("senderCompany", e.target.value)} required placeholder="Acme Corp"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Recipient Name</label>
                 <input value={form.recipientName} onChange={(e) => set("recipientName", e.target.value)} required placeholder="Priya Patel"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Recipient Email</label>
                 <input type="email" value={form.recipientEmail} onChange={(e) => set("recipientEmail", e.target.value)} required placeholder="priya@gmail.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Amount (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="500.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
                 {form.amountUsdg && (
                   <p className="text-xs text-white/40 mt-1">≈ ₹{(parseFloat(form.amountUsdg || "0") * 83.5).toLocaleString()} · Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG</p>
                 )}
@@ -172,11 +172,11 @@ export default function Payroll() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">UPI ID (optional)</label>
                 <input value={form.recipientUpiId} onChange={(e) => set("recipientUpiId", e.target.value)} placeholder="priya@okaxis"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div className="col-span-2 flex gap-3 mt-2">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 bg-white hover:bg-white/90 text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
                   {submitting ? "Sending on Solana…" : "Send Payment"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
@@ -203,19 +203,19 @@ export default function Payroll() {
             <div className="divide-y divide-white/5">
               {payments.map((p) => (
                 <div key={p.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/3 transition-colors">
-                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4 text-blue-400" />
+                  <div className="w-9 h-9 rounded-lg bg-white/8 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-white/40" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white font-medium">{p.senderCompany} → {p.recipientName}</p>
                     <p className="text-xs text-white/40 mt-0.5">{p.recipientEmail} · {new Date(p.createdAt).toLocaleString()}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-mono font-semibold text-[#00ff88]">${parseFloat(p.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-mono font-semibold text-white">${parseFloat(p.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-xs text-white/40">₹{parseFloat(p.amountInr).toLocaleString()} · {p.settlementSeconds}s</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${p.status === "completed" ? "bg-[#00ff88]/10 text-[#00ff88]" : "bg-yellow-500/10 text-yellow-400"}`}>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/50">
                       {p.status}
                     </span>
                     {p.solanaSignature && (
