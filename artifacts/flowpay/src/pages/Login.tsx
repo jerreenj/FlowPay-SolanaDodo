@@ -36,15 +36,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#070707] flex items-center justify-center px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#00ff88]/5 blur-[120px]" />
-      </div>
-
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#00ff88]/20 border border-[#00ff88]/30">
-              <Zap className="w-5 h-5 text-[#00ff88]" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/8 border border-white/15">
+              <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-white font-bold text-2xl">FlowPay</span>
           </div>
@@ -54,7 +50,7 @@ export default function Login() {
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
+            <div className="bg-white/5 border border-white/15 text-white/70 text-sm rounded-lg px-4 py-3 mb-4">
               {error}
             </div>
           )}
@@ -67,7 +63,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#00ff88]/50 focus:bg-white/8 transition-all"
+                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all"
                 placeholder="you@company.com"
               />
             </div>
@@ -80,7 +76,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-11 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#00ff88]/50 focus:bg-white/8 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-11 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all"
                   placeholder="••••••••"
                 />
                 <button
@@ -96,7 +92,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black font-semibold text-sm py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-white/90 text-black font-semibold text-sm py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {loading ? "Signing in…" : (
                 <>Sign in <ArrowRight className="w-4 h-4" /></>
@@ -107,12 +103,12 @@ export default function Login() {
           <div className="mt-5 pt-5 border-t border-white/10 text-center">
             <p className="text-sm text-white/40">
               Don't have an account?{" "}
-              <Link href="/register" className="text-[#00ff88] hover:text-[#00e87a] font-medium">Create one</Link>
+              <Link href="/register" className="text-white/70 hover:text-white font-medium">Create one</Link>
             </p>
           </div>
 
-          <div className="mt-4 p-3 bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-lg">
-            <p className="text-[11px] text-[#00ff88]/70 font-mono text-center">
+          <div className="mt-4 p-3 bg-white/4 border border-white/10 rounded-lg">
+            <p className="text-[11px] text-white/40 font-mono text-center">
               Demo: demo@flowpay.in / demo123
             </p>
           </div>
