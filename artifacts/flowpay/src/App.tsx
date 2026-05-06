@@ -15,6 +15,7 @@ import EscrowPage from "@/pages/Escrow";
 import Creator from "@/pages/Creator";
 import Agents from "@/pages/Agents";
 import WalletPage from "@/pages/Wallet";
+import Profile from "@/pages/Profile";
 import Buy from "@/pages/Buy";
 import NotFound from "@/pages/not-found";
 
@@ -59,6 +60,9 @@ function Router() {
       </Route>
       <Route path="/wallet">
         <ProtectedRoute component={WalletPage} />
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute component={Profile} />
       </Route>
       <Route path="/buy/:id" component={Buy} />
       <Route component={NotFound} />
