@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { Bot, Plus, Zap, ArrowUpRight, ArrowDownLeft, Copy } from "lucide-react";
+import { Bot, Plus, Zap, ArrowUpRight, ArrowDownLeft, Copy, X } from "lucide-react";
+
+const ACCENT = "#fb923c";
 
 interface Agent {
   id: number;
@@ -52,7 +54,7 @@ export default function Agents() {
     try {
       const data = await apiFetch("/api/agents", { headers: authHeaders }).then((r) => r.json());
       setAgents(data);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -70,13 +72,13 @@ export default function Agents() {
       const res = await apiFetch("/api/agents", {
         method: "POST",
         headers: authHeaders,
-        body: JSON.stringify({ ...form, x402Enabled: form.x402Enabled }),
+        body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error();
       setShowForm(false);
       setForm({ name: "", description: "", ownerName: "", x402Enabled: false });
       await load();
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
@@ -92,7 +94,7 @@ export default function Agents() {
       setFundAmount("");
       await load();
       if (txs[agentId]) await loadTxs(agentId);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
@@ -108,65 +110,112 @@ export default function Agents() {
       setPayForm({ recipientName: "", recipientAddress: "", amountUsdg: "", purpose: "" });
       await load();
       if (txs[agentId]) await loadTxs(agentId);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
   const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
+  const totalBalance = agents.reduce((sum, a) => sum + parseFloat(a.usdgBalance || "0"), 0);
+  const totalTxs = agents.reduce((sum, a) => sum + a.transactionCount, 0);
+
   return (
     <AppLayout>
-      <div className="p-8">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Bot className="w-5 h-5 text-[#00ff88]" />
-              <h1 className="text-2xl font-bold text-white">AgentBank</h1>
-              <span className="text-xs bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20 px-2 py-0.5 rounded-full font-mono">1% fee</span>
-              <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full">x402 ready</span>
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
+              <Bot className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <p className="text-white/50 text-sm">Autonomous AI agent wallets on Solana — machine-to-machine payments at &lt;500ms</p>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <h1 className="text-xl font-bold text-white tracking-tight">AgentBank</h1>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>1% fee</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.10)" }}>x402</span>
+              </div>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Autonomous AI agent wallets on Solana — machine-to-machine payments at &lt;500ms</p>
+            </div>
           </div>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-[#00ff88]/10 hover:bg-[#00ff88]/20 border border-[#00ff88]/30 text-[#00ff88] text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
+            style={{ background: ACCENT, color: "#000" }}>
             <Plus className="w-4 h-4" /> Deploy Agent
           </button>
         </div>
+      </div>
+
+      <div className="p-8">
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {[
+            { label: "Agents Deployed", value: agents.length.toString(), colored: true },
+            { label: "Total USDG Held", value: `$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, colored: false },
+            { label: "Total Transactions", value: totalTxs.toString(), colored: false },
+          ].map(({ label, value, colored }) => (
+            <div key={label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+              <p className="text-2xl font-bold font-mono tracking-tight" style={{ color: colored ? ACCENT : "white" }}>{value}</p>
+            </div>
+          ))}
+        </div>
 
         {showForm && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-            <h2 className="text-base font-semibold text-white mb-5">Deploy New Agent</h2>
+          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-white">Deploy New Agent</h2>
+              <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
+            </div>
             <form onSubmit={handleCreate} className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Agent Name</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Agent Name</label>
                 <input value={form.name} onChange={(e) => set("name", e.target.value)} required placeholder="PayBot Alpha"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Owner Name</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Owner</label>
                 <input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} required placeholder="TechVentures Inc"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-white/50 uppercase tracking-wide">Description</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Description</label>
                 <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required rows={2} placeholder="What does this agent do?"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all resize-none" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all resize-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.x402Enabled} onChange={(e) => set("x402Enabled", e.target.checked)}
-                    className="w-4 h-4 accent-[#00ff88]" />
-                  <span className="text-sm text-white/70">Enable x402 protocol</span>
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <div
+                    className="relative w-9 h-5 rounded-full transition-all cursor-pointer"
+                    style={{ background: form.x402Enabled ? ACCENT : "rgba(255,255,255,0.12)" }}
+                    onClick={() => set("x402Enabled", !form.x402Enabled)}
+                  >
+                    <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform" style={{ transform: form.x402Enabled ? "translateX(16px)" : "translateX(0)" }} />
+                  </div>
+                  <div>
+                    <div className="text-sm text-white">Enable x402 protocol</div>
+                    <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>HTTP payment-gated APIs</div>
+                  </div>
                 </label>
-                <span className="text-xs text-white/30">(HTTP payment-gated APIs)</span>
               </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
+                  style={{ background: ACCENT, color: "#000" }}>
                   {submitting ? "Deploying…" : "Deploy Agent"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
-                  className="px-4 bg-white/5 hover:bg-white/10 text-white/60 text-sm rounded-lg transition-colors">Cancel</button>
+                  className="px-4 text-sm rounded-xl transition-all"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -174,137 +223,152 @@ export default function Agents() {
 
         <div className="space-y-4">
           {loading ? [...Array(3)].map((_, i) => (
-            <div key={i} className="h-40 bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+            <div key={i} className="h-44 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />
           )) : agents.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-10 text-center text-white/40 text-sm">No agents deployed yet</div>
+            <div className="rounded-2xl px-6 py-12 text-center text-sm" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}>
+              No agents deployed yet
+            </div>
           ) : agents.map((agent) => {
             const isSelected = selectedAgent?.id === agent.id;
+            const isActive = agent.isActive === "true";
             return (
-              <div key={agent.id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+              <div key={agent.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#00ff88]/10 border border-[#00ff88]/20 flex items-center justify-center">
-                        <Bot className="w-5 h-5 text-[#00ff88]" />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}25` }}>
+                        <Bot className="w-5 h-5" style={{ color: ACCENT }} />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-white font-semibold">{agent.name}</h3>
+                          <h3 className="text-white font-semibold text-[15px]">{agent.name}</h3>
                           {agent.x402Enabled === "true" && (
-                            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-mono">x402</span>
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>x402</span>
                           )}
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${agent.isActive === "true" ? "bg-[#00ff88]/10 text-[#00ff88]" : "bg-white/10 text-white/40"}`}>
-                            {agent.isActive === "true" ? "active" : "inactive"}
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={isActive ? { background: "#4ade8015", color: "#4ade80", border: "1px solid #4ade8025" } : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                            {isActive ? "active" : "inactive"}
                           </span>
                         </div>
-                        <p className="text-xs text-white/40">Owner: {agent.ownerName}</p>
+                        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Owner: {agent.ownerName}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-[#00ff88] font-mono">${parseFloat(agent.usdgBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                      <p className="text-xs text-white/40">USDG balance</p>
+                      <p className="text-2xl font-bold font-mono" style={{ color: ACCENT }}>${parseFloat(agent.usdgBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>USDG balance</p>
                     </div>
                   </div>
 
-                  <p className="text-sm text-white/50 mb-4">{agent.description}</p>
+                  <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.48)" }}>{agent.description}</p>
 
-                  <div className="grid grid-cols-3 gap-3 mb-4 text-center">
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     {[
-                      { label: "Total Paid", value: `$${parseFloat(agent.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
-                      { label: "Total Received", value: `$${parseFloat(agent.totalReceived).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+                      { label: "Paid Out", value: `$${parseFloat(agent.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+                      { label: "Received", value: `$${parseFloat(agent.totalReceived).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
                       { label: "Transactions", value: agent.transactionCount.toString() },
                     ].map(({ label, value }) => (
-                      <div key={label} className="bg-white/5 rounded-lg p-2.5">
-                        <p className="text-[10px] text-white/40">{label}</p>
+                      <div key={label} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.04)" }}>
+                        <p className="text-[10px] mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
                         <p className="text-sm font-mono font-semibold text-white">{value}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-white/30">
-                      <span className="font-mono">{agent.walletAddress.slice(0, 14)}…</span>
-                      <button onClick={() => navigator.clipboard.writeText(agent.walletAddress)} className="hover:text-white/60">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.28)" }}>{agent.walletAddress.slice(0, 14)}…</span>
+                      <button onClick={() => navigator.clipboard.writeText(agent.walletAddress)} className="transition-colors hover:text-white/60" style={{ color: "rgba(255,255,255,0.2)" }}>
                         <Copy className="w-3 h-3" />
                       </button>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => { setSelectedAgent(agent); setAction("fund"); }}
-                        className="flex items-center gap-1.5 text-xs bg-[#00ff88]/10 hover:bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/20 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                        style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>
                         <ArrowDownLeft className="w-3 h-3" /> Fund
                       </button>
                       <button onClick={() => { setSelectedAgent(agent); setAction("pay"); }}
-                        className="flex items-center gap-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                        style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}>
                         <ArrowUpRight className="w-3 h-3" /> Pay
                       </button>
                       <button onClick={() => { setSelectedAgent(isSelected ? null : agent); if (!txs[agent.id]) loadTxs(agent.id); }}
-                        className="flex items-center gap-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
-                        <Zap className="w-3 h-3" /> {isSelected ? "Hide" : "Txs"}
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                        style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                        <Zap className="w-3 h-3" /> {isSelected ? "Hide" : "History"}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Fund action */}
                 {selectedAgent?.id === agent.id && action === "fund" && (
-                  <div className="border-t border-white/10 p-4 bg-[#00ff88]/5">
+                  <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                    <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>Fund Agent Wallet</p>
                     <div className="flex gap-2">
                       <input type="number" min="0.01" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="Amount (USDG)"
-                        className="flex-1 bg-white/5 border border-[#00ff88]/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/60" />
+                        className="flex-1 rounded-lg px-3 py-2 text-white text-sm outline-none"
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}
+                        onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                        onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")} />
                       <button onClick={() => handleFund(agent.id)} disabled={submitting || !fundAmount}
-                        className="bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                        className="text-sm font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                        style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "…" : "Fund"}
                       </button>
-                      <button onClick={() => setAction(null)} className="px-3 py-2 bg-white/5 text-white/50 text-sm rounded-lg">✕</button>
+                      <button onClick={() => setAction(null)} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
                   </div>
                 )}
 
-                {/* Pay action */}
                 {selectedAgent?.id === agent.id && action === "pay" && (
-                  <div className="border-t border-white/10 p-4 bg-white/3">
+                  <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                    <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>Execute Agent Payment</p>
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      <input value={payForm.recipientName} onChange={(e) => setPayForm((f) => ({ ...f, recipientName: e.target.value }))} placeholder="Recipient name"
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
-                      <input value={payForm.recipientAddress} onChange={(e) => setPayForm((f) => ({ ...f, recipientAddress: e.target.value }))} placeholder="Wallet address"
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
-                      <input type="number" min="0.01" step="0.01" value={payForm.amountUsdg} onChange={(e) => setPayForm((f) => ({ ...f, amountUsdg: e.target.value }))} placeholder="Amount (USDG)"
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
-                      <input value={payForm.purpose} onChange={(e) => setPayForm((f) => ({ ...f, purpose: e.target.value }))} placeholder="Purpose / memo"
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00ff88]/50" />
+                      {[
+                        { key: "recipientName", placeholder: "Recipient name" },
+                        { key: "recipientAddress", placeholder: "Wallet address" },
+                        { key: "amountUsdg", placeholder: "Amount (USDG)", type: "number" },
+                        { key: "purpose", placeholder: "Purpose / memo" },
+                      ].map(({ key, placeholder, type }) => (
+                        <input key={key} type={type ?? "text"} value={(payForm as any)[key]}
+                          onChange={(e) => setPayForm((f) => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
+                          className="rounded-lg px-3 py-2 text-white text-sm outline-none"
+                          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}
+                          onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                          onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")} />
+                      ))}
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => handlePay(agent.id)} disabled={submitting || !payForm.recipientName || !payForm.amountUsdg || !payForm.purpose}
-                        className="flex-1 bg-white hover:bg-white/90 text-black text-sm font-semibold py-2 rounded-lg transition-colors disabled:opacity-50">
+                        className="flex-1 text-sm font-bold py-2 rounded-lg transition-all disabled:opacity-50"
+                        style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "Sending…" : "Execute Payment"}
                       </button>
-                      <button onClick={() => setAction(null)} className="px-3 py-2 bg-white/5 text-white/50 text-sm rounded-lg">✕</button>
+                      <button onClick={() => setAction(null)} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
                   </div>
                 )}
 
-                {/* Transactions */}
                 {isSelected && txs[agent.id] && (
-                  <div className="border-t border-white/10">
-                    <div className="divide-y divide-white/5 max-h-60 overflow-y-auto">
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div className="max-h-56 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                       {txs[agent.id].length === 0 ? (
-                        <p className="px-5 py-4 text-xs text-white/40 text-center">No transactions yet</p>
+                        <p className="px-5 py-4 text-xs text-center" style={{ color: "rgba(255,255,255,0.35)" }}>No transactions yet</p>
                       ) : txs[agent.id].map((tx) => (
                         <div key={tx.id} className="flex items-center gap-3 px-5 py-3">
-                          <div className={`p-1.5 rounded ${tx.type === "fund" ? "bg-[#00ff88]/10" : "bg-white/5"}`}>
+                          <div className="p-1.5 rounded-lg" style={{ background: tx.type === "fund" ? "rgba(74,222,128,0.10)" : `${ACCENT}10` }}>
                             {tx.type === "fund"
-                              ? <ArrowDownLeft className="w-3 h-3 text-[#00ff88]" />
-                              : <ArrowUpRight className="w-3 h-3 text-white/50" />}
+                              ? <ArrowDownLeft className="w-3 h-3" style={{ color: "#4ade80" }} />
+                              : <ArrowUpRight className="w-3 h-3" style={{ color: ACCENT }} />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-white">{tx.purpose}</p>
-                            {tx.recipientName && <p className="text-[10px] text-white/40">→ {tx.recipientName}</p>}
+                            {tx.recipientName && <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>→ {tx.recipientName}</p>}
                           </div>
                           <div className="text-right">
-                            <p className={`text-xs font-mono font-semibold ${tx.type === "fund" ? "text-[#00ff88]" : "text-white/70"}`}>
+                            <p className="text-xs font-mono font-semibold" style={{ color: tx.type === "fund" ? "#4ade80" : ACCENT }}>
                               {tx.type === "fund" ? "+" : "-"}${parseFloat(tx.amountUsdg).toFixed(4)}
                             </p>
-                            {tx.settlementMs && <p className="text-[10px] text-white/30">{tx.settlementMs.toFixed(0)}ms</p>}
+                            {tx.settlementMs && <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.28)" }}>{tx.settlementMs.toFixed(0)}ms</p>}
                           </div>
                         </div>
                       ))}
