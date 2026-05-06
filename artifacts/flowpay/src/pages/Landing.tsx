@@ -182,16 +182,29 @@ export default function Landing() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-xl md:text-2xl font-semibold text-white max-w-3xl mx-auto mb-11 leading-snug px-4 py-2 rounded-xl"
+            className="text-xl md:text-2xl font-semibold text-white max-w-lg mx-auto mb-3 leading-snug px-4 py-2 rounded-xl"
             style={{
               textShadow: "0 0 40px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.8)",
             }}
           >
-            India's stablecoin payment super-layer. Five payment rails on one Solana platform, payroll, remittance, escrow, creator commerce, and AI agent payments.
+            India's stablecoin payment super-layer.
+          </motion.p>
+
+          <motion.p
+            custom={2}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="text-sm md:text-base text-white/50 max-w-2xl mx-auto mb-11 leading-relaxed"
+            style={{
+              textShadow: "0 0 28px rgba(0,0,0,0.85)",
+            }}
+          >
+            Five payment rails on one Solana platform — payroll, remittance, escrow, creator commerce, and AI agent payments.
           </motion.p>
 
           <motion.div
-            custom={2}
+            custom={3}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
