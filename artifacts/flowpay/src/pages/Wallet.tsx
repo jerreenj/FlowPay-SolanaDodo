@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { Wallet as WalletIcon, Copy, TrendingUp, TrendingDown, ArrowRightLeft, Zap } from "lucide-react";
 
 interface WalletData {
@@ -26,8 +27,8 @@ export default function WalletPage() {
       try {
         const headers = { Authorization: `Bearer ${token}` };
         const [w, r] = await Promise.all([
-          fetch("/api/wallet", { headers }).then((res) => res.json()),
-          fetch("/api/rates").then((res) => res.json()),
+          apiFetch("/api/wallet", { headers }).then((res) => res.json()),
+          apiFetch("/api/rates").then((res) => res.json()),
         ]);
         setWallet(w);
         if (r.usdgToInr) setRate(r.usdgToInr);
