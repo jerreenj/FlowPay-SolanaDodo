@@ -13,7 +13,7 @@ const modules = [
     accent: "#00ff88",
     fee: "0.5%",
     headline: "Pay your team in USDG",
-    sub: "Stablecoin salaries · UPI delivery · Solana in 2.3s",
+    sub: "Stablecoin salaries · UPI delivery in INR · Solana in 2.3s",
     route: "/payroll",
   },
   {
@@ -91,17 +91,17 @@ export default function ModuleSelect() {
     <div className="relative min-h-screen bg-[#080808] text-white overflow-hidden">
       <RainingLetters />
 
-      {/* Ambient glow top-center */}
+      {/* Purple ambient glow — top center */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] pointer-events-none"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at top, rgba(255,255,255,0.03) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at top, rgba(139,92,246,0.12) 0%, rgba(109,40,217,0.05) 40%, transparent 70%)",
         }}
       />
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
-        <div className="text-xs font-mono text-white/20 tracking-widest uppercase">
+        <div className="text-xs font-mono text-white/30 tracking-widest uppercase">
           FlowPay · Select Module
         </div>
         <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export default function ModuleSelect() {
           )}
           <button
             onClick={() => { logout(); setLocation("/"); }}
-            className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors px-2 py-1.5"
+            className="flex items-center gap-1.5 text-xs text-white/25 hover:text-white/55 transition-colors px-2 py-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
             Disconnect
@@ -125,112 +125,152 @@ export default function ModuleSelect() {
       </nav>
 
       {/* Header */}
-      <div className="relative z-10 px-8 pt-14 pb-12 text-center">
-        <p className="text-[11px] font-mono text-white/20 tracking-[0.3em] uppercase mb-4">
+      <div className="relative z-10 px-8 pt-14 pb-10 text-center">
+        <p className="text-[11px] font-mono text-white/35 tracking-[0.3em] uppercase mb-4">
           {user?.name ? `Welcome back, ${user.name}` : "Wallet connected"}
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-3 leading-tight">
           Which rail today?
         </h1>
-        <p className="text-white/30 text-base max-w-sm mx-auto">
+        <p className="text-white/50 text-base max-w-sm mx-auto">
           Five purpose-built payment modules on Solana. Pick one.
         </p>
       </div>
 
-      {/* Module grid */}
-      <div className="relative z-10 px-6 sm:px-8 pb-24 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {modules.map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
-          const isHovered = hovered === id;
-          return (
-            <button
-              key={id}
-              onClick={() => setLocation(route)}
-              onMouseEnter={() => setHovered(id)}
-              onMouseLeave={() => setHovered(null)}
-              className="group relative text-left rounded-2xl p-6 border overflow-hidden transition-all duration-300"
-              style={{
-                background: isHovered
-                  ? `linear-gradient(135deg, ${accent}0d 0%, rgba(255,255,255,0.02) 100%)`
-                  : "rgba(255,255,255,0.025)",
-                borderColor: isHovered ? `${accent}50` : "rgba(255,255,255,0.07)",
-                transform: isHovered ? "translateY(-4px)" : "translateY(0)",
-                boxShadow: isHovered
-                  ? `0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px ${accent}20, inset 0 1px 0 ${accent}15`
-                  : "0 2px 8px rgba(0,0,0,0.2)",
-              }}
-            >
-              {/* Top glow blob on hover */}
-              <div
-                className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl transition-opacity duration-500 pointer-events-none"
-                style={{
-                  background: accent,
-                  opacity: isHovered ? 0.08 : 0,
-                }}
+      {/* Module grid — 3 top, 2 centered bottom */}
+      <div className="relative z-10 px-6 sm:px-8 pb-24 max-w-5xl mx-auto">
+        {/* First row — 3 cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          {modules.slice(0, 3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
+            const isHovered = hovered === id;
+            return (
+              <ModuleCard
+                key={id}
+                id={id} name={name} tag={tag} Icon={Icon} accent={accent}
+                fee={fee} headline={headline} sub={sub} route={route}
+                isHovered={isHovered}
+                onEnter={() => setHovered(id)}
+                onLeave={() => setHovered(null)}
+                onClick={() => setLocation(route)}
               />
-
-              {/* Icon row */}
-              <div className="flex items-start justify-between mb-5">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300"
-                  style={{
-                    background: `${accent}12`,
-                    border: `1px solid ${accent}25`,
-                    boxShadow: isHovered ? `0 0 20px ${accent}20` : "none",
-                  }}
-                >
-                  <Icon className="w-5 h-5 transition-transform duration-300" style={{ color: accent, transform: isHovered ? "scale(1.1)" : "scale(1)" }} />
-                </div>
-
-                <div className="text-right">
-                  <span
-                    className="inline-block text-[10px] font-mono px-2 py-0.5 rounded-full mb-1"
-                    style={{ background: `${accent}10`, color: accent, border: `1px solid ${accent}20` }}
-                  >
-                    {tag}
-                  </span>
-                  <p className="text-[10px] text-white/20 font-mono">{fee} fee</p>
-                </div>
-              </div>
-
-              {/* Text */}
-              <h2 className="text-base font-bold text-white mb-1 leading-snug">{name}</h2>
-              <p
-                className="text-sm font-medium mb-2 leading-snug transition-colors duration-300"
-                style={{ color: isHovered ? accent : "rgba(255,255,255,0.45)" }}
-              >
-                {headline}
-              </p>
-              <p className="text-xs text-white/25 leading-relaxed mb-5">{sub}</p>
-
-              {/* CTA */}
-              <div
-                className="flex items-center gap-1.5 text-xs font-semibold transition-all duration-300"
-                style={{ color: isHovered ? accent : "rgba(255,255,255,0.2)" }}
-              >
-                Enter
-                <ArrowRight
-                  className="w-3.5 h-3.5 transition-transform duration-300"
-                  style={{ transform: isHovered ? "translateX(4px)" : "translateX(0)" }}
-                />
-              </div>
-
-              {/* Bottom border line that fills on hover */}
-              <div
-                className="absolute bottom-0 left-0 h-[1px] transition-all duration-500"
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
-                  width: isHovered ? "100%" : "0%",
-                }}
+            );
+          })}
+        </div>
+        {/* Second row — 2 cards, centered */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[calc(66.666%+0.5rem)] mx-auto">
+          {modules.slice(3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
+            const isHovered = hovered === id;
+            return (
+              <ModuleCard
+                key={id}
+                id={id} name={name} tag={tag} Icon={Icon} accent={accent}
+                fee={fee} headline={headline} sub={sub} route={route}
+                isHovered={isHovered}
+                onEnter={() => setHovered(id)}
+                onLeave={() => setHovered(null)}
+                onClick={() => setLocation(route)}
               />
-            </button>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Footer hint */}
+      {/* Footer */}
       <div className="relative z-10 text-center pb-8">
-        <p className="text-[10px] font-mono text-white/10 tracking-widest">SOLANA · USDG · DODO PAYMENTS</p>
+        <p className="text-[10px] font-mono text-white/15 tracking-widest">SOLANA · USDG · DODO PAYMENTS</p>
       </div>
     </div>
+  );
+}
+
+interface CardProps {
+  id: string; name: string; tag: string;
+  Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  accent: string; fee: string; headline: string; sub: string; route: string;
+  isHovered: boolean;
+  onEnter: () => void; onLeave: () => void; onClick: () => void;
+}
+
+function ModuleCard({ name, tag, Icon, accent, fee, headline, sub, isHovered, onEnter, onLeave, onClick }: CardProps) {
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      className="group relative text-left rounded-2xl p-6 border overflow-hidden transition-all duration-300 w-full"
+      style={{
+        background: isHovered
+          ? `linear-gradient(135deg, ${accent}12 0%, rgba(255,255,255,0.02) 100%)`
+          : "rgba(255,255,255,0.03)",
+        borderColor: isHovered ? `${accent}55` : "rgba(255,255,255,0.08)",
+        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: isHovered
+          ? `0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px ${accent}20, inset 0 1px 0 ${accent}15`
+          : "0 2px 8px rgba(0,0,0,0.2)",
+      }}
+    >
+      {/* Glow blob */}
+      <div
+        className="absolute -top-8 -right-8 w-36 h-36 rounded-full blur-3xl transition-opacity duration-500 pointer-events-none"
+        style={{ background: accent, opacity: isHovered ? 0.1 : 0 }}
+      />
+
+      {/* Icon + tag row */}
+      <div className="flex items-start justify-between mb-5">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300"
+          style={{
+            background: `${accent}15`,
+            border: `1px solid ${accent}30`,
+            boxShadow: isHovered ? `0 0 20px ${accent}25` : "none",
+          }}
+        >
+          <Icon
+            className="w-5 h-5 transition-transform duration-300"
+            style={{ color: accent, transform: isHovered ? "scale(1.1)" : "scale(1)" } as React.CSSProperties}
+          />
+        </div>
+        <div className="text-right">
+          <span
+            className="inline-block text-[10px] font-mono px-2 py-0.5 rounded-full mb-1"
+            style={{ background: `${accent}12`, color: accent, border: `1px solid ${accent}25` }}
+          >
+            {tag}
+          </span>
+          <p className="text-[10px] text-white/30 font-mono">{fee} fee</p>
+        </div>
+      </div>
+
+      {/* Text */}
+      <h2 className="text-base font-bold text-white mb-1.5 leading-snug">{name}</h2>
+      <p
+        className="text-sm font-semibold mb-2.5 leading-snug transition-colors duration-300"
+        style={{ color: isHovered ? accent : "rgba(255,255,255,0.6)" }}
+      >
+        {headline}
+      </p>
+      <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.42)" }}>{sub}</p>
+
+      {/* CTA */}
+      <div
+        className="flex items-center gap-1.5 text-xs font-semibold transition-all duration-300"
+        style={{ color: isHovered ? accent : "rgba(255,255,255,0.25)" }}
+      >
+        Enter
+        <ArrowRight
+          className="w-3.5 h-3.5 transition-transform duration-300"
+          style={{ transform: isHovered ? "translateX(4px)" : "translateX(0)" }}
+        />
+      </div>
+
+      {/* Bottom fill line */}
+      <div
+        className="absolute bottom-0 left-0 h-[1px] transition-all duration-500"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+          width: isHovered ? "100%" : "0%",
+        }}
+      />
+    </button>
   );
 }
