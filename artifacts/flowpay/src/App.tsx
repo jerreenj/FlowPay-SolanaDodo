@@ -15,6 +15,7 @@ import EscrowPage from "@/pages/Escrow";
 import Creator from "@/pages/Creator";
 import Agents from "@/pages/Agents";
 import WalletPage from "@/pages/Wallet";
+import Buy from "@/pages/Buy";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/wallet">
         <ProtectedRoute component={WalletPage} />
       </Route>
+      <Route path="/buy/:id" component={Buy} />
       <Route component={NotFound} />
     </Switch>
   );
