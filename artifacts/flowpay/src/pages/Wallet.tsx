@@ -66,14 +66,12 @@ export default function WalletPage() {
         ) : wallet ? (
           <div className="max-w-2xl">
             {/* Balance card */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#00ff88]/10 via-[#00ff88]/5 to-transparent border border-[#00ff88]/20 rounded-2xl p-8 mb-6">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ff88]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
+            <div className="relative overflow-hidden bg-white/5 border border-white/10 rounded-2xl p-8 mb-6">
               <div className="mb-6">
                 <p className="text-sm text-white/50 mb-1">USDG Balance</p>
                 <div className="flex items-end gap-3">
                   <span className="text-5xl font-bold text-white font-mono">{usdgBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  <span className="text-2xl text-[#00ff88] font-semibold mb-1">USDG</span>
+                  <span className="text-2xl text-white/50 font-semibold mb-1">USDG</span>
                 </div>
                 <p className="text-white/40 mt-1">≈ ₹{parseFloat(inrEquivalent).toLocaleString()} INR</p>
               </div>
@@ -85,7 +83,7 @@ export default function WalletPage() {
                 </div>
                 <button onClick={copyAddress}
                   className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 ${
-                    copied ? "border-[#00ff88]/50 bg-[#00ff88]/10 text-[#00ff88]" : "border-white/20 bg-white/5 text-white/50 hover:text-white/80"
+                    copied ? "border-white/30 bg-white/10 text-white" : "border-white/20 bg-white/5 text-white/50 hover:text-white/80"
                   }`}>
                   <Copy className="w-3 h-3" />
                   {copied ? "Copied!" : "Copy"}
@@ -96,9 +94,9 @@ export default function WalletPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-8">
               {[
-                { label: "Total Received", value: `$${parseFloat(wallet.totalReceived).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: "text-[#00ff88]" },
+                { label: "Total Received", value: `$${parseFloat(wallet.totalReceived).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: "text-white" },
                 { label: "Total Sent", value: `$${parseFloat(wallet.totalSent).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingDown, color: "text-white/60" },
-                { label: "INR Balance", value: `₹${parseFloat(wallet.inrBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: ArrowRightLeft, color: "text-blue-400" },
+                { label: "INR Balance", value: `₹${parseFloat(wallet.inrBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: ArrowRightLeft, color: "text-white/70" },
               ].map(({ label, value, icon: Icon, color }) => (
                 <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -130,7 +128,7 @@ export default function WalletPage() {
 
             {/* Solana info */}
             <div className="flex items-center gap-2 text-xs text-white/30">
-              <Zap className="w-3.5 h-3.5 text-[#00ff88]/50" />
+              <Zap className="w-3.5 h-3.5 text-white/20" />
               <span>Transactions settle on Solana mainnet in &lt;3 seconds · USDG is 1:1 USD pegged</span>
             </div>
           </div>
