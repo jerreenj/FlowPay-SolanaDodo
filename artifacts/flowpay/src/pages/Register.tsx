@@ -36,15 +36,11 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#070707] flex items-center justify-center px-4 py-8">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#00ff88]/5 blur-[120px]" />
-      </div>
-
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#00ff88]/20 border border-[#00ff88]/30">
-              <Zap className="w-5 h-5 text-[#00ff88]" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/8 border border-white/15">
+              <Zap className="w-5 h-5 text-white" />
             </div>
             <span className="text-white font-bold text-2xl">FlowPay</span>
           </div>
@@ -54,7 +50,7 @@ export default function Register() {
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
+            <div className="bg-white/5 border border-white/15 text-white/70 text-sm rounded-lg px-4 py-3 mb-4">
               {error}
             </div>
           )}
@@ -63,21 +59,21 @@ export default function Register() {
             <div>
               <label className="text-xs text-white/60 font-medium uppercase tracking-wide">Full Name</label>
               <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} required
-                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all"
+                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 transition-all"
                 placeholder="Rahul Sharma" />
             </div>
 
             <div>
               <label className="text-xs text-white/60 font-medium uppercase tracking-wide">Email</label>
               <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required
-                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all"
+                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 transition-all"
                 placeholder="rahul@company.com" />
             </div>
 
             <div>
               <label className="text-xs text-white/60 font-medium uppercase tracking-wide">Password</label>
               <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} required
-                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all"
+                className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30 transition-all"
                 placeholder="••••••••" />
             </div>
 
@@ -85,7 +81,7 @@ export default function Register() {
               <div>
                 <label className="text-xs text-white/60 font-medium uppercase tracking-wide">I am a</label>
                 <select value={form.userType} onChange={(e) => set("userType", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all">
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
                   <option value="freelancer">Freelancer</option>
                   <option value="business">Business</option>
                   <option value="creator">Creator</option>
@@ -95,7 +91,7 @@ export default function Register() {
               <div>
                 <label className="text-xs text-white/60 font-medium uppercase tracking-wide">Country</label>
                 <select value={form.country} onChange={(e) => set("country", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all">
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
                   <option value="IN">India</option>
                   <option value="US">United States</option>
                   <option value="UAE">UAE</option>
@@ -106,7 +102,7 @@ export default function Register() {
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black font-semibold text-sm py-3 rounded-lg transition-colors disabled:opacity-50 mt-2">
+              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-white/90 text-black font-semibold text-sm py-3 rounded-lg transition-colors disabled:opacity-50 mt-2">
               {loading ? "Creating account…" : (<>Create account <ArrowRight className="w-4 h-4" /></>)}
             </button>
           </form>
@@ -114,7 +110,7 @@ export default function Register() {
           <div className="mt-5 pt-5 border-t border-white/10 text-center">
             <p className="text-sm text-white/40">
               Already have an account?{" "}
-              <Link href="/login" className="text-[#00ff88] hover:text-[#00e87a] font-medium">Sign in</Link>
+              <Link href="/login" className="text-white/70 hover:text-white font-medium">Sign in</Link>
             </p>
           </div>
         </div>
