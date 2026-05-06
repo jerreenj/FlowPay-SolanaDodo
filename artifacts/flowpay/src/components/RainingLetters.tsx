@@ -20,8 +20,7 @@ export default function RainingLetters() {
       char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
       x: (i / 80) * 100 + Math.random() * 1.2,
       y: Math.random() * 100,
-      speed: 0.008 + Math.random() * 0.012,
-      // Much higher base opacity — always legible
+      speed: 0.022 + Math.random() * 0.028,
       opacity: 0.22 + Math.random() * 0.22,
     }));
   }, []);
@@ -53,7 +52,7 @@ export default function RainingLetters() {
               char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
               x: Math.random() * 100,
               y: -8,
-              speed: 0.008 + Math.random() * 0.012,
+              speed: 0.022 + Math.random() * 0.028,
               opacity: 0.22 + Math.random() * 0.22,
             };
           }
