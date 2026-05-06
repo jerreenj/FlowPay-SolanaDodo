@@ -19,9 +19,23 @@ Every payment settles on-chain in under 3 seconds. Every transaction produces a 
 
 ---
 
-## 🔶 Dodo Payments Integration
+## 🔶 Dodo Payments Integration — Real API Calls, Not Mocks
 
-**FlowPay uses the Dodo Payments SDK (`dodopayments@2.31.0`) for live API calls.** Every transaction in PayRails and CreatorPay hits the real Dodo test-mode API — creating real products and checkout sessions, not mocks.
+**FlowPay uses the Dodo Payments SDK (`dodopayments@2.31.0`) for live API calls.** Every transaction in PayRails and CreatorPay hits the real Dodo test-mode API.
+
+### What Happens on Each Transaction
+
+**PayRails (Payroll):**
+1. Calls `dodo.products.create()` → creates a real Dodo product for the payment amount
+2. Calls `dodo.checkoutSessions.create()` → gets a real `cks_…` session ID and a live checkout URL
+3. Stores both in the database alongside the Solana signature
+4. The checkout link is clickable directly from the UI
+
+**CreatorPay:**
+1. On product listing → calls `dodo.products.create()` → real `pdt_…` product ID stored in DB
+2. On purchase → calls `dodo.checkoutSessions.create()` → real checkout session
+3. Buyer is **redirected to Dodo's hosted checkout page** automatically
+4. Products verified on Dodo show a "Dodo ✓" badge on their listing and public buy page
 
 ### The Stack
 
@@ -40,11 +54,11 @@ User Intent → USDG Transfer on Solana (<3s) → Dodo Checkout Session → INR 
 
 | Module | Dodo's Role |
 |--------|-------------|
-| **PayRails** | Creates a real Dodo product and checkout session per payroll payment |
-| **RemitDirect** | Handles cross-border corridors and INR delivery via UPI |
-| **EscrowX** | Processes milestone release payouts when contracts complete |
-| **CreatorPay** | Registers each product on Dodo; processes buyer checkout on purchase |
-| **AgentBank** | Enables AI agents to pay autonomously via the x402 protocol |
+| **PayRails** | Real Dodo product + checkout session per payroll payment; link stored and shown in UI |
+| **RemitDirect** | Dodo's cross-border corridors (UAE → India, US → India, UK → India) handle INR delivery |
+| **EscrowX** | Dodo processes milestone release payouts — USDG locked on Solana, released via Dodo on trigger |
+| **CreatorPay** | Real Dodo product (`pdt_…`) created per listing; real checkout session (`cks_…`) per purchase with redirect |
+| **AgentBank** | Dodo's API infrastructure enables AI agents to pay autonomously via x402 |
 
 ---
 
@@ -70,48 +84,58 @@ FlowPay replaces every one of these with Dodo + Solana:
 ---
 
 ### 💼 1. PayRails — Stablecoin Payroll
-**Route:** `/payroll` · **Fee:** 0.5%
+**Route:** `/payroll` · **Fee:** 0.5% · **Dodo:** Real product + checkout session per payment
 
-PayRails lets any company pay Indian contractors, remote workers, and DAO contributors in USDG. Enter the recipient's name, UPI ID, and amount — FlowPay converts to INR at live rates, settles on Solana in under 3 seconds, and routes the payment to the recipient's UPI handle via Dodo. Each payment is backed by a real Dodo checkout session and an on-chain Solana signature as proof.
+PayRails lets any company pay Indian contractors, remote workers, and DAO contributors in USDG. A real Dodo checkout session is created per payment — the `cks_…` session ID and checkout URL are stored in the database and shown in the UI. The USDG converts to INR at the point of receipt via Dodo's UPI rails.
+
+**Payment flow:**
+1. Enter recipient's name, UPI ID, and amount in USDG
+2. FlowPay shows the INR equivalent at live rates (1 USDG = ₹83.52)
+3. Hit Send → Solana settles in ~2.3 seconds
+4. Dodo creates a real checkout session (`cks_…`) → clickable link appears in UI
+5. Dodo routes INR to the recipient's UPI handle
+6. Solana transaction signature returned as on-chain proof
 
 ---
 
 ### 🌍 2. RemitDirect — Cross-Border Remittances
-**Route:** `/remittance` · **Fee:** 0.75%
+**Route:** `/remittance` · **Fee:** 0.75% · **Dodo:** Cross-border corridor management + INR delivery
 
-A direct replacement for Western Union, Wise, and hawala networks. Send from UAE, US, UK, Singapore, Canada, or Australia to any Indian UPI handle — delivered in INR in under 2 seconds.
+Direct replacement for Western Union, Wise, and hawala networks. Send from UAE, US, UK, Singapore, Canada, or Australia to India — delivered in INR via UPI in under 2 seconds.
 
 **The economics:** Western Union charges 3–8% on UAE → India. On a $500 remittance, that's $15–40 in fees. RemitDirect charges 0.75% — $3.75 for the same transfer, delivered in 2 seconds instead of 2 days.
 
 ---
 
 ### 🔒 3. EscrowX — Smart Contract Escrow
-**Route:** `/escrow` · **Fee:** 0.5%
+**Route:** `/escrow` · **Fee:** 0.5% · **Dodo:** Milestone payout processing → INR on release
 
-Trustless escrow for freelancers and clients. USDG locks into a Solana smart contract and only releases when milestones are marked complete — neither party needs to trust the other. Dodo handles the fiat payout when funds are released.
+Trustless escrow for freelancers and clients. Funds lock into a Solana smart contract and only release when milestones are marked complete. Neither party needs to trust the other.
 
-**Escrow states:** Active → Released → Completed / Disputed
+**Escrow states:** `active` → `released` → `completed` / `disputed`
 
 ---
 
 ### 🎨 4. CreatorPay — Digital Product Commerce
-**Route:** `/creator` · **Fee:** 2%
+**Route:** `/creator` · **Fee:** 2% · **Dodo:** Real product registry + checkout session per sale
 
-List any digital product and share a link — no account needed to purchase. Each product is registered with Dodo Payments. Buyers get a real hosted checkout experience, and creators receive USDG settled in seconds.
+List any digital product. Share a link (`/buy/:id`) — no account needed to purchase. Each product gets a real Dodo product ID (`pdt_…`). Each purchase creates a real Dodo checkout session and redirects the buyer to Dodo's hosted checkout page.
 
 **vs alternatives:**
 - Gumroad: 10% fee, USD-only, 2–5 day payouts
 - Stripe: 2.9% + $0.30, reversible up to 120 days, country restrictions
-- CreatorPay: 2%, on-chain final, settled in seconds
+- CreatorPay: 2%, on-chain final, Dodo-verified, settled in seconds
 
 **Product types:** Course · eBook · Template · Newsletter · Membership
 
 ---
 
 ### 🤖 5. AgentBank — AI Agent Wallets
-**Route:** `/agents` · **Fee:** 1%
+**Route:** `/agents` · **Fee:** 1% · **Dodo:** x402-compatible payment execution infrastructure
 
-Infrastructure for the autonomous economy. Each AI agent gets its own Solana wallet funded with USDG. Supports the **x402 payment-gating protocol** — when an HTTP `402 Payment Required` response is returned, an AgentBank-funded agent reads the instructions and pays automatically with no human approval needed.
+Infrastructure for the autonomous economy. Each AI agent gets its own Solana wallet funded with USDG. Supports the **x402 payment-gating protocol** — Dodo's infrastructure executes payments automatically when an HTTP `402 Payment Required` is returned.
+
+**What is x402?** An emerging protocol where HTTP `402` responses carry machine-readable payment instructions. An AI agent with a funded AgentBank wallet reads them and pays automatically — no human approval, no interruption.
 
 ---
 
@@ -157,10 +181,10 @@ Pure black (`#070707`) background. Neon green (`#00ff88`) for live indicators an
 | `users` | Auth handle, display name |
 | `wallets` | USDG balance, INR balance, total sent/received |
 | `wallet_transactions` | Every balance movement with timestamps |
-| `payroll_payments` | PayRails records, Solana signatures, Dodo session IDs |
+| `payroll_payments` | PayRails records, Solana sigs, Dodo session IDs + checkout URLs |
 | `remittances` | Cross-border transfers, corridors, INR amounts |
 | `escrows` | Contract addresses, milestone counts, status |
-| `creator_products` | Listings, price, type, sales count, Dodo product ID |
+| `creator_products` | Listings, price, type, sales count, **Dodo product ID** (`pdt_…`) |
 | `creator_sales` | Purchase records, buyer info, Solana signatures |
 | `agents` | Agent registry, wallet address, x402 flag |
 | `agent_transactions` | Per-agent payment history with purpose |
@@ -208,7 +232,7 @@ pnpm --filter @workspace/db run push
 
 | Criterion | FlowPay |
 |-----------|---------|
-| **Dodo Payments integration** | ✅ Real SDK calls — products and checkout sessions on every transaction |
+| **Dodo Payments integration** | ✅ Real SDK calls — `dodo.products.create()` + `dodo.checkoutSessions.create()` on every transaction |
 | **Real working product** | ✅ Five fully functional modules, end-to-end |
 | **India-specific** | ✅ UPI delivery, INR conversion, six cross-border corridors |
 | **Solana-native** | ✅ Every payment produces a Solana transaction signature |
