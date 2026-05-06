@@ -489,6 +489,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/CreatorStats"
 
+  /webhooks/dodo:
+    post:
+      operationId: dodoWebhook
+      tags: [creator]
+      summary: Dodo Payments webhook handler — updates sale payment status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DodoWebhookBody"
+      responses:
+        "200":
+          description: Webhook processed
+        "400":
+          description: Bad request
+
   # AI AGENTS
   /agents:
     get:
@@ -1062,10 +1079,35 @@ components:
           type: string
         solanaSignature:
           type: ["string", "null"]
+        dodoSessionId:
+          type: ["string", "null"]
+        dodoCheckoutUrl:
+          type: ["string", "null"]
+        dodoPaymentStatus:
+          type: string
+          enum: [pending, paid, failed]
         createdAt:
           type: string
           format: date-time
-      required: [id, productId, productTitle, creatorName, buyerName, buyerEmail, amountUsdg, feeUsdg, creatorReceives, createdAt]
+      required: [id, productId, productTitle, creatorName, buyerName, buyerEmail, amountUsdg, feeUsdg, creatorReceives, dodoPaymentStatus, createdAt]
+
+    DodoWebhookBody:
+      type: object
+      description: Dodo Payments webhook event in the standardwebhooks format
+      properties:
+        type:
+          type: string
+          description: Event type, e.g. payment.succeeded or payment.failed
+        data:
+          type: object
+          description: Event payload — for payment events contains checkout_session_id and payment_id
+          properties:
+            checkout_session_id:
+              type: string
+            payment_id:
+              type: string
+          additionalProperties: true
+      required: [type, data]
 
     CreatorStats:
       type: object

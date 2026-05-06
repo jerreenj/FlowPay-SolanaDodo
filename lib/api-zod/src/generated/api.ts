@@ -455,6 +455,9 @@ export const ListCreatorSalesResponseItem = zod.object({
   feeUsdg: zod.string(),
   creatorReceives: zod.string(),
   solanaSignature: zod.string().nullish(),
+  dodoSessionId: zod.string().nullish(),
+  dodoCheckoutUrl: zod.string().nullish(),
+  dodoPaymentStatus: zod.enum(["pending", "paid", "failed"]),
   createdAt: zod.coerce.date(),
 });
 export const ListCreatorSalesResponse = zod.array(ListCreatorSalesResponseItem);
@@ -475,6 +478,25 @@ export const GetCreatorStatsResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * @summary Dodo Payments webhook handler — updates sale payment status
+ */
+export const DodoWebhookBody = zod
+  .object({
+    type: zod
+      .string()
+      .describe("Event type, e.g. payment.succeeded or payment.failed"),
+    data: zod
+      .object({
+        checkout_session_id: zod.string().optional(),
+        payment_id: zod.string().optional(),
+      })
+      .describe(
+        "Event payload — for payment events contains checkout_session_id and payment_id",
+      ),
+  })
+  .describe("Dodo Payments webhook event in the standardwebhooks format");
 
 /**
  * @summary List AI payment agents

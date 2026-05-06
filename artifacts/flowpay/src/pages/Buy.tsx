@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "wouter";
 import { apiFetch } from "@/lib/apiFetch";
-import { Sparkles, CheckCircle, Copy, CheckCheck, ArrowLeft, Zap, ShieldCheck, Clock, ExternalLink } from "lucide-react";
+import { Sparkles, CheckCircle, Copy, CheckCheck, ArrowLeft, Zap, ShieldCheck, Clock, ExternalLink, Loader2 } from "lucide-react";
 
 const ACCENT = "#f472b6";
 
@@ -29,6 +29,7 @@ interface Sale {
   solanaSignature: string | null;
   dodoCheckoutUrl: string | null;
   dodoSessionId: string | null;
+  dodoPaymentStatus: string;
 }
 
 const typeLabels: Record<string, string> = {
@@ -45,6 +46,8 @@ function truncateSig(sig: string | null) {
   return sig.slice(0, 12) + "…" + sig.slice(-12);
 }
 
+const SALE_KEY = (productId: number) => `flowpay_sale_${productId}`;
+
 export default function Buy() {
   const params = useParams<{ id: string }>();
   const productId = parseInt(params.id ?? "0", 10);
@@ -56,11 +59,44 @@ export default function Buy() {
   const [form, setForm] = useState({ buyerName: "", buyerEmail: "" });
   const [submitting, setSubmitting] = useState(false);
   const [sale, setSale] = useState<Sale | null>(null);
+  const [pollingStatus, setPollingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function pollSaleStatus(saleId: number, attempts = 0) {
+    if (attempts >= 5) {
+      setPollingStatus(false);
+      return;
+    }
+    try {
+      const r = await apiFetch(`/api/creator/sales/${saleId}`);
+      if (!r.ok) { setPollingStatus(false); return; }
+      const data: Sale = await r.json();
+      setSale(data);
+      if (data.dodoPaymentStatus !== "pending") {
+        setPollingStatus(false);
+        sessionStorage.removeItem(SALE_KEY(productId));
+        return;
+      }
+      pollRef.current = setTimeout(() => pollSaleStatus(saleId, attempts + 1), 2500);
+    } catch {
+      setPollingStatus(false);
+    }
+  }
+
+  useEffect(() => {
+    return () => { if (pollRef.current) clearTimeout(pollRef.current); };
+  }, []);
+
   useEffect(() => {
     if (!productId) { setNotFound(true); setLoading(false); return; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isReturn = urlParams.get("status") === "success";
+    const storedSaleId = isReturn ? sessionStorage.getItem(SALE_KEY(productId)) : null;
+
     apiFetch(`/api/creator/products/${productId}`)
       .then((r) => {
         if (r.status === 404) { setNotFound(true); return; }
@@ -68,7 +104,13 @@ export default function Buy() {
       })
       .then((data) => { if (data) setProduct(data); })
       .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+      .finally(async () => {
+        setLoading(false);
+        if (storedSaleId) {
+          setPollingStatus(true);
+          await pollSaleStatus(parseInt(storedSaleId, 10));
+        }
+      });
   }, [productId]);
 
   async function handlePurchase(e: React.FormEvent) {
@@ -85,6 +127,11 @@ export default function Buy() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Purchase failed"); return; }
 
+      if (data.dodoCheckoutUrl) {
+        sessionStorage.setItem(SALE_KEY(productId), String(data.id));
+        window.location.href = data.dodoCheckoutUrl;
+        return;
+      }
       setSale(data);
     } catch {
       setError("Network error — please try again");
@@ -96,7 +143,7 @@ export default function Buy() {
   const tc = product ? (typeAccent[product.type] ?? ACCENT) : ACCENT;
   const inrEquiv = product ? (parseFloat(product.priceUsdg) * 83.52).toLocaleString("en-IN", { maximumFractionDigits: 0 }) : "0";
 
-  if (loading) {
+  if (loading || (pollingStatus && !sale)) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#070707" }}>
         <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }} />
@@ -173,22 +220,40 @@ export default function Buy() {
                   <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Creator Receives</span>
                   <span className="text-sm font-mono" style={{ color: "#4ade80" }}>${parseFloat(sale.creatorReceives).toFixed(4)} USDG</span>
                 </div>
-                {sale.dodoCheckoutUrl && (
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} className="pt-3">
+                {sale.dodoSessionId && (
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} className="pt-3 space-y-2">
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Checkout</span>
-                      <a
-                        href={sale.dodoCheckoutUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-[11px] font-mono truncate transition-opacity hover:opacity-80"
-                        style={{ color: ACCENT }}
-                      >
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}30`, color: ACCENT }}>Dodo ✓</span>
-                        <span className="truncate">{sale.dodoSessionId ?? sale.dodoCheckoutUrl}</span>
-                        <ExternalLink className="w-3 h-3 shrink-0" />
-                      </a>
+                      <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Status</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}30`, color: ACCENT }}>Dodo ✓</span>
+                        {pollingStatus ? (
+                          <span className="flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(251,146,60,0.12)", border: "1px solid rgba(251,146,60,0.30)", color: "#fb923c" }}>
+                            <Loader2 className="w-2.5 h-2.5 animate-spin" /> Checking…
+                          </span>
+                        ) : sale.dodoPaymentStatus === "paid" ? (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.30)", color: "#4ade80" }}>Paid</span>
+                        ) : sale.dodoPaymentStatus === "failed" ? (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.30)", color: "#f87171" }}>Failed</span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(251,146,60,0.12)", border: "1px solid rgba(251,146,60,0.30)", color: "#fb923c" }}>Pending</span>
+                        )}
+                      </div>
                     </div>
+                    {sale.dodoCheckoutUrl && (
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Session</span>
+                        <a
+                          href={sale.dodoCheckoutUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-[11px] font-mono truncate transition-opacity hover:opacity-80"
+                          style={{ color: "rgba(255,255,255,0.45)" }}
+                        >
+                          <span className="truncate">{sale.dodoSessionId}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
                 {sale.solanaSignature && (

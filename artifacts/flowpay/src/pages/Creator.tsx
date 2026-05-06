@@ -32,7 +32,30 @@ interface Sale {
   solanaSignature: string | null;
   dodoSessionId: string | null;
   dodoCheckoutUrl: string | null;
+  dodoPaymentStatus: string;
   createdAt: string;
+}
+
+function DodoStatusChip({ status }: { status: string }) {
+  if (status === "paid") {
+    return (
+      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.30)", color: "#4ade80" }}>
+        Paid
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.30)", color: "#f87171" }}>
+        Failed
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(251,146,60,0.12)", border: "1px solid rgba(251,146,60,0.30)", color: "#fb923c" }}>
+      Pending
+    </span>
+  );
 }
 
 const typeLabels: Record<string, string> = {
@@ -401,7 +424,10 @@ export default function Creator() {
                   <div className="w-52 shrink-0">
                     {s.dodoSessionId ? (
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full w-fit" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, color: ACCENT }}>Dodo ✓</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, color: ACCENT }}>Dodo ✓</span>
+                          <DodoStatusChip status={s.dodoPaymentStatus ?? "pending"} />
+                        </div>
                         {s.dodoCheckoutUrl ? (
                           <a
                             href={s.dodoCheckoutUrl}

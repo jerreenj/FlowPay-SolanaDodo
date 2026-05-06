@@ -13,6 +13,25 @@
 
 ---
 
+## 🎬 Demo Walkthrough
+
+> Landing → Sign in → Module select → PayRails payroll with live Dodo `cks_` session → CreatorPay public checkout
+
+![FlowPay demo walkthrough](docs/demo.gif)
+
+<details>
+<summary>What you're seeing (frame by frame)</summary>
+
+1. **Landing** — Purple particle-network hero. Live Solana Mainnet status indicator top-right.
+2. **Sign in** — Demo credentials shown (`demo@flowpay.in` / `demo123`).
+3. **Module select** — "Which rail today?" — all five payment rails with fees. Matrix-column rain background.
+4. **PayRails dashboard** — Live payment table: $5,750 volume, 2.3 s avg settlement. First row shows **`Dodo: cks_0NeEixAR…`** — a real Dodo Payments checkout session created by the SDK.
+5. **CreatorPay public checkout** — Shareable `/buy/:id` link (no login needed). Product price in USDG + INR equivalent. One click → Dodo hosted checkout redirect.
+
+</details>
+
+---
+
 FlowPay is a **full-stack stablecoin payment infrastructure** built for India — powered by **Dodo Payments** and settled on **Solana**. Five purpose-built payment rails in one platform: payroll, cross-border remittance, smart contract escrow, creator commerce, and autonomous AI agent payments.
 
 Every payment settles on-chain in under 3 seconds. Every transaction produces a Solana signature as an immutable receipt. Dodo Payments handles real checkout sessions and fiat delivery — converting USDG to INR and routing it to the right UPI handle, bank account, or API endpoint.
