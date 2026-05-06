@@ -89,7 +89,7 @@ export default function Landing() {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 255, 136, 0.55)";
+        ctx.fillStyle = "rgba(149, 76, 255, 0.75)";
         ctx.fill();
       }
       update() {
@@ -132,7 +132,7 @@ export default function Landing() {
             (particles[a].y - particles[b].y) ** 2;
           if (dist < (canvas!.width / 7) * (canvas!.height / 7)) {
             const op = (1 - dist / 20000) * 0.4;
-            ctx.strokeStyle = `rgba(0, 255, 136, ${op})`;
+            ctx.strokeStyle = `rgba(149, 76, 255, ${op})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(particles[a].x, particles[a].y);
