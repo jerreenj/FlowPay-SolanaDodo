@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { Sparkles, Plus, ShoppingCart, TrendingUp } from "lucide-react";
+import { Sparkles, Plus, ShoppingCart, TrendingUp, Copy, CheckCheck, ExternalLink, X } from "lucide-react";
+
+const ACCENT = "#f472b6";
 
 interface Product {
   id: number;
@@ -38,13 +40,76 @@ const typeLabels: Record<string, string> = {
   membership: "Membership",
 };
 
-const typeColors: Record<string, string> = {
-  course: "bg-white/8 text-white/60",
-  ebook: "bg-white/8 text-white/60",
-  template: "bg-white/8 text-white/60",
-  newsletter: "bg-white/8 text-white/60",
-  membership: "bg-white/8 text-white/60",
+const typeAccent: Record<string, string> = {
+  course: "#f472b6",
+  ebook: "#a78bfa",
+  template: "#38bdf8",
+  newsletter: "#fb923c",
+  membership: "#4ade80",
 };
+
+function ShareModal({ productId, productTitle, onClose }: { productId: number; productTitle: string; onClose: () => void }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const baseUrl = window.location.origin;
+  const shareUrl = `${baseUrl}/buy/${productId}`;
+  const embedCode = `<script src="${baseUrl}/embed.js" data-product="${productId}"></script>`;
+
+  function copy(text: string, key: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)" }} onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl p-6 mx-4" style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.12)" }} onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-white font-bold text-[15px]">Share & Sell</h2>
+            <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{productTitle}</p>
+          </div>
+          <button onClick={onClose} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>Direct Buy Link</p>
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" style={{ color: ACCENT }} />
+              <span className="text-xs font-mono text-white/70 flex-1 truncate">{shareUrl}</span>
+              <button onClick={() => copy(shareUrl, "url")} className="shrink-0 transition-colors" style={{ color: copied === "url" ? ACCENT : "rgba(255,255,255,0.25)" }}>
+                {copied === "url" ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+            <p className="text-[11px] mt-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Anyone with this link can purchase directly — no account needed</p>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Embed on WHOP / Gumroad</p>
+              <button onClick={() => copy(embedCode, "embed")} className="flex items-center gap-1 text-[11px] transition-colors" style={{ color: copied === "embed" ? ACCENT : "rgba(255,255,255,0.35)" }}>
+                {copied === "embed" ? <CheckCheck className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copied === "embed" ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <div className="rounded-xl px-4 py-3 font-mono text-[11px] text-white/50 overflow-auto" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              {embedCode}
+            </div>
+            <p className="text-[11px] mt-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>Paste into any HTML page — renders a buy button with Solana checkout</p>
+          </div>
+
+          <button
+            onClick={() => copy(shareUrl, "cta")}
+            className="w-full flex items-center justify-center gap-2 text-sm font-bold py-2.5 rounded-xl transition-all"
+            style={{ background: ACCENT, color: "#000" }}
+          >
+            {copied === "cta" ? <><CheckCheck className="w-4 h-4" /> Link Copied!</> : <><Copy className="w-4 h-4" /> Copy Share Link</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Creator() {
   const token = useAuthStore((s) => s.token);
@@ -57,6 +122,7 @@ export default function Creator() {
   const [submitting, setSubmitting] = useState(false);
   const [newProduct, setNewProduct] = useState({ creatorName: "", title: "", description: "", type: "course", priceUsdg: "" });
   const [tab, setTab] = useState<"marketplace" | "sales">("marketplace");
+  const [shareProduct, setShareProduct] = useState<Product | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -68,7 +134,7 @@ export default function Creator() {
       ]);
       setProducts(p);
       setSales(s);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -83,11 +149,13 @@ export default function Creator() {
         headers: authHeaders,
         body: JSON.stringify(newProduct),
       });
+      const data = await res.json();
       if (!res.ok) throw new Error();
       setShowForm(false);
       setNewProduct({ creatorName: "", title: "", description: "", type: "course", priceUsdg: "" });
       await load();
-    } catch { /* ignore */ }
+      setShareProduct(data);
+    } catch { }
     finally { setSubmitting(false); }
   }
 
@@ -103,78 +171,120 @@ export default function Creator() {
       setBuyingId(null);
       setBuyForm({ buyerName: "", buyerEmail: "" });
       await load();
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
   const setNP = (k: string, v: string) => setNewProduct((f) => ({ ...f, [k]: v }));
 
+  const totalRevenue = sales.reduce((sum, s) => sum + parseFloat(s.creatorReceives || "0"), 0);
+
   return (
     <AppLayout>
-      <div className="p-8">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-5 h-5 text-white/60" />
-              <h1 className="text-2xl font-bold text-white">CreatorPay</h1>
-              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">2% fee</span>
+      {shareProduct && <ShareModal productId={shareProduct.id} productTitle={shareProduct.title} onClose={() => setShareProduct(null)} />}
+
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
+              <Sparkles className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <p className="text-white/50 text-sm">Sell digital products in USDG — instant settlement, no chargebacks</p>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <h1 className="text-xl font-bold text-white tracking-tight">CreatorPay</h1>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>2% fee</span>
+              </div>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Sell digital products in USDG — instant settlement, zero chargebacks</p>
+            </div>
           </div>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
+            style={{ background: ACCENT, color: "#000" }}>
             <Plus className="w-4 h-4" /> List Product
           </button>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-white/5 p-1 rounded-lg w-fit">
+      <div className="p-8">
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {[
+            { label: "Products Listed", value: products.length.toString(), colored: true },
+            { label: "Total Sales", value: sales.length.toString(), colored: false },
+            { label: "Revenue Earned", value: `$${totalRevenue.toFixed(2)}`, colored: false },
+          ].map(({ label, value, colored }) => (
+            <div key={label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+              <p className="text-2xl font-bold font-mono tracking-tight" style={{ color: colored ? ACCENT : "white" }}>{value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: "rgba(255,255,255,0.04)" }}>
           {(["marketplace", "sales"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-1.5 text-sm rounded-md font-medium transition-colors capitalize ${tab === t ? "bg-white/10 text-white" : "text-white/40 hover:text-white/70"}`}>
+              className="px-4 py-1.5 text-sm rounded-lg font-medium transition-all capitalize"
+              style={tab === t ? { background: ACCENT + "20", color: ACCENT, border: `1px solid ${ACCENT}30` } : { color: "rgba(255,255,255,0.4)" }}>
               {t === "marketplace" ? "Marketplace" : `Sales (${sales.length})`}
             </button>
           ))}
         </div>
 
         {showForm && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-            <h2 className="text-base font-semibold text-white mb-5">List New Product</h2>
+          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-white">List New Product</h2>
+              <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
+            </div>
             <form onSubmit={handleCreateProduct} className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Creator Name</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Creator Name</label>
                 <input value={newProduct.creatorName} onChange={(e) => setNP("creatorName", e.target.value)} required placeholder="Ankur Warikoo"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Type</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Type</label>
                 <select value={newProduct.type} onChange={(e) => setNP("type", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
                   {Object.entries(typeLabels).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-white/50 uppercase tracking-wide">Title</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Title</label>
                 <input value={newProduct.title} onChange={(e) => setNP("title", e.target.value)} required placeholder="Build Your Startup: Complete Guide"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-white/50 uppercase tracking-wide">Description</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Description</label>
                 <textarea value={newProduct.description} onChange={(e) => setNP("description", e.target.value)} required rows={2}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all resize-none" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all resize-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Price (USDG)</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Price (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={newProduct.priceUsdg} onChange={(e) => setNP("priceUsdg", e.target.value)} required placeholder="29.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
                 {newProduct.priceUsdg && (
-                  <p className="text-xs text-white/40 mt-1">You receive ${(parseFloat(newProduct.priceUsdg || "0") * 0.98).toFixed(4)} USDG after 2% fee</p>
+                  <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>You receive ${(parseFloat(newProduct.priceUsdg || "0") * 0.98).toFixed(4)} USDG after 2% fee</p>
                 )}
               </div>
               <div className="flex flex-col justify-end">
                 <button type="submit" disabled={submitting}
-                  className="bg-white hover:bg-white/90 text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
-                  {submitting ? "Listing…" : "List Product"}
+                  className="text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
+                  style={{ background: ACCENT, color: "#000" }}>
+                  {submitting ? "Listing…" : "List & Get Share Link"}
                 </button>
               </div>
             </form>
@@ -184,70 +294,90 @@ export default function Creator() {
         {tab === "marketplace" ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {loading ? [...Array(4)].map((_, i) => (
-              <div key={i} className="h-40 bg-white/5 border border-white/10 rounded-xl animate-pulse" />
-            )) : products.map((p) => (
-              <div key={p.id} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-white/20 transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typeColors[p.type] ?? "bg-white/10 text-white/50"}`}>
-                        {typeLabels[p.type] ?? p.type}
-                      </span>
-                    </div>
-                    <h3 className="text-white font-semibold text-sm leading-tight">{p.title}</h3>
-                    <p className="text-xs text-white/40 mt-0.5">by {p.creatorName}</p>
-                  </div>
-                  <div className="text-right shrink-0 ml-4">
-                    <p className="text-xl font-bold text-white font-mono">${parseFloat(p.priceUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-[10px] text-white/40">{p.salesCount} sold</p>
-                  </div>
-                </div>
-                <p className="text-xs text-white/50 mb-4 line-clamp-2">{p.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-white/40">
-                    <TrendingUp className="w-3 h-3" />
-                    <span>${parseFloat(p.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2 })} earned</span>
-                  </div>
-                  {buyingId === p.id ? (
-                    <div className="flex items-end gap-2">
-                      <div className="space-y-1">
-                        <input value={buyForm.buyerName} onChange={(e) => setBuyForm((f) => ({ ...f, buyerName: e.target.value }))} placeholder="Your name"
-                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-white/30" />
-                        <input value={buyForm.buyerEmail} onChange={(e) => setBuyForm((f) => ({ ...f, buyerEmail: e.target.value }))} placeholder="your@email.com"
-                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-white/30" />
-                      </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => handleBuy(p.id)} disabled={submitting || !buyForm.buyerName || !buyForm.buyerEmail}
-                          className="bg-white hover:bg-white/90 text-black text-xs font-semibold px-3 py-1.5 rounded transition-colors disabled:opacity-50">
-                          {submitting ? "…" : "Buy"}
-                        </button>
-                        <button onClick={() => setBuyingId(null)} className="text-white/40 hover:text-white/70 text-xs px-2 py-1.5">✕</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button onClick={() => { setBuyingId(p.id); setBuyForm({ buyerName: "", buyerEmail: "" }); }}
-                      className="flex items-center gap-1.5 text-xs bg-white/8 hover:bg-white/12 text-white/60 border border-white/12 px-3 py-1.5 rounded-lg transition-colors">
-                      <ShoppingCart className="w-3 h-3" /> Purchase
-                    </button>
-                  )}
-                </div>
+              <div key={i} className="h-44 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />
+            )) : products.length === 0 ? (
+              <div className="col-span-2 rounded-2xl px-6 py-12 text-center text-sm" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}>
+                No products listed yet
               </div>
-            ))}
+            ) : products.map((p) => {
+              const tc = typeAccent[p.type] ?? ACCENT;
+              return (
+                <div key={p.id} className="rounded-2xl p-5 transition-all" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${tc}15`, color: tc, border: `1px solid ${tc}25` }}>
+                          {typeLabels[p.type] ?? p.type}
+                        </span>
+                      </div>
+                      <h3 className="text-white font-semibold text-[15px] leading-tight">{p.title}</h3>
+                      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>by {p.creatorName}</p>
+                    </div>
+                    <div className="text-right shrink-0 ml-4">
+                      <p className="text-2xl font-bold text-white font-mono">${parseFloat(p.priceUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                      <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{p.salesCount} sold</p>
+                    </div>
+                  </div>
+                  <p className="text-xs mb-4 line-clamp-2" style={{ color: "rgba(255,255,255,0.48)" }}>{p.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+                        <TrendingUp className="w-3 h-3" />
+                        <span>${parseFloat(p.totalRevenue).toLocaleString(undefined, { minimumFractionDigits: 2 })} earned</span>
+                      </div>
+                      <button
+                        onClick={() => setShareProduct(p)}
+                        className="flex items-center gap-1 text-xs transition-colors"
+                        style={{ color: ACCENT }}
+                      >
+                        <ExternalLink className="w-3 h-3" /> Share
+                      </button>
+                    </div>
+                    {buyingId === p.id ? (
+                      <div className="flex items-end gap-2">
+                        <div className="space-y-1">
+                          <input value={buyForm.buyerName} onChange={(e) => setBuyForm((f) => ({ ...f, buyerName: e.target.value }))} placeholder="Your name"
+                            className="w-28 rounded px-2 py-1 text-white text-xs outline-none"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }} />
+                          <input value={buyForm.buyerEmail} onChange={(e) => setBuyForm((f) => ({ ...f, buyerEmail: e.target.value }))} placeholder="your@email.com"
+                            className="w-28 rounded px-2 py-1 text-white text-xs outline-none"
+                            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }} />
+                        </div>
+                        <div className="flex gap-1">
+                          <button onClick={() => handleBuy(p.id)} disabled={submitting || !buyForm.buyerName || !buyForm.buyerEmail}
+                            className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+                            style={{ background: ACCENT, color: "#000" }}>
+                            {submitting ? "…" : "Buy"}
+                          </button>
+                          <button onClick={() => setBuyingId(null)} className="text-xs px-2 py-1.5" style={{ color: "rgba(255,255,255,0.4)" }}>✕</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setBuyingId(p.id); setBuyForm({ buyerName: "", buyerEmail: "" }); }}
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                        style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>
+                        <ShoppingCart className="w-3 h-3" /> Purchase
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-            <div className="divide-y divide-white/5">
+          <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
               {sales.length === 0 ? (
-                <div className="px-6 py-10 text-center text-white/40 text-sm">No sales yet</div>
+                <div className="px-6 py-12 text-center text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No sales yet</div>
               ) : sales.map((s) => (
-                <div key={s.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/3 transition-colors">
+                <div key={s.id} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white font-medium">{s.buyerName} purchased "{s.productTitle}"</p>
-                    <p className="text-xs text-white/40 mt-0.5">by {s.creatorName} · {new Date(s.createdAt).toLocaleString()}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>by {s.creatorName} · {new Date(s.createdAt).toLocaleString()}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="text-sm font-mono font-semibold text-white">${parseFloat(s.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-xs text-white/40">creator gets ${parseFloat(s.creatorReceives).toFixed(4)}</p>
+                    <p className="text-xs mt-0.5" style={{ color: ACCENT }}>+${parseFloat(s.creatorReceives).toFixed(4)} earned</p>
                   </div>
                 </div>
               ))}
