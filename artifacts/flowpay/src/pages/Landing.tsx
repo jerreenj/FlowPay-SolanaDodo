@@ -177,13 +177,11 @@ export default function Landing() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="mb-5"
+            className="font-black mb-5 leading-none"
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
+              fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 700,
-              letterSpacing: "-0.01em",
-              lineHeight: 1.05,
-              paddingBottom: "0.08em",
+              letterSpacing: "-0.04em",
               fontSize: "clamp(4.5rem, 13vw, 9.5rem)",
               backgroundImage: "linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.75) 100%)",
               WebkitBackgroundClip: "text",
@@ -191,11 +189,7 @@ export default function Landing() {
               backgroundClip: "text",
             }}
           >
-            {"FlowPay".split("").map((char, i) =>
-              char === char.toLowerCase()
-                ? <span key={i} style={{ fontSize: "0.62em", verticalAlign: "baseline" }}>{char}</span>
-                : <span key={i}>{char}</span>
-            )}
+            FlowPay
           </motion.h1>
 
           <motion.p
