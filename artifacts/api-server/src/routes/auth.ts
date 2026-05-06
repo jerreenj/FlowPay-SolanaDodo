@@ -115,4 +115,44 @@ router.get("/auth/me", async (req, res): Promise<void> => {
   }
 });
 
+// Update display name
+router.patch("/auth/profile", async (req, res): Promise<void> => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const { name } = req.body;
+  if (!name || typeof name !== "string" || name.trim().length < 1) {
+    res.status(400).json({ error: "name is required" });
+    return;
+  }
+
+  try {
+    const token = authHeader.slice(7);
+    const { userId } = JSON.parse(Buffer.from(token, "base64").toString());
+    const [user] = await db
+      .update(usersTable)
+      .set({ name: name.trim() })
+      .where(eq(usersTable.id, userId))
+      .returning();
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    req.log.info({ userId }, "Profile name updated");
+    res.json({
+      id: user.id,
+      name: user.name,
+      walletAddress: user.walletAddress,
+      createdAt: user.createdAt,
+    });
+  } catch {
+    res.status(400).json({ error: "Invalid token" });
+  }
+});
+
 export default router;
