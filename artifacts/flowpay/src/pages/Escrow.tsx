@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { ShieldCheck, Plus, CheckCircle, AlertTriangle, Copy, Unlock } from "lucide-react";
 
 interface Escrow {
@@ -34,7 +35,7 @@ export default function EscrowPage() {
 
   async function load() {
     try {
-      const data = await fetch("/api/escrows", { headers: authHeaders }).then((r) => r.json());
+      const data = await apiFetch("/api/escrows", { headers: authHeaders }).then((r) => r.json());
       setEscrows(data);
     } catch { /* ignore */ }
     finally { setLoading(false); }
@@ -46,7 +47,7 @@ export default function EscrowPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/escrows", {
+      const res = await apiFetch("/api/escrows", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify({ ...form, milestones: parseInt(form.milestones) }),
@@ -62,12 +63,12 @@ export default function EscrowPage() {
   }
 
   async function release(id: number) {
-    await fetch(`/api/escrows/${id}/release`, { method: "PATCH", headers: authHeaders });
+    await apiFetch(`/api/escrows/${id}/release`, { method: "PATCH", headers: authHeaders });
     await load();
   }
 
   async function dispute(id: number) {
-    await fetch(`/api/escrows/${id}/dispute`, { method: "PATCH", headers: authHeaders });
+    await apiFetch(`/api/escrows/${id}/dispute`, { method: "PATCH", headers: authHeaders });
     await load();
   }
 
