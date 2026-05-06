@@ -70,7 +70,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : undefined;
         const [s, a] = await Promise.all([
           apiFetch("/api/dashboard/stats", { headers }).then((r) => r.json()),
           apiFetch("/api/dashboard/activity", { headers }).then((r) => r.json()),
