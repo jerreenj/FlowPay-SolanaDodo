@@ -101,18 +101,18 @@ export default function Payroll() {
   return (
     <AppLayout>
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
-          <div className="flex items-center gap-4">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}10 0%, transparent 70%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
+          <div className="flex items-start gap-4 min-w-0">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
               <Users className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <h1 className="text-xl font-bold text-white tracking-tight">PayRails</h1>
+            <div className="min-w-0 max-w-[54rem]">
+              <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">PayRails</h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.5% fee</span>
               </div>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Stablecoin payroll for remote teams — settled on Solana in &lt;3s</p>
+              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Stablecoin payroll for remote teams — settled on Solana in &lt;3s</p>
             </div>
           </div>
           <button
@@ -127,7 +127,7 @@ export default function Payroll() {
 
       <div className="p-8">
         {stats && (
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             {[
               { label: "Total Payments", value: stats.totalPayments.toString(), colored: true },
               { label: "Volume (USDG)", value: `$${parseFloat(stats.totalVolume).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, colored: false },
