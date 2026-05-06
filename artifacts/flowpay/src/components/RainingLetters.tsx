@@ -28,11 +28,11 @@ export default function RainingLetters() {
       if (ts - last < SPEED_MS) return;
       last = ts;
 
-      // Fade trail with a very slight purple tint
-      ctx.fillStyle = "rgba(8, 6, 14, 0.2)";
+      // Fade trail
+      ctx.fillStyle = "rgba(8, 8, 8, 0.2)";
       ctx.fillRect(0, 0, W, H);
 
-      ctx.font = `bold ${FONT_SIZE}px monospace`;
+      ctx.font = `${FONT_SIZE}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
         const y = drops[i] * FONT_SIZE;
@@ -40,12 +40,9 @@ export default function RainingLetters() {
 
         const char = CHARS[Math.floor(Math.random() * CHARS.length)];
 
-        // Head glyph — bright purple with glow
-        ctx.shadowColor = "rgba(180, 100, 255, 0.9)";
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = "rgba(200, 130, 255, 1.0)";
+        // Head glyph — white/grey
+        ctx.fillStyle = "rgba(210, 210, 220, 0.82)";
         ctx.fillText(char, i * FONT_SIZE, y);
-        ctx.shadowBlur = 0;
 
         if (y > H && Math.random() > 0.977) {
           drops[i] = -Math.floor(Math.random() * 20);
@@ -76,7 +73,7 @@ export default function RainingLetters() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.55 }}
+      style={{ opacity: 0.38 }}
     />
   );
 }
