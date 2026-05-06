@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import {
   TrendingUp, Users, Zap, DollarSign, ArrowRightLeft, ShieldCheck, Sparkles, Bot, Activity,
   ExternalLink
@@ -71,8 +72,8 @@ export default function Dashboard() {
       try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const [s, a] = await Promise.all([
-          fetch("/api/dashboard/stats", { headers }).then((r) => r.json()),
-          fetch("/api/dashboard/activity", { headers }).then((r) => r.json()),
+          apiFetch("/api/dashboard/stats", { headers }).then((r) => r.json()),
+          apiFetch("/api/dashboard/activity", { headers }).then((r) => r.json()),
         ]);
         setStats(s);
         setActivity(a);
