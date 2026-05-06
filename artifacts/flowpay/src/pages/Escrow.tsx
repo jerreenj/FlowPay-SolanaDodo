@@ -43,11 +43,12 @@ function StatusPill({ status }: { status: string }) {
 
 export default function EscrowPage() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const [escrows, setEscrows] = useState<Escrow[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ clientName: "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
+  const [form, setForm] = useState({ clientName: user?.name ?? "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
   const [success, setSuccess] = useState<Escrow | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
