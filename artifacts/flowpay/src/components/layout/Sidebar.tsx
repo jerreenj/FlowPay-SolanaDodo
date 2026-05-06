@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth";
 import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
-  Wallet, LogOut, Zap, Grid2x2, Copy, CheckCheck,
+  Wallet, LogOut, Zap, Grid2x2, Copy, CheckCheck, UserCircle,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/creator",    label: "CreatorPay",    icon: Sparkles,       accent: "#f472b6" },
   { href: "/agents",     label: "AgentBank",     icon: Bot,            accent: "#fb923c" },
   { href: "/wallet",     label: "Wallet",        icon: Wallet,         accent: "#94a3b8" },
+  { href: "/profile",    label: "Profile",       icon: UserCircle,     accent: "#94a3b8" },
 ];
 
 function truncateAddress(addr: string) {
