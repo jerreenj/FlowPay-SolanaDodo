@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { Bot, Plus, Zap, ArrowUpRight, ArrowDownLeft, Copy } from "lucide-react";
 
 interface Agent {
@@ -49,14 +50,14 @@ export default function Agents() {
 
   async function load() {
     try {
-      const data = await fetch("/api/agents", { headers: authHeaders }).then((r) => r.json());
+      const data = await apiFetch("/api/agents", { headers: authHeaders }).then((r) => r.json());
       setAgents(data);
     } catch { /* ignore */ }
     finally { setLoading(false); }
   }
 
   async function loadTxs(agentId: number) {
-    const data = await fetch(`/api/agents/${agentId}/transactions`, { headers: authHeaders }).then((r) => r.json());
+    const data = await apiFetch(`/api/agents/${agentId}/transactions`, { headers: authHeaders }).then((r) => r.json());
     setTxs((t) => ({ ...t, [agentId]: data }));
   }
 
@@ -66,7 +67,7 @@ export default function Agents() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/agents", {
+      const res = await apiFetch("/api/agents", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify({ ...form, x402Enabled: form.x402Enabled }),
@@ -82,7 +83,7 @@ export default function Agents() {
   async function handleFund(agentId: number) {
     setSubmitting(true);
     try {
-      await fetch(`/api/agents/${agentId}/fund`, {
+      await apiFetch(`/api/agents/${agentId}/fund`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify({ amountUsdg: fundAmount }),
@@ -98,7 +99,7 @@ export default function Agents() {
   async function handlePay(agentId: number) {
     setSubmitting(true);
     try {
-      await fetch(`/api/agents/${agentId}/pay`, {
+      await apiFetch(`/api/agents/${agentId}/pay`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(payForm),
