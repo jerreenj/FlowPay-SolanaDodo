@@ -100,10 +100,7 @@ export default function ModuleSelect() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
-        <div className="text-xs font-mono text-white/30 tracking-widest uppercase">
-          FlowPay · Select Module
-        </div>
+      <nav className="relative z-10 flex items-center justify-end px-8 py-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
           {user?.walletAddress && (
             <button
@@ -175,10 +172,6 @@ export default function ModuleSelect() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="relative z-10 text-center pb-8">
-        <p className="text-[10px] font-mono text-white/15 tracking-widest">SOLANA · USDG · DODO PAYMENTS</p>
-      </div>
     </div>
   );
 }
