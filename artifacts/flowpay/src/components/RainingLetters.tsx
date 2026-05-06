@@ -21,7 +21,8 @@ export default function RainingLetters() {
       x: (i / 80) * 100 + Math.random() * 1.2,
       y: Math.random() * 100,
       speed: 0.008 + Math.random() * 0.012,
-      opacity: 0.04 + Math.random() * 0.08,
+      // Much higher base opacity — always legible
+      opacity: 0.22 + Math.random() * 0.22,
     }));
   }, []);
 
@@ -29,20 +30,20 @@ export default function RainingLetters() {
     setCharacters(createCharacters());
   }, [createCharacters]);
 
-  // Slowly light up a few letters at a time
+  // Light up a healthy batch of letters each tick
   useEffect(() => {
     const id = setInterval(() => {
       const next = new Set<number>();
-      const n = Math.floor(Math.random() * 3) + 1;
+      const n = Math.floor(Math.random() * 6) + 4; // 4–9 active at once
       for (let i = 0; i < n; i++) {
         next.add(Math.floor(Math.random() * 80));
       }
       setActiveIndices(next);
-    }, 800);
+    }, 700);
     return () => clearInterval(id);
   }, []);
 
-  // Slow fall using setInterval instead of rAF to avoid 60fps churn
+  // Slow, steady fall
   useEffect(() => {
     const id = setInterval(() => {
       setCharacters((prev) =>
@@ -53,7 +54,7 @@ export default function RainingLetters() {
               x: Math.random() * 100,
               y: -8,
               speed: 0.008 + Math.random() * 0.012,
-              opacity: 0.04 + Math.random() * 0.08,
+              opacity: 0.22 + Math.random() * 0.22,
             };
           }
           return { ...c, y: c.y + c.speed };
@@ -76,11 +77,15 @@ export default function RainingLetters() {
               top: `${c.y}%`,
               fontSize: "1.1rem",
               fontFamily: "monospace",
-              fontWeight: active ? 600 : 300,
-              color: active ? "rgba(255,255,255,0.55)" : `rgba(255,255,255,${c.opacity})`,
-              textShadow: active ? "0 0 12px rgba(255,255,255,0.25)" : "none",
+              fontWeight: active ? 700 : 400,
+              color: active
+                ? "rgba(255,255,255,0.92)"
+                : `rgba(255,255,255,${c.opacity})`,
+              textShadow: active
+                ? "0 0 18px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.25)"
+                : "none",
               transform: "translate(-50%, -50%)",
-              transition: "color 1.2s ease, text-shadow 1.2s ease",
+              transition: "color 0.9s ease, text-shadow 0.9s ease",
               willChange: "top",
             }}
           >
