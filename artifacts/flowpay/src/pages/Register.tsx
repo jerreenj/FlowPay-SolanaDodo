@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { Zap, ArrowRight } from "lucide-react";
 
 export default function Register() {
@@ -17,7 +18,7 @@ export default function Register() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await apiFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
