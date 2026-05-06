@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { ShieldCheck, Plus, CheckCircle, AlertTriangle, Copy, Unlock } from "lucide-react";
+import { ShieldCheck, Plus, CheckCircle, AlertTriangle, Copy, Unlock, X } from "lucide-react";
+
+const ACCENT = "#a78bfa";
 
 interface Escrow {
   id: number;
@@ -22,6 +24,23 @@ interface Escrow {
   createdAt: string;
 }
 
+function StatusPill({ status }: { status: string }) {
+  const s = status.toLowerCase();
+  const style =
+    s === "released" || s === "completed"
+      ? { color: "#4ade80", background: "#4ade8015", border: "1px solid #4ade8030" }
+      : s === "active"
+      ? { color: ACCENT, background: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }
+      : s === "disputed"
+      ? { color: "#f87171", background: "#f8717115", border: "1px solid #f8717130" }
+      : { color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" };
+  return (
+    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={style}>
+      {status}
+    </span>
+  );
+}
+
 export default function EscrowPage() {
   const token = useAuthStore((s) => s.token);
   const [escrows, setEscrows] = useState<Escrow[]>([]);
@@ -37,7 +56,7 @@ export default function EscrowPage() {
     try {
       const data = await apiFetch("/api/escrows", { headers: authHeaders }).then((r) => r.json());
       setEscrows(data);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -58,7 +77,7 @@ export default function EscrowPage() {
       setShowForm(false);
       setForm({ clientName: "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
       await load();
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
@@ -74,104 +93,121 @@ export default function EscrowPage() {
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const statusColor: Record<string, string> = {
-    active: "bg-white/10 text-white/60",
-    released: "bg-white/10 text-white/60",
-    disputed: "bg-white/10 text-white/60",
-    completed: "bg-white/10 text-white/60",
-  };
-
   return (
     <AppLayout>
-      <div className="p-8">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck className="w-5 h-5 text-white/60" />
-              <h1 className="text-2xl font-bold text-white">EscrowX</h1>
-              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
+              <ShieldCheck className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <p className="text-white/50 text-sm">Smart contract escrow on Solana — trustless milestone payments for freelancers</p>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <h1 className="text-xl font-bold text-white tracking-tight">EscrowX</h1>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.5% fee</span>
+              </div>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Smart contract escrow on Solana — trustless milestone payments for freelancers</p>
+            </div>
           </div>
-          <button onClick={() => { setShowForm(true); setSuccess(null); }}
-            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors">
+          <button
+            onClick={() => { setShowForm(true); setSuccess(null); }}
+            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
+            style={{ background: ACCENT, color: "#000" }}
+          >
             <Plus className="w-4 h-4" /> Create Escrow
           </button>
         </div>
+      </div>
 
+      <div className="p-8">
         {success && (
-          <div className="bg-white/5 border border-white/15 rounded-xl p-5 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-white" />
-              <span className="text-white font-semibold">Escrow created on Solana!</span>
-            </div>
-            <div className="text-sm text-white/60 space-y-1">
-              <p><span className="text-white">{success.projectTitle}</span> — ${success.amountUsdg} USDG locked</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-white/40 font-mono">Contract:</span>
-                <span className="text-xs text-white/50 font-mono">{success.solanaAddress?.slice(0, 20)}…</span>
-                <button onClick={() => navigator.clipboard.writeText(success.solanaAddress ?? "")} className="text-white/30 hover:text-white/60"><Copy className="w-3 h-3" /></button>
+          <div className="rounded-2xl p-5 mb-6 flex items-start gap-4" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}25` }}>
+            <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: ACCENT }} />
+            <div className="flex-1">
+              <p className="text-white font-semibold mb-1">Escrow deployed on Solana</p>
+              <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <span className="text-white">{success.projectTitle}</span> — ${success.amountUsdg} USDG locked across {success.milestones} milestones
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>Contract: {success.solanaAddress?.slice(0, 20)}…</span>
+                <button onClick={() => navigator.clipboard.writeText(success.solanaAddress ?? "")} className="hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.25)" }}>
+                  <Copy className="w-3 h-3" />
+                </button>
               </div>
             </div>
+            <button onClick={() => setSuccess(null)} className="text-white/20 hover:text-white/50 transition-colors"><X className="w-4 h-4" /></button>
           </div>
         )}
 
         {showForm && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-            <h2 className="text-base font-semibold text-white mb-5">Create Escrow Contract</h2>
+          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-white">Create Escrow Contract</h2>
+              <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
+            </div>
             <form onSubmit={handleCreate} className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Client Name</label>
-                <input value={form.clientName} onChange={(e) => set("clientName", e.target.value)} required placeholder="TechCorp USA"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Client Email</label>
-                <input type="email" value={form.clientEmail} onChange={(e) => set("clientEmail", e.target.value)} required placeholder="john@techcorp.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Freelancer Name</label>
-                <input value={form.freelancerName} onChange={(e) => set("freelancerName", e.target.value)} required placeholder="Priya Menon"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Freelancer Email</label>
-                <input type="email" value={form.freelancerEmail} onChange={(e) => set("freelancerEmail", e.target.value)} required placeholder="priya@gmail.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
+              {[
+                { key: "clientName", label: "Client Name", placeholder: "TechCorp USA" },
+                { key: "clientEmail", label: "Client Email", placeholder: "john@techcorp.com", type: "email" },
+                { key: "freelancerName", label: "Freelancer Name", placeholder: "Priya Menon" },
+                { key: "freelancerEmail", label: "Freelancer Email", placeholder: "priya@gmail.com", type: "email" },
+              ].map(({ key, label, placeholder, type }) => (
+                <div key={key}>
+                  <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</label>
+                  <input type={type ?? "text"} value={(form as any)[key]} onChange={(e) => set(key, e.target.value)} required placeholder={placeholder}
+                    className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                </div>
+              ))}
               <div className="col-span-2">
-                <label className="text-xs text-white/50 uppercase tracking-wide">Project Title</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Project Title</label>
                 <input value={form.projectTitle} onChange={(e) => set("projectTitle", e.target.value)} required placeholder="React Dashboard Build"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-white/50 uppercase tracking-wide">Description</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Description</label>
                 <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required rows={2} placeholder="Describe the work scope…"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all resize-none" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all resize-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Amount (USDG)</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Amount (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="2000.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
                 {form.amountUsdg && (
-                  <p className="text-xs text-white/40 mt-1">Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG</p>
+                  <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG</p>
                 )}
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Milestones</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Milestones</label>
                 <select value={form.milestones} onChange={(e) => set("milestones", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
                   {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} milestone{n > 1 ? "s" : ""}</option>)}
                 </select>
               </div>
-              <div className="col-span-2 flex gap-3 mt-2">
+              <div className="col-span-2 flex gap-3 pt-1">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-white hover:bg-white/90 text-black font-semibold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
+                  style={{ background: ACCENT, color: "#000" }}>
                   {submitting ? "Locking on Solana…" : "Create Escrow"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
-                  className="px-4 bg-white/5 hover:bg-white/10 text-white/60 text-sm rounded-lg transition-colors">Cancel</button>
+                  className="px-5 text-sm rounded-xl transition-all"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}>
+                  Cancel
+                </button>
               </div>
             </form>
           </div>
@@ -179,57 +215,64 @@ export default function EscrowPage() {
 
         <div className="space-y-4">
           {loading ? (
-            [...Array(3)].map((_, i) => <div key={i} className="h-32 bg-white/5 border border-white/10 rounded-xl animate-pulse" />)
+            [...Array(3)].map((_, i) => <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />)
           ) : escrows.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl px-6 py-10 text-center text-white/40 text-sm">No escrows yet</div>
+            <div className="rounded-2xl px-6 py-12 text-center text-sm" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}>
+              No escrows yet — create your first contract
+            </div>
           ) : (
             escrows.map((e) => (
-              <div key={e.id} className="bg-white/5 border border-white/10 rounded-xl p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="text-white font-semibold">{e.projectTitle}</h3>
-                    <p className="text-xs text-white/40 mt-0.5">{e.clientName} → {e.freelancerName}</p>
+              <div key={e.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="text-white font-semibold text-[15px]">{e.projectTitle}</h3>
+                      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{e.clientName} → {e.freelancerName}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <StatusPill status={e.status} />
+                      <p className="text-xl font-bold text-white font-mono">${parseFloat(e.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor[e.status] ?? "bg-white/10 text-white/50"}`}>{e.status}</span>
-                    <p className="text-lg font-bold text-white font-mono">${parseFloat(e.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                  </div>
-                </div>
 
-                <p className="text-sm text-white/50 mb-4">{e.description}</p>
+                  <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.48)" }}>{e.description}</p>
 
-                {/* Milestones */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between text-xs text-white/40 mb-1.5">
-                    <span>Milestones: {e.completedMilestones}/{e.milestones}</span>
-                    <span>{Math.round((e.completedMilestones / e.milestones) * 100)}%</span>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Milestones: {e.completedMilestones}/{e.milestones}</span>
+                      <span className="text-xs font-mono" style={{ color: ACCENT }}>{Math.round((e.completedMilestones / e.milestones) * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="h-full rounded-full transition-all" style={{ width: `${(e.completedMilestones / e.milestones) * 100}%`, background: ACCENT, boxShadow: `0 0 8px ${ACCENT}60` }} />
+                    </div>
                   </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${(e.completedMilestones / e.milestones) * 100}%` }} />
-                  </div>
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-white/40">
-                    {e.solanaAddress && (
-                      <>
-                        <span className="font-mono">Contract: {e.solanaAddress.slice(0, 12)}…</span>
-                        <button onClick={() => navigator.clipboard.writeText(e.solanaAddress ?? "")} className="hover:text-white/70"><Copy className="w-3 h-3" /></button>
-                      </>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {e.solanaAddress && (
+                        <>
+                          <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>Contract: {e.solanaAddress.slice(0, 12)}…</span>
+                          <button onClick={() => navigator.clipboard.writeText(e.solanaAddress ?? "")} className="transition-colors hover:text-white/60" style={{ color: "rgba(255,255,255,0.2)" }}>
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {e.status === "active" && (
+                      <div className="flex gap-2">
+                        <button onClick={() => release(e.id)}
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                          style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}30` }}>
+                          <Unlock className="w-3 h-3" /> Release
+                        </button>
+                        <button onClick={() => dispute(e.id)}
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+                          style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.25)" }}>
+                          <AlertTriangle className="w-3 h-3" /> Dispute
+                        </button>
+                      </div>
                     )}
                   </div>
-                  {e.status === "active" && (
-                    <div className="flex gap-2">
-                      <button onClick={() => release(e.id)}
-                        className="flex items-center gap-1.5 text-xs bg-white/10 hover:bg-white/15 text-white/80 border border-white/15 px-3 py-1.5 rounded-lg transition-colors">
-                        <Unlock className="w-3 h-3" /> Release
-                      </button>
-                      <button onClick={() => dispute(e.id)}
-                        className="flex items-center gap-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/50 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
-                        <AlertTriangle className="w-3 h-3" /> Dispute
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             ))
