@@ -3,8 +3,9 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth";
 import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
-  Wallet, LogOut, Zap, Grid2x2, Copy, CheckCheck, UserCircle,
+  Wallet, LogOut, Grid2x2, Copy, CheckCheck, UserCircle,
 } from "lucide-react";
+import flowpayLogo from "@assets/flowing-f-logo-vector-61749642_1778055940051.avif";
 import { useState } from "react";
 
 const navItems = [
@@ -63,14 +64,12 @@ export function Sidebar() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div
-          className="flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-500"
+          className="flex items-center justify-center w-8 h-8 rounded-xl overflow-hidden shrink-0 transition-all duration-500"
           style={{
-            background: activeAccent ? `${activeAccent}18` : "rgba(255,255,255,0.07)",
-            border: `1px solid ${activeAccent ? activeAccent + "30" : "rgba(255,255,255,0.12)"}`,
-            boxShadow: activeAccent ? `0 0 14px ${activeAccent}20` : "none",
+            boxShadow: activeAccent ? `0 0 14px ${activeAccent}30` : "none",
           }}
         >
-          <Zap className="w-4 h-4" style={{ color: activeAccent ?? "rgba(255,255,255,0.8)" }} />
+          <img src={flowpayLogo} alt="FlowPay" className="w-full h-full object-cover" />
         </div>
         <div>
           <div className="text-white font-bold text-[15px] tracking-tight leading-none">FlowPay</div>
