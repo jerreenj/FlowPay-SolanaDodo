@@ -89,8 +89,11 @@ export default function Landing() {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(149, 76, 255, 0.75)";
+        ctx.fillStyle = "rgba(180, 100, 255, 1.0)";
+        ctx.shadowColor = "rgba(160, 80, 255, 0.9)";
+        ctx.shadowBlur = 8;
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
       update() {
         if (this.x > canvas!.width || this.x < 0) this.dx = -this.dx;
@@ -115,7 +118,7 @@ export default function Landing() {
       particles = [];
       const count = (canvas!.height * canvas!.width) / 9000;
       for (let i = 0; i < count; i++) {
-        const size = Math.random() * 1.5 + 0.5;
+        const size = Math.random() * 2.5 + 1.5;
         const x = Math.random() * (canvas!.width - size * 4) + size * 2;
         const y = Math.random() * (canvas!.height - size * 4) + size * 2;
         const dx = (Math.random() * 0.4) - 0.2;
@@ -131,9 +134,9 @@ export default function Landing() {
             (particles[a].x - particles[b].x) ** 2 +
             (particles[a].y - particles[b].y) ** 2;
           if (dist < (canvas!.width / 7) * (canvas!.height / 7)) {
-            const op = (1 - dist / 20000) * 0.4;
-            ctx.strokeStyle = `rgba(149, 76, 255, ${op})`;
-            ctx.lineWidth = 0.6;
+            const op = Math.min((1 - dist / 20000) * 1.4, 0.9);
+            ctx.strokeStyle = `rgba(180, 100, 255, ${op})`;
+            ctx.lineWidth = 1.2;
             ctx.beginPath();
             ctx.moveTo(particles[a].x, particles[a].y);
             ctx.lineTo(particles[b].x, particles[b].y);
