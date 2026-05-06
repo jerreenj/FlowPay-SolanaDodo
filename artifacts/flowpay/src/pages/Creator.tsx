@@ -39,11 +39,11 @@ const typeLabels: Record<string, string> = {
 };
 
 const typeColors: Record<string, string> = {
-  course: "bg-blue-400/10 text-blue-400",
-  ebook: "bg-purple-400/10 text-purple-400",
-  template: "bg-yellow-400/10 text-yellow-400",
-  newsletter: "bg-pink-400/10 text-pink-400",
-  membership: "bg-[#00ff88]/10 text-[#00ff88]",
+  course: "bg-white/8 text-white/60",
+  ebook: "bg-white/8 text-white/60",
+  template: "bg-white/8 text-white/60",
+  newsletter: "bg-white/8 text-white/60",
+  membership: "bg-white/8 text-white/60",
 };
 
 export default function Creator() {
@@ -115,14 +115,14 @@ export default function Creator() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-5 h-5 text-pink-400" />
+              <Sparkles className="w-5 h-5 text-white/60" />
               <h1 className="text-2xl font-bold text-white">CreatorPay</h1>
-              <span className="text-xs bg-pink-400/10 text-pink-400 border border-pink-400/20 px-2 py-0.5 rounded-full font-mono">2% fee</span>
+              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">2% fee</span>
             </div>
             <p className="text-white/50 text-sm">Sell digital products in USDG — instant settlement, no chargebacks</p>
           </div>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> List Product
           </button>
         </div>
@@ -144,36 +144,36 @@ export default function Creator() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Creator Name</label>
                 <input value={newProduct.creatorName} onChange={(e) => setNP("creatorName", e.target.value)} required placeholder="Ankur Warikoo"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Type</label>
                 <select value={newProduct.type} onChange={(e) => setNP("type", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all">
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
                   {Object.entries(typeLabels).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                 </select>
               </div>
               <div className="col-span-2">
                 <label className="text-xs text-white/50 uppercase tracking-wide">Title</label>
                 <input value={newProduct.title} onChange={(e) => setNP("title", e.target.value)} required placeholder="Build Your Startup: Complete Guide"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div className="col-span-2">
                 <label className="text-xs text-white/50 uppercase tracking-wide">Description</label>
                 <textarea value={newProduct.description} onChange={(e) => setNP("description", e.target.value)} required rows={2}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all resize-none" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all resize-none" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Price (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={newProduct.priceUsdg} onChange={(e) => setNP("priceUsdg", e.target.value)} required placeholder="29.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
                 {newProduct.priceUsdg && (
                   <p className="text-xs text-white/40 mt-1">You receive ${(parseFloat(newProduct.priceUsdg || "0") * 0.98).toFixed(4)} USDG after 2% fee</p>
                 )}
               </div>
               <div className="flex flex-col justify-end">
                 <button type="submit" disabled={submitting}
-                  className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="bg-white hover:bg-white/90 text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
                   {submitting ? "Listing…" : "List Product"}
                 </button>
               </div>
@@ -198,7 +198,7 @@ export default function Creator() {
                     <p className="text-xs text-white/40 mt-0.5">by {p.creatorName}</p>
                   </div>
                   <div className="text-right shrink-0 ml-4">
-                    <p className="text-xl font-bold text-[#00ff88] font-mono">${parseFloat(p.priceUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-xl font-bold text-white font-mono">${parseFloat(p.priceUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-[10px] text-white/40">{p.salesCount} sold</p>
                   </div>
                 </div>
@@ -212,13 +212,13 @@ export default function Creator() {
                     <div className="flex items-end gap-2">
                       <div className="space-y-1">
                         <input value={buyForm.buyerName} onChange={(e) => setBuyForm((f) => ({ ...f, buyerName: e.target.value }))} placeholder="Your name"
-                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-[#00ff88]/50" />
+                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-white/30" />
                         <input value={buyForm.buyerEmail} onChange={(e) => setBuyForm((f) => ({ ...f, buyerEmail: e.target.value }))} placeholder="your@email.com"
-                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-[#00ff88]/50" />
+                          className="w-28 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-white/30" />
                       </div>
                       <div className="flex gap-1">
                         <button onClick={() => handleBuy(p.id)} disabled={submitting || !buyForm.buyerName || !buyForm.buyerEmail}
-                          className="bg-[#00ff88] hover:bg-[#00e87a] text-black text-xs font-semibold px-3 py-1.5 rounded transition-colors disabled:opacity-50">
+                          className="bg-white hover:bg-white/90 text-black text-xs font-semibold px-3 py-1.5 rounded transition-colors disabled:opacity-50">
                           {submitting ? "…" : "Buy"}
                         </button>
                         <button onClick={() => setBuyingId(null)} className="text-white/40 hover:text-white/70 text-xs px-2 py-1.5">✕</button>
@@ -226,7 +226,7 @@ export default function Creator() {
                     </div>
                   ) : (
                     <button onClick={() => { setBuyingId(p.id); setBuyForm({ buyerName: "", buyerEmail: "" }); }}
-                      className="flex items-center gap-1.5 text-xs bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                      className="flex items-center gap-1.5 text-xs bg-white/8 hover:bg-white/12 text-white/60 border border-white/12 px-3 py-1.5 rounded-lg transition-colors">
                       <ShoppingCart className="w-3 h-3" /> Purchase
                     </button>
                   )}
@@ -246,7 +246,7 @@ export default function Creator() {
                     <p className="text-xs text-white/40 mt-0.5">by {s.creatorName} · {new Date(s.createdAt).toLocaleString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-mono font-semibold text-[#00ff88]">${parseFloat(s.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-mono font-semibold text-white">${parseFloat(s.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-xs text-white/40">creator gets ${parseFloat(s.creatorReceives).toFixed(4)}</p>
                   </div>
                 </div>
