@@ -187,35 +187,22 @@ export default function Landing() {
         />
 
         {/* Nav */}
-        <nav className="relative z-10 flex items-center justify-between px-8 py-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#00ff88]/15 border border-[#00ff88]/30 flex items-center justify-center">
-              <Zap className="w-4 h-4 text-[#00ff88]" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">FlowPay</span>
+        <nav className="relative z-10 flex items-center justify-end px-8 py-6 gap-4">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
+            </span>
+            <span className="text-xs font-mono text-[#00ff88]/75 tracking-[0.2em]">MAINNET</span>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
-              </span>
-              <span className="text-xs font-mono text-[#00ff88]/75 tracking-[0.2em]">MAINNET</span>
-            </div>
-            {token ? (
-              <Link
-                href="/select"
-                className="flex items-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-bold px-4 py-2 rounded-xl transition-colors"
-              >
-                Open App <ArrowRight className="w-4 h-4" />
-              </Link>
-            ) : (
-              <Link
-                href="/select"
-                className="hidden"
-              />
-            )}
-          </div>
+          {token && (
+            <Link
+              href="/select"
+              className="flex items-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-bold px-4 py-2 rounded-xl transition-colors"
+            >
+              Open App <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
         </nav>
 
         {/* Hero content */}
