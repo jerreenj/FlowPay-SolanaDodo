@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { Users, Plus, CheckCircle, Clock, ChevronRight, Copy } from "lucide-react";
 
 interface Payment {
@@ -48,8 +49,8 @@ export default function Payroll() {
   async function load() {
     try {
       const [p, s] = await Promise.all([
-        fetch("/api/payroll/payments", { headers: authHeaders }).then((r) => r.json()),
-        fetch("/api/payroll/stats", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/payroll/payments", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/payroll/stats", { headers: authHeaders }).then((r) => r.json()),
       ]);
       setPayments(p);
       setStats(s);
@@ -63,7 +64,7 @@ export default function Payroll() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/payroll/payments", {
+      const res = await apiFetch("/api/payroll/payments", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(form),
