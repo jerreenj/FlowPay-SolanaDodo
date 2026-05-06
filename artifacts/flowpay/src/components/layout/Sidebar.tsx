@@ -5,7 +5,6 @@ import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
   Wallet, LogOut, Grid2x2, Copy, CheckCheck, UserCircle,
 } from "lucide-react";
-import flowpayLogo from "@assets/flowing-f-logo-vector-61749642_1778055940051.avif";
 import { useState } from "react";
 
 const navItems = [
@@ -69,7 +68,7 @@ export function Sidebar() {
             boxShadow: activeAccent ? `0 0 14px ${activeAccent}30` : "none",
           }}
         >
-          <img src={flowpayLogo} alt="FlowPay" className="w-full h-full object-cover" />
+          <img src="/logo.avif" alt="FlowPay" className="w-full h-full object-cover" />
         </div>
         <div>
           <div className="text-white font-bold text-[15px] tracking-tight leading-none">FlowPay</div>
