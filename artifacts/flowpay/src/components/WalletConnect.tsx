@@ -122,14 +122,15 @@ export default function WalletConnect({ variant = "default" }: Props) {
       walletAddress: address,
       name: name ?? null,
     });
-    if (ok) {
+    // 202 = new wallet, needs username — check BEFORE ok (202 is in 2xx so ok=true)
+    if (status === 202) {
+      setPendingAddress(address);
+      setShowUsername(true);
+    } else if (ok) {
       setAuth(data.token as string, data.user as any);
       setOpen(false);
       setShowUsername(false);
       setLocation("/select");
-    } else if (status === 202) {
-      setPendingAddress(address);
-      setShowUsername(true);
     } else {
       throw new Error((data.error as string) ?? "Authentication failed");
     }

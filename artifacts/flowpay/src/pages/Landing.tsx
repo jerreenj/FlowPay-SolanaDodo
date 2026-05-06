@@ -151,6 +151,14 @@ export default function Landing() {
           </div>
         </nav>
 
+        {/* Dark radial vignette — makes center text pop without whitening everything */}
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
+          }}
+        />
+
         {/* Hero content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
 
@@ -160,43 +168,38 @@ export default function Landing() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-7xl md:text-9xl font-black tracking-tighter mb-5 leading-[0.88]"
+            className="font-black tracking-[-0.04em] mb-6 pb-3 leading-none overflow-visible"
             style={{
-              backgroundImage: "linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.5) 100%)",
+              fontSize: "clamp(5rem, 14vw, 10rem)",
+              backgroundImage: "linear-gradient(160deg, #ffffff 20%, rgba(200,185,255,0.75) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
+              letterSpacing: "-0.03em",
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontVariationSettings: "'wght' 900",
             }}
           >
             FlowPay
           </motion.h1>
 
-          {/* Primary tagline */}
+          {/* Primary tagline — with subtle backdrop so it reads over canvas */}
           <motion.p
             custom={1}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-xl md:text-2xl font-semibold text-white/85 max-w-lg mx-auto mb-3 leading-snug"
+            className="text-xl md:text-2xl font-semibold text-white max-w-lg mx-auto mb-11 leading-snug px-4 py-2 rounded-xl"
+            style={{
+              textShadow: "0 0 40px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.8)",
+            }}
           >
             India's stablecoin payment super-layer.
           </motion.p>
 
-          {/* Secondary tagline */}
-          <motion.p
-            custom={2}
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="text-sm md:text-base text-white/50 max-w-sm mx-auto mb-11 leading-relaxed"
-          >
-            Five payment rails on one Solana platform — payroll, remittance,
-            escrow, creator commerce, and AI agent payments.
-          </motion.p>
-
           {/* Module pills */}
           <motion.div
-            custom={3}
+            custom={2}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
@@ -205,13 +208,13 @@ export default function Landing() {
             {MODULES.map((m) => (
               <div
                 key={m.name}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-white/[0.05] backdrop-blur-sm"
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/25 bg-white/[0.08] backdrop-blur-sm"
               >
                 <span
                   className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ background: m.color, boxShadow: `0 0 6px ${m.color}` }}
+                  style={{ background: m.color, boxShadow: `0 0 8px ${m.color}` }}
                 />
-                <span className="text-[13px] font-semibold text-white/85 tracking-wide">
+                <span className="text-[13px] font-semibold text-white tracking-wide">
                   {m.name}
                 </span>
               </div>
@@ -220,7 +223,7 @@ export default function Landing() {
 
           {/* CTA */}
           <motion.div
-            custom={4}
+            custom={3}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
