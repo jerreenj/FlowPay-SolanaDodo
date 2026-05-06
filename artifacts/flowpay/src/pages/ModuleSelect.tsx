@@ -91,7 +91,6 @@ export default function ModuleSelect() {
     <div className="relative min-h-screen bg-[#080808] text-white overflow-hidden">
       <RainingLetters />
 
-      {/* Purple ambient glow — top center */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
         style={{
@@ -99,11 +98,13 @@ export default function ModuleSelect() {
         }}
       />
 
-      {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <button
           onClick={() => setLocation("/")}
-          className="flex items-center gap-2 text-xs text-white/35 hover:text-white/70 transition-colors"
+          className="flex items-center gap-2 text-xs transition-colors"
+          style={{ color: "rgba(255,255,255,0.35)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back
@@ -112,7 +113,8 @@ export default function ModuleSelect() {
           {user?.walletAddress && (
             <button
               onClick={copyAddress}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/4 border border-white/8 text-xs text-white/40 hover:text-white/70 hover:border-white/15 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)" }}
             >
               {copied ? <CheckCheck className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
               {truncateAddress(user.walletAddress)}
@@ -120,72 +122,63 @@ export default function ModuleSelect() {
           )}
           <button
             onClick={() => { logout(); setLocation("/"); }}
-            className="flex items-center gap-1.5 text-xs text-white/25 hover:text-white/55 transition-colors px-2 py-1.5"
+            className="flex items-center gap-1.5 text-xs px-2 py-1.5 transition-colors"
+            style={{ color: "rgba(255,255,255,0.25)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.25)")}
           >
             <LogOut className="w-3.5 h-3.5" />
-            Disconnect
+            Sign out
           </button>
         </div>
       </nav>
 
-      {/* Header */}
       <div className="relative z-10 px-8 pt-14 pb-10 text-center">
-        <p className="text-[11px] font-mono text-white/60 tracking-[0.35em] uppercase mb-4">
+        <p className="text-[11px] font-mono tracking-[0.35em] uppercase mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>
           Welcome back
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-3 leading-tight">
           Which rail today?
         </h1>
-        <p className="text-white/55 text-base max-w-sm mx-auto">
+        <p className="text-base max-w-sm mx-auto" style={{ color: "rgba(255,255,255,0.5)" }}>
           Five purpose-built payment modules on Solana. Pick one.
         </p>
       </div>
 
-      {/* Module grid — 3 top, 2 centered bottom */}
       <div className="relative z-10 px-6 sm:px-8 pb-24 max-w-5xl mx-auto">
-        {/* First row — 3 cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          {modules.slice(0, 3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
-            const isHovered = hovered === id;
-            return (
-              <ModuleCard
-                key={id}
-                id={id} name={name} tag={tag} Icon={Icon} accent={accent}
-                fee={fee} headline={headline} sub={sub} route={route}
-                isHovered={isHovered}
-                onEnter={() => setHovered(id)}
-                onLeave={() => setHovered(null)}
-                onClick={() => setLocation(route)}
-              />
-            );
-          })}
+          {modules.slice(0, 3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => (
+            <ModuleCard
+              key={id}
+              id={id} name={name} tag={tag} Icon={Icon} accent={accent}
+              fee={fee} headline={headline} sub={sub} route={route}
+              isHovered={hovered === id}
+              onEnter={() => setHovered(id)}
+              onLeave={() => setHovered(null)}
+              onClick={() => setLocation(route)}
+            />
+          ))}
         </div>
-        {/* Second row — 2 cards, centered */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[calc(66.666%+0.5rem)] mx-auto">
-          {modules.slice(3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
-            const isHovered = hovered === id;
-            return (
-              <ModuleCard
-                key={id}
-                id={id} name={name} tag={tag} Icon={Icon} accent={accent}
-                fee={fee} headline={headline} sub={sub} route={route}
-                isHovered={isHovered}
-                onEnter={() => setHovered(id)}
-                onLeave={() => setHovered(null)}
-                onClick={() => setLocation(route)}
-              />
-            );
-          })}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {modules.slice(3).map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => (
+            <ModuleCard
+              key={id}
+              id={id} name={name} tag={tag} Icon={Icon} accent={accent}
+              fee={fee} headline={headline} sub={sub} route={route}
+              isHovered={hovered === id}
+              onEnter={() => setHovered(id)}
+              onLeave={() => setHovered(null)}
+              onClick={() => setLocation(route)}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Footer */}
       <div className="relative z-10 text-center pb-8 pt-4">
-        <p className="text-[11px] font-mono text-white/45 tracking-[0.25em] uppercase">
+        <p className="text-[11px] font-mono tracking-[0.25em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>
           Solana · USDG · Dodo Payments
         </p>
       </div>
-
     </div>
   );
 }
@@ -204,32 +197,30 @@ function ModuleCard({ name, tag, Icon, accent, fee, headline, sub, isHovered, on
       onClick={onClick}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
-      className="group relative text-left rounded-2xl p-6 border overflow-hidden transition-all duration-300 w-full"
+      className="group relative text-left rounded-2xl p-6 overflow-hidden transition-all duration-300 w-full"
       style={{
         background: isHovered
-          ? `linear-gradient(135deg, ${accent}12 0%, rgba(255,255,255,0.02) 100%)`
+          ? `linear-gradient(135deg, ${accent}14 0%, rgba(255,255,255,0.02) 100%)`
           : "rgba(255,255,255,0.03)",
-        borderColor: isHovered ? `${accent}55` : "rgba(255,255,255,0.08)",
-        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+        border: `1px solid ${isHovered ? accent + "50" : "rgba(255,255,255,0.08)"}`,
+        transform: isHovered ? "translateY(-3px)" : "translateY(0)",
         boxShadow: isHovered
-          ? `0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px ${accent}20, inset 0 1px 0 ${accent}15`
+          ? `0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px ${accent}18, inset 0 1px 0 ${accent}12`
           : "0 2px 8px rgba(0,0,0,0.2)",
       }}
     >
-      {/* Glow blob */}
       <div
-        className="absolute -top-8 -right-8 w-36 h-36 rounded-full blur-3xl transition-opacity duration-500 pointer-events-none"
-        style={{ background: accent, opacity: isHovered ? 0.1 : 0 }}
+        className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl pointer-events-none transition-opacity duration-500"
+        style={{ background: accent, opacity: isHovered ? 0.12 : 0 }}
       />
 
-      {/* Icon + tag row */}
       <div className="flex items-start justify-between mb-5">
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300"
           style={{
             background: `${accent}15`,
-            border: `1px solid ${accent}30`,
-            boxShadow: isHovered ? `0 0 20px ${accent}25` : "none",
+            border: `1px solid ${accent}28`,
+            boxShadow: isHovered ? `0 0 18px ${accent}22` : "none",
           }}
         >
           <Icon
@@ -240,28 +231,26 @@ function ModuleCard({ name, tag, Icon, accent, fee, headline, sub, isHovered, on
         <div className="text-right">
           <span
             className="inline-block text-[10px] font-mono px-2 py-0.5 rounded-full mb-1"
-            style={{ background: `${accent}12`, color: accent, border: `1px solid ${accent}25` }}
+            style={{ background: `${accent}12`, color: accent, border: `1px solid ${accent}22` }}
           >
             {tag}
           </span>
-          <p className="text-[10px] text-white/30 font-mono">{fee} fee</p>
+          <p className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.28)" }}>{fee} fee</p>
         </div>
       </div>
 
-      {/* Text */}
-      <h2 className="text-base font-bold text-white mb-1.5 leading-snug">{name}</h2>
+      <h2 className="text-[15px] font-bold text-white mb-1.5 leading-snug">{name}</h2>
       <p
         className="text-sm font-semibold mb-2.5 leading-snug transition-colors duration-300"
         style={{ color: isHovered ? accent : "rgba(255,255,255,0.6)" }}
       >
         {headline}
       </p>
-      <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.42)" }}>{sub}</p>
+      <p className="text-xs leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.38)" }}>{sub}</p>
 
-      {/* CTA */}
       <div
         className="flex items-center gap-1.5 text-xs font-semibold transition-all duration-300"
-        style={{ color: isHovered ? accent : "rgba(255,255,255,0.25)" }}
+        style={{ color: isHovered ? accent : "rgba(255,255,255,0.22)" }}
       >
         Enter
         <ArrowRight
@@ -270,7 +259,6 @@ function ModuleCard({ name, tag, Icon, accent, fee, headline, sub, isHovered, on
         />
       </div>
 
-      {/* Bottom fill line */}
       <div
         className="absolute bottom-0 left-0 h-[1px] transition-all duration-500"
         style={{
