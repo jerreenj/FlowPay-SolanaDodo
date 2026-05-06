@@ -84,14 +84,14 @@ export default function Remittance() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <ArrowRightLeft className="w-5 h-5 text-purple-400" />
+              <ArrowRightLeft className="w-5 h-5 text-white/60" />
               <h1 className="text-2xl font-bold text-white">RemitDirect</h1>
-              <span className="text-xs bg-purple-400/10 text-purple-400 border border-purple-400/20 px-2 py-0.5 rounded-full font-mono">0.75% fee</span>
+              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">0.75% fee</span>
             </div>
             <p className="text-white/50 text-sm">Cross-border remittances to India — Dubai→Mumbai in 2 seconds</p>
           </div>
           <button onClick={() => { setShowForm(true); setSuccess(null); }}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> Send Money
           </button>
         </div>
@@ -129,10 +129,10 @@ export default function Remittance() {
         )}
 
         {success && (
-          <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-xl p-5 mb-6">
+          <div className="bg-white/5 border border-white/15 rounded-xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-[#00ff88]" />
-              <span className="text-[#00ff88] font-semibold">Remittance sent in {success.settlementSeconds}s!</span>
+              <CheckCircle className="w-5 h-5 text-white" />
+              <span className="text-white font-semibold">Remittance sent in {success.settlementSeconds}s!</span>
             </div>
             <div className="text-sm text-white/60">
               <p>{success.senderName} ({success.senderCountry}) sent <span className="text-white font-mono">${success.amountUsdg} USDG</span></p>
@@ -148,12 +148,12 @@ export default function Remittance() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Sender Name</label>
                 <input value={form.senderName} onChange={(e) => set("senderName", e.target.value)} required placeholder="Mohammed Al-Rashid"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Sending From</label>
                 <select value={form.senderCountry} onChange={(e) => set("senderCountry", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all">
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
                   <option value="UAE">🇦🇪 UAE</option>
                   <option value="US">🇺🇸 United States</option>
                   <option value="UK">🇬🇧 United Kingdom</option>
@@ -165,24 +165,24 @@ export default function Remittance() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Recipient Name</label>
                 <input value={form.recipientName} onChange={(e) => set("recipientName", e.target.value)} required placeholder="Priya Sharma"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Recipient UPI ID</label>
                 <input value={form.recipientUpiId} onChange={(e) => set("recipientUpiId", e.target.value)} required placeholder="priya@okaxis"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div className="col-span-2">
                 <label className="text-xs text-white/50 uppercase tracking-wide">Amount (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="500.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
                 {form.amountUsdg && (
                   <p className="text-xs text-white/40 mt-1">Recipient gets ≈ ₹{(parseFloat(form.amountUsdg || "0") * 83.5).toLocaleString()} · Fee: ${(parseFloat(form.amountUsdg || "0") * 0.0075).toFixed(4)} USDG</p>
                 )}
               </div>
               <div className="col-span-2 flex gap-3 mt-2">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 bg-white hover:bg-white/90 text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
                   {submitting ? "Processing on Solana…" : "Send Remittance"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
@@ -210,10 +210,10 @@ export default function Remittance() {
                     <p className="text-xs text-white/40 mt-0.5">{r.senderCountry} → IN · {r.recipientUpiId} · {new Date(r.createdAt).toLocaleString()}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-mono font-semibold text-[#00ff88]">${parseFloat(r.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-sm font-mono font-semibold text-white">${parseFloat(r.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-xs text-white/40">₹{parseFloat(r.amountInr).toLocaleString()} · {r.settlementSeconds}s</p>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${r.status === "completed" ? "bg-[#00ff88]/10 text-[#00ff88]" : "bg-yellow-500/10 text-yellow-400"}`}>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-white/10 text-white/50">
                     {r.status}
                   </span>
                 </div>
