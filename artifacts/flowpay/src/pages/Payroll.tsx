@@ -39,7 +39,8 @@ export default function Payroll() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ senderName: "Rahul Sharma", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
+  const user = useAuthStore((s) => s.user);
+  const [form, setForm] = useState({ senderName: user?.name ?? "", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
   const [success, setSuccess] = useState<Payment | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
@@ -71,7 +72,7 @@ export default function Payroll() {
       if (!res.ok) throw new Error(data.error);
       setSuccess(data);
       setShowForm(false);
-      setForm({ senderName: "Rahul Sharma", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
+      setForm({ senderName: user?.name ?? "", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
       await load();
     } catch { /* ignore */ }
     finally { setSubmitting(false); }

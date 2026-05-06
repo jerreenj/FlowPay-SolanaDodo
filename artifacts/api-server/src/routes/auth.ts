@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, usersTable, walletsTable } from "@workspace/db";
-import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -10,99 +9,90 @@ function generateToken(userId: number): string {
   return Buffer.from(JSON.stringify({ userId, ts: Date.now() })).toString("base64");
 }
 
-function generateWalletAddress(): string {
-  const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  let address = "";
-  for (let i = 0; i < 44; i++) {
-    address += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return address;
+function isValidSolanaAddress(address: string): boolean {
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 }
 
-router.post("/auth/register", async (req, res): Promise<void> => {
-  const parsed = RegisterBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+// Wallet-based auth — connect wallet → create or find account
+router.post("/auth/wallet", async (req, res): Promise<void> => {
+  const { walletAddress, name } = req.body;
+
+  if (!walletAddress || typeof walletAddress !== "string") {
+    res.status(400).json({ error: "walletAddress is required" });
     return;
   }
 
-  const { name, email, password, userType, country } = parsed.data;
+  if (!isValidSolanaAddress(walletAddress)) {
+    res.status(400).json({ error: "Invalid Solana wallet address" });
+    return;
+  }
 
-  const existing = await db.select().from(usersTable).where(eq(usersTable.email, email));
+  // Check if user exists by wallet address
+  const existing = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.walletAddress, walletAddress));
+
   if (existing.length > 0) {
-    res.status(400).json({ error: "Email already registered" });
+    const user = existing[0];
+    const token = generateToken(user.id);
+    req.log.info({ userId: user.id }, "Wallet login");
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        walletAddress: user.walletAddress,
+        createdAt: user.createdAt,
+      },
+    });
     return;
   }
 
-  const walletAddress = generateWalletAddress();
+  // New wallet — require name before creating account
+  if (!name || typeof name !== "string" || name.trim().length < 1) {
+    res.status(202).json({ newUser: true, message: "Username required for new wallet" });
+    return;
+  }
 
-  const [user] = await db.insert(usersTable).values({
-    name,
-    email,
-    password,
-    userType: userType ?? "freelancer",
-    country: country ?? "IN",
-    walletAddress,
-  }).returning();
+  const trimmedName = name.trim().slice(0, 32);
+
+  const [user] = await db
+    .insert(usersTable)
+    .values({
+      name: trimmedName,
+      email: `${walletAddress.toLowerCase()}@wallet.flowpay`,
+      password: "",
+      userType: "freelancer",
+      country: "IN",
+      walletAddress,
+    })
+    .returning();
 
   await db.insert(walletsTable).values({
     userId: user.id,
     address: walletAddress,
-    usdgBalance: "100.00",
-    inrBalance: "8350.00",
+    usdgBalance: "0.00",
+    inrBalance: "0.00",
     totalReceived: "0.00",
     totalSent: "0.00",
   });
 
   const token = generateToken(user.id);
+  req.log.info({ userId: user.id }, "New wallet user created");
 
-  req.log.info({ userId: user.id }, "User registered");
   res.status(201).json({
     token,
     user: {
       id: user.id,
       name: user.name,
-      email: user.email,
-      userType: user.userType,
-      country: user.country,
       walletAddress: user.walletAddress,
       createdAt: user.createdAt,
     },
   });
 });
 
-router.post("/auth/login", async (req, res): Promise<void> => {
-  const parsed = LoginBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
-
-  const { email, password } = parsed.data;
-
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
-  if (!user || user.password !== password) {
-    res.status(401).json({ error: "Invalid email or password" });
-    return;
-  }
-
-  const token = generateToken(user.id);
-
-  req.log.info({ userId: user.id }, "User logged in");
-  res.json({
-    token,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      userType: user.userType,
-      country: user.country,
-      walletAddress: user.walletAddress,
-      createdAt: user.createdAt,
-    },
-  });
-});
-
+// Keep /auth/me for token validation
 router.get("/auth/me", async (req, res): Promise<void> => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
@@ -121,9 +111,6 @@ router.get("/auth/me", async (req, res): Promise<void> => {
     res.json({
       id: user.id,
       name: user.name,
-      email: user.email,
-      userType: user.userType,
-      country: user.country,
       walletAddress: user.walletAddress,
       createdAt: user.createdAt,
     });

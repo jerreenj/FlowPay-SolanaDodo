@@ -4,9 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/lib/auth";
 
-import Home from "@/pages/Home";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import Landing from "@/pages/Landing";
+import ModuleSelect from "@/pages/ModuleSelect";
 import Dashboard from "@/pages/Dashboard";
 import Payroll from "@/pages/Payroll";
 import Remittance from "@/pages/Remittance";
@@ -18,34 +17,22 @@ import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
+    queries: { retry: false, refetchOnWindowFocus: false },
   },
 });
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
-  const token = useAuthStore((state) => state.token);
-  if (!token) return <Redirect to="/login" />;
-  return <Component />;
-}
-
-function PublicOnlyRoute({ component: Component }: { component: React.ComponentType }) {
-  const token = useAuthStore((state) => state.token);
-  if (token) return <Redirect to="/dashboard" />;
+  const token = useAuthStore((s) => s.token);
+  if (!token) return <Redirect to="/" />;
   return <Component />;
 }
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/login">
-        <PublicOnlyRoute component={Login} />
-      </Route>
-      <Route path="/register">
-        <PublicOnlyRoute component={Register} />
+      <Route path="/" component={Landing} />
+      <Route path="/select">
+        <ProtectedRoute component={ModuleSelect} />
       </Route>
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} />
@@ -73,7 +60,7 @@ function Router() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -85,5 +72,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-export default App;
