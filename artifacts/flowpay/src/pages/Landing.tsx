@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/lib/auth";
 import WalletConnect from "@/components/WalletConnect";
+import { Link } from "wouter";
 import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
   ArrowRight, Zap, Globe, TrendingUp, Shield, Clock
@@ -71,10 +72,6 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   const token = useAuthStore((s) => s.token);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (token) setLocation("/select");
-  }, [token]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -197,12 +194,27 @@ export default function Landing() {
             </div>
             <span className="font-bold text-lg tracking-tight">FlowPay</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
-            </span>
-            <span className="text-xs font-mono text-[#00ff88]/75 tracking-[0.2em]">MAINNET</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
+              </span>
+              <span className="text-xs font-mono text-[#00ff88]/75 tracking-[0.2em]">MAINNET</span>
+            </div>
+            {token ? (
+              <Link
+                href="/select"
+                className="flex items-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-bold px-4 py-2 rounded-xl transition-colors"
+              >
+                Open App <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <Link
+                href="/select"
+                className="hidden"
+              />
+            )}
           </div>
         </nav>
 
