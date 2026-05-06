@@ -75,10 +75,10 @@ export default function EscrowPage() {
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const statusColor: Record<string, string> = {
-    active: "bg-blue-400/10 text-blue-400",
-    released: "bg-[#00ff88]/10 text-[#00ff88]",
-    disputed: "bg-red-400/10 text-red-400",
-    completed: "bg-[#00ff88]/10 text-[#00ff88]",
+    active: "bg-white/10 text-white/60",
+    released: "bg-white/10 text-white/60",
+    disputed: "bg-white/10 text-white/60",
+    completed: "bg-white/10 text-white/60",
   };
 
   return (
@@ -87,29 +87,29 @@ export default function EscrowPage() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck className="w-5 h-5 text-yellow-400" />
+              <ShieldCheck className="w-5 h-5 text-white/60" />
               <h1 className="text-2xl font-bold text-white">EscrowX</h1>
-              <span className="text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
+              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
             </div>
             <p className="text-white/50 text-sm">Smart contract escrow on Solana — trustless milestone payments for freelancers</p>
           </div>
           <button onClick={() => { setShowForm(true); setSuccess(null); }}
-            className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> Create Escrow
           </button>
         </div>
 
         {success && (
-          <div className="bg-[#00ff88]/10 border border-[#00ff88]/30 rounded-xl p-5 mb-6">
+          <div className="bg-white/5 border border-white/15 rounded-xl p-5 mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-[#00ff88]" />
-              <span className="text-[#00ff88] font-semibold">Escrow created on Solana!</span>
+              <CheckCircle className="w-5 h-5 text-white" />
+              <span className="text-white font-semibold">Escrow created on Solana!</span>
             </div>
             <div className="text-sm text-white/60 space-y-1">
               <p><span className="text-white">{success.projectTitle}</span> — ${success.amountUsdg} USDG locked</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs text-white/40 font-mono">Contract:</span>
-                <span className="text-xs text-[#00ff88]/80 font-mono">{success.solanaAddress?.slice(0, 20)}…</span>
+                <span className="text-xs text-white/50 font-mono">{success.solanaAddress?.slice(0, 20)}…</span>
                 <button onClick={() => navigator.clipboard.writeText(success.solanaAddress ?? "")} className="text-white/30 hover:text-white/60"><Copy className="w-3 h-3" /></button>
               </div>
             </div>
@@ -123,37 +123,37 @@ export default function EscrowPage() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Client Name</label>
                 <input value={form.clientName} onChange={(e) => set("clientName", e.target.value)} required placeholder="TechCorp USA"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Client Email</label>
                 <input type="email" value={form.clientEmail} onChange={(e) => set("clientEmail", e.target.value)} required placeholder="john@techcorp.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Freelancer Name</label>
                 <input value={form.freelancerName} onChange={(e) => set("freelancerName", e.target.value)} required placeholder="Priya Menon"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Freelancer Email</label>
                 <input type="email" value={form.freelancerEmail} onChange={(e) => set("freelancerEmail", e.target.value)} required placeholder="priya@gmail.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div className="col-span-2">
                 <label className="text-xs text-white/50 uppercase tracking-wide">Project Title</label>
                 <input value={form.projectTitle} onChange={(e) => set("projectTitle", e.target.value)} required placeholder="React Dashboard Build"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
               </div>
               <div className="col-span-2">
                 <label className="text-xs text-white/50 uppercase tracking-wide">Description</label>
                 <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required rows={2} placeholder="Describe the work scope…"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all resize-none" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all resize-none" />
               </div>
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Amount (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="2000.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all" />
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
                 {form.amountUsdg && (
                   <p className="text-xs text-white/40 mt-1">Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG</p>
                 )}
@@ -161,13 +161,13 @@ export default function EscrowPage() {
               <div>
                 <label className="text-xs text-white/50 uppercase tracking-wide">Milestones</label>
                 <select value={form.milestones} onChange={(e) => set("milestones", e.target.value)}
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-[#00ff88]/50 transition-all">
+                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all">
                   {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} milestone{n > 1 ? "s" : ""}</option>)}
                 </select>
               </div>
               <div className="col-span-2 flex gap-3 mt-2">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 bg-white hover:bg-white/90 text-black font-semibold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-50">
                   {submitting ? "Locking on Solana…" : "Create Escrow"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
@@ -192,7 +192,7 @@ export default function EscrowPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor[e.status] ?? "bg-white/10 text-white/50"}`}>{e.status}</span>
-                    <p className="text-lg font-bold text-[#00ff88] font-mono">${parseFloat(e.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    <p className="text-lg font-bold text-white font-mono">${parseFloat(e.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
 
@@ -205,7 +205,7 @@ export default function EscrowPage() {
                     <span>{Math.round((e.completedMilestones / e.milestones) * 100)}%</span>
                   </div>
                   <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#00ff88] rounded-full transition-all" style={{ width: `${(e.completedMilestones / e.milestones) * 100}%` }} />
+                    <div className="h-full bg-white rounded-full transition-all" style={{ width: `${(e.completedMilestones / e.milestones) * 100}%` }} />
                   </div>
                 </div>
 
@@ -221,11 +221,11 @@ export default function EscrowPage() {
                   {e.status === "active" && (
                     <div className="flex gap-2">
                       <button onClick={() => release(e.id)}
-                        className="flex items-center gap-1.5 text-xs bg-[#00ff88]/10 hover:bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/20 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs bg-white/10 hover:bg-white/15 text-white/80 border border-white/15 px-3 py-1.5 rounded-lg transition-colors">
                         <Unlock className="w-3 h-3" /> Release
                       </button>
                       <button onClick={() => dispute(e.id)}
-                        className="flex items-center gap-1.5 text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-xs bg-white/5 hover:bg-white/10 text-white/50 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">
                         <AlertTriangle className="w-3 h-3" /> Dispute
                       </button>
                     </div>
