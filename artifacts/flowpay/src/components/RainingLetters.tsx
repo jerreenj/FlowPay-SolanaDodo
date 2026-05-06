@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01₹$#%ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const FONT_SIZE = 15;
-const SPEED_MS = 75; // ms between steps — controls fall pace
+const SPEED_MS = 75;
 
 export default function RainingLetters() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -18,7 +18,6 @@ export default function RainingLetters() {
     canvas.height = H;
 
     let cols = Math.floor(W / FONT_SIZE);
-    // Start each column at a random negative row so they stagger in
     let drops = Array.from({ length: cols }, () => -Math.floor(Math.random() * 40));
 
     let animId: number;
@@ -29,11 +28,11 @@ export default function RainingLetters() {
       if (ts - last < SPEED_MS) return;
       last = ts;
 
-      // Fade trail: paint a semi-transparent dark layer every frame
-      ctx.fillStyle = "rgba(8, 8, 8, 0.18)";
+      // Fade trail with a very slight purple tint
+      ctx.fillStyle = "rgba(8, 6, 14, 0.2)";
       ctx.fillRect(0, 0, W, H);
 
-      ctx.font = `${FONT_SIZE}px monospace`;
+      ctx.font = `bold ${FONT_SIZE}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
         const y = drops[i] * FONT_SIZE;
@@ -41,11 +40,13 @@ export default function RainingLetters() {
 
         const char = CHARS[Math.floor(Math.random() * CHARS.length)];
 
-        // Head glyph — bright white
-        ctx.fillStyle = "rgba(230, 230, 255, 0.85)";
+        // Head glyph — bright purple with glow
+        ctx.shadowColor = "rgba(180, 100, 255, 0.9)";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "rgba(200, 130, 255, 1.0)";
         ctx.fillText(char, i * FONT_SIZE, y);
+        ctx.shadowBlur = 0;
 
-        // Randomly reset column after it passes bottom
         if (y > H && Math.random() > 0.977) {
           drops[i] = -Math.floor(Math.random() * 20);
         }
@@ -75,7 +76,7 @@ export default function RainingLetters() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.28 }}
+      style={{ opacity: 0.55 }}
     />
   );
 }
