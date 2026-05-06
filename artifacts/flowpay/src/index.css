@@ -2,6 +2,16 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Hide Replit badge injected at runtime */
+[data-replit-badge],
+#replit-badge,
+.replit-badge,
+iframe[src*="replit.com/badge"],
+a[href*="replit.com"][target="_blank"]:has(img[src*="replit"]) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

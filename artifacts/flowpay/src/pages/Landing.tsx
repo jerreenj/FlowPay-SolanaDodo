@@ -1,16 +1,23 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-
 import { useAuthStore } from "@/lib/auth";
 import WalletConnect from "@/components/WalletConnect";
 
+const MODULES = [
+  { name: "PayRails", color: "#a78bfa" },
+  { name: "RemitDirect", color: "#60a5fa" },
+  { name: "EscrowX", color: "#34d399" },
+  { name: "CreatorPay", color: "#f472b6" },
+  { name: "AgentBank", color: "#fb923c" },
+];
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 28 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.18 + 0.4, duration: 0.85, ease: "easeInOut" },
+    transition: { delay: i * 0.14 + 0.25, duration: 0.75, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
@@ -23,7 +30,6 @@ export default function Landing() {
     if (token) setLocation("/select");
   }, [token]);
 
-  // Purple particle canvas — AetherFlow-style
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -131,31 +137,32 @@ export default function Landing() {
 
   return (
     <div className="bg-black text-white overflow-x-hidden">
-      {/* HERO — full viewport, canvas bg */}
       <section className="relative h-screen w-full flex flex-col overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-        {/* Nav — just a green dot + MAINNET */}
-        <nav className="relative z-10 flex items-center justify-end px-8 py-5">
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-60" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00ff88]" />
+        {/* Nav */}
+        <nav className="relative z-10 flex items-center justify-end px-8 py-6">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
             </span>
-            <span className="text-[11px] font-mono text-white/30 tracking-widest">MAINNET</span>
+            <span className="text-xs font-mono text-white/75 tracking-[0.2em]">MAINNET</span>
           </div>
         </nav>
 
-        {/* Centered hero content */}
+        {/* Hero content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
+
+          {/* Title */}
           <motion.h1
-            custom={1}
+            custom={0}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-6 leading-[0.9]"
+            className="text-7xl md:text-9xl font-black tracking-tighter mb-5 leading-[0.88]"
             style={{
-              backgroundImage: "linear-gradient(180deg, #ffffff 30%, rgba(255,255,255,0.4) 100%)",
+              backgroundImage: "linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.5) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -164,45 +171,54 @@ export default function Landing() {
             FlowPay
           </motion.h1>
 
+          {/* Primary tagline */}
+          <motion.p
+            custom={1}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="text-xl md:text-2xl font-semibold text-white/85 max-w-lg mx-auto mb-3 leading-snug"
+          >
+            India's stablecoin payment super-layer.
+          </motion.p>
+
+          {/* Secondary tagline */}
           <motion.p
             custom={2}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-base md:text-lg text-white/40 max-w-lg mx-auto mb-3 leading-relaxed font-light"
+            className="text-sm md:text-base text-white/50 max-w-sm mx-auto mb-11 leading-relaxed"
           >
-            India's stablecoin payment super-layer.
+            Five payment rails on one Solana platform — payroll, remittance,
+            escrow, creator commerce, and AI agent payments.
           </motion.p>
 
-          <motion.p
-            custom={2.5}
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="text-sm text-white/25 max-w-md mx-auto mb-10 leading-relaxed"
-          >
-            Five payment rails on one Solana platform — payroll, remittance, escrow, creator commerce, and AI agent payments.
-          </motion.p>
-
-          {/* Feature tags */}
+          {/* Module pills */}
           <motion.div
             custom={3}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="flex flex-wrap items-center justify-center gap-2 mb-10"
+            className="flex flex-wrap items-center justify-center gap-2.5 mb-12"
           >
-            {["PayRails", "RemitDirect", "EscrowX", "CreatorPay", "AgentBank"].map((m) => (
-              <span
-                key={m}
-                className="text-[11px] font-mono px-3 py-1 rounded-full border border-white/15 text-white/40"
+            {MODULES.map((m) => (
+              <div
+                key={m.name}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-white/[0.05] backdrop-blur-sm"
               >
-                {m}
-              </span>
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: m.color, boxShadow: `0 0 6px ${m.color}` }}
+                />
+                <span className="text-[13px] font-semibold text-white/85 tracking-wide">
+                  {m.name}
+                </span>
+              </div>
             ))}
           </motion.div>
 
-          {/* Single center CTA */}
+          {/* CTA */}
           <motion.div
             custom={4}
             variants={fadeUp}

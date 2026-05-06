@@ -180,19 +180,63 @@ export default function WalletConnect({ variant = "default" }: Props) {
 
   if (token) return null;
 
-  const btnClass =
-    variant === "hero"
-      ? "inline-flex items-center gap-2.5 bg-white text-black font-bold text-sm px-8 py-4 rounded-xl hover:bg-white/90 active:scale-[0.98] transition-all duration-150 shadow-lg"
-      : variant === "card"
-      ? "inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-white/90 transition-all"
-      : "inline-flex items-center gap-2 border border-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-white/8 transition-all";
+  const defaultBtn = (
+    <button
+      onClick={() => { setOpen(true); setError(null); }}
+      className="inline-flex items-center gap-2 border border-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-white/8 transition-all"
+    >
+      Connect Wallet
+    </button>
+  );
+
+  const cardBtn = (
+    <button
+      onClick={() => { setOpen(true); setError(null); }}
+      className="inline-flex items-center gap-2 bg-white text-black font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-white/90 transition-all"
+    >
+      Connect Wallet
+    </button>
+  );
+
+  const heroBtn = (
+    <button
+      onClick={() => { setOpen(true); setError(null); }}
+      className="group relative inline-flex items-center gap-3 px-9 py-4 rounded-full transition-all duration-300 overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(139,92,246,0.06) 100%)",
+        border: "1px solid rgba(167,139,250,0.35)",
+        boxShadow: "0 0 24px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.07)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.boxShadow =
+          "0 0 40px rgba(139,92,246,0.28), inset 0 1px 0 rgba(255,255,255,0.1)";
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(167,139,250,0.65)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.boxShadow =
+          "0 0 24px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.07)";
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(167,139,250,0.35)";
+      }}
+    >
+      {/* shimmer sweep */}
+      <span
+        className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%)",
+        }}
+      />
+      <span className="relative text-white font-semibold text-base tracking-wide">
+        Connect Wallet
+      </span>
+      <span className="relative text-violet-300 text-lg leading-none group-hover:translate-x-0.5 transition-transform duration-200">
+        →
+      </span>
+    </button>
+  );
 
   return (
     <>
-      <button onClick={() => { setOpen(true); setError(null); }} className={btnClass}>
-        Connect Wallet
-        {variant === "hero" && <ChevronRight className="w-4 h-4" />}
-      </button>
+      {variant === "hero" ? heroBtn : variant === "card" ? cardBtn : defaultBtn}
 
       {open && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
