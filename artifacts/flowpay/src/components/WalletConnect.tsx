@@ -203,19 +203,19 @@ export default function WalletConnect({ variant = "default" }: Props) {
       onClick={() => { setOpen(true); setError(null); }}
       className="group relative inline-flex items-center gap-3 px-9 py-4 rounded-full transition-all duration-300 overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, rgba(167,139,250,0.12) 0%, rgba(139,92,246,0.06) 100%)",
-        border: "1px solid rgba(167,139,250,0.35)",
-        boxShadow: "0 0 24px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.07)",
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 0 24px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)",
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLButtonElement).style.boxShadow =
-          "0 0 40px rgba(139,92,246,0.28), inset 0 1px 0 rgba(255,255,255,0.1)";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(167,139,250,0.65)";
+          "0 0 40px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1)";
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.4)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLButtonElement).style.boxShadow =
-          "0 0 24px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.07)";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(167,139,250,0.35)";
+          "0 0 24px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)";
+        (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.2)";
       }}
     >
       <span
@@ -227,7 +227,7 @@ export default function WalletConnect({ variant = "default" }: Props) {
       <span className="relative text-white font-semibold text-base tracking-wide">
         Connect Wallet
       </span>
-      <span className="relative text-violet-300 text-lg leading-none group-hover:translate-x-0.5 transition-transform duration-200">
+      <span className="relative text-white/50 text-lg leading-none group-hover:translate-x-0.5 transition-transform duration-200">
         →
       </span>
     </button>

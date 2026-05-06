@@ -50,6 +50,7 @@ export default function EscrowPage() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ clientName: user?.name ?? "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
   const [success, setSuccess] = useState<Escrow | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -66,6 +67,7 @@ export default function EscrowPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setFormError(null);
     try {
       const res = await apiFetch("/api/escrows", {
         method: "POST",
@@ -73,12 +75,14 @@ export default function EscrowPage() {
         body: JSON.stringify({ ...form, milestones: parseInt(form.milestones) }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error ?? "Failed to create escrow");
       setSuccess(data);
       setShowForm(false);
-      setForm({ clientName: "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
+      setForm({ clientName: user?.name ?? "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
       await load();
-    } catch { }
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : "Something went wrong");
+    }
     finally { setSubmitting(false); }
   }
 
@@ -112,7 +116,7 @@ export default function EscrowPage() {
             </div>
           </div>
           <button
-            onClick={() => { setShowForm(true); setSuccess(null); }}
+            onClick={() => { setShowForm(true); setSuccess(null); setFormError(null); }}
             className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
             style={{ background: ACCENT, color: "#000" }}
           >
@@ -198,6 +202,11 @@ export default function EscrowPage() {
                   {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} milestone{n > 1 ? "s" : ""}</option>)}
                 </select>
               </div>
+              {formError && (
+                <div className="col-span-2 rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+                  {formError}
+                </div>
+              )}
               <div className="col-span-2 flex gap-3 pt-1">
                 <button type="submit" disabled={submitting}
                   className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"

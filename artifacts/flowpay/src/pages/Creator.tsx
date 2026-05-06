@@ -16,6 +16,7 @@ interface Product {
   salesCount: number;
   totalRevenue: string;
   isActive: string;
+  dodoProductId: string | null;
   createdAt: string;
 }
 
@@ -168,7 +169,13 @@ export default function Creator() {
         headers: authHeaders,
         body: JSON.stringify(buyForm),
       });
+      const data = await res.json();
       if (!res.ok) throw new Error();
+      // If Dodo returned a real checkout URL, redirect there
+      if (data.dodoCheckoutUrl) {
+        window.location.href = data.dodoCheckoutUrl;
+        return;
+      }
       setBuyingId(null);
       setBuyForm({ buyerName: "", buyerEmail: "" });
       await load();
@@ -194,8 +201,9 @@ export default function Creator() {
               <div className="flex flex-wrap items-center gap-2.5 mb-2">
                 <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">CreatorPay</h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>2% fee</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.10)" }}>Dodo Payments</span>
               </div>
-              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Sell digital products in USDG — instant settlement, zero chargebacks</p>
+              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Sell digital products in USDG — instant settlement via Dodo, zero chargebacks</p>
             </div>
           </div>
           <button onClick={() => setShowForm(true)}
@@ -305,10 +313,15 @@ export default function Creator() {
                 <div key={p.id} className="rounded-2xl p-5 transition-all" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${tc}15`, color: tc, border: `1px solid ${tc}25` }}>
                           {typeLabels[p.type] ?? p.type}
                         </span>
+                        {p.dodoProductId && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                            Dodo ✓
+                          </span>
+                        )}
                       </div>
                       <h3 className="text-white font-semibold text-[15px] leading-tight">{p.title}</h3>
                       <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>by {p.creatorName}</p>

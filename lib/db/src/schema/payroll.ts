@@ -17,6 +17,7 @@ export const payrollPaymentsTable = pgTable("payroll_payments", {
   solanaSignature: text("solana_signature"),
   settlementSeconds: text("settlement_seconds"),
   dodoPaymentId: text("dodo_payment_id"),
+  dodoCheckoutUrl: text("dodo_checkout_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

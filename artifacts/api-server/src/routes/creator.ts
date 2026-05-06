@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql, count } from "drizzle-orm";
 import { db, creatorProductsTable, creatorSalesTable } from "@workspace/db";
 import { CreateCreatorProductBody, GetCreatorProductParams, PurchaseCreatorProductBody, PurchaseCreatorProductParams } from "@workspace/api-zod";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -25,8 +26,16 @@ function mapProduct(p: typeof creatorProductsTable.$inferSelect) {
     salesCount: p.salesCount,
     totalRevenue: p.totalRevenue,
     isActive: p.isActive,
+    dodoProductId: p.dodoProductId ?? null,
     createdAt: p.createdAt,
   };
+}
+
+// Map our product type to Dodo tax category
+function toDodoTaxCategory(type: string): "digital_products" | "saas" | "e_book" | "edtech" {
+  if (type === "ebook") return "e_book";
+  if (type === "course" || type === "newsletter") return "edtech";
+  return "digital_products";
 }
 
 router.get("/creator/products", async (_req, res): Promise<void> => {
@@ -43,6 +52,34 @@ router.post("/creator/products", async (req, res): Promise<void> => {
 
   const { creatorName, title, description, type, priceUsdg } = parsed.data;
 
+  // Create a real Dodo product
+  let dodoProductId: string | null = null;
+  if (dodoEnabled) {
+    try {
+      const priceInCents = Math.round(parseFloat(priceUsdg) * 100);
+      const dodoProduct = await dodo.products.create({
+        name: title,
+        description,
+        tax_category: toDodoTaxCategory(type ?? "course"),
+        price: {
+          currency: "USD",
+          discount: 0,
+          price: priceInCents,
+          purchasing_power_parity: false,
+          type: "one_time_price",
+        },
+        metadata: {
+          creator_name: creatorName,
+          product_type: type ?? "course",
+          source: "flowpay_creator",
+        },
+      });
+      dodoProductId = dodoProduct.product_id;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo product creation failed — continuing without Dodo product id");
+    }
+  }
+
   const [row] = await db.insert(creatorProductsTable).values({
     creatorName,
     title,
@@ -52,6 +89,7 @@ router.post("/creator/products", async (req, res): Promise<void> => {
     salesCount: 0,
     totalRevenue: "0.00",
     isActive: "true",
+    dodoProductId,
   }).returning();
 
   res.status(201).json(mapProduct(row));
@@ -96,6 +134,33 @@ router.post("/creator/products/:id/purchase", async (req, res): Promise<void> =>
   const creatorReceives = (parseFloat(product.priceUsdg) - parseFloat(feeUsdg)).toFixed(4);
   const solanaSignature = generateSolanaSignature();
 
+  // If this product has a real Dodo product, create a real checkout session
+  let dodoCheckoutUrl: string | null = null;
+  let dodoSessionId: string | null = null;
+
+  if (dodoEnabled && product.dodoProductId) {
+    try {
+      const session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: product.dodoProductId, quantity: 1 }],
+        customer: {
+          email: body.data.buyerEmail,
+          name: body.data.buyerName,
+        },
+        metadata: {
+          product_title: product.title,
+          creator_name: product.creatorName,
+          solana_sig: solanaSignature,
+          source: "flowpay_creator_buy",
+        },
+        return_url: `${DODO_RETURN_URL_BASE}/buy/${product.id}?status=success`,
+      });
+      dodoSessionId = session.session_id;
+      dodoCheckoutUrl = session.checkout_url ?? null;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo purchase session creation failed — recording sale without redirect");
+    }
+  }
+
   const [sale] = await db.insert(creatorSalesTable).values({
     productId: product.id,
     productTitle: product.title,
@@ -126,6 +191,8 @@ router.post("/creator/products/:id/purchase", async (req, res): Promise<void> =>
     feeUsdg: sale.feeUsdg,
     creatorReceives: sale.creatorReceives,
     solanaSignature: sale.solanaSignature ?? null,
+    dodoCheckoutUrl,
+    dodoSessionId,
     createdAt: sale.createdAt,
   });
 });

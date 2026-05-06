@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
 import { apiFetch } from "@/lib/apiFetch";
-import { Sparkles, CheckCircle, Copy, CheckCheck, ArrowLeft, Zap, ShieldCheck, Clock } from "lucide-react";
+import { Sparkles, CheckCircle, Copy, CheckCheck, ArrowLeft, Zap, ShieldCheck, Clock, ExternalLink } from "lucide-react";
 
 const ACCENT = "#f472b6";
 
@@ -15,6 +15,7 @@ interface Product {
   salesCount: number;
   totalRevenue: string;
   isActive: string;
+  dodoProductId: string | null;
   createdAt: string;
 }
 
@@ -26,6 +27,8 @@ interface Sale {
   feeUsdg: string;
   creatorReceives: string;
   solanaSignature: string | null;
+  dodoCheckoutUrl: string | null;
+  dodoSessionId: string | null;
 }
 
 const typeLabels: Record<string, string> = {
@@ -81,6 +84,13 @@ export default function Buy() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Purchase failed"); return; }
+
+      // If Dodo returned a real checkout URL, redirect the buyer there
+      if (data.dodoCheckoutUrl) {
+        window.location.href = data.dodoCheckoutUrl;
+        return;
+      }
+
       setSale(data);
     } catch {
       setError("Network error — please try again");
@@ -129,6 +139,11 @@ export default function Buy() {
           </div>
           <span className="text-sm font-bold text-white">FlowPay</span>
           <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ background: "#00ff8810", color: "#00ff88", border: "1px solid #00ff8820" }}>CreatorPay</span>
+          {product.dodoProductId && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-mono" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.10)" }}>
+              Dodo
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5 text-xs font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>
           <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "#00ff88" }} /><span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "#00ff88" }} /></span>
@@ -164,6 +179,14 @@ export default function Buy() {
                   <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Creator Receives</span>
                   <span className="text-sm font-mono" style={{ color: "#4ade80" }}>${parseFloat(sale.creatorReceives).toFixed(4)} USDG</span>
                 </div>
+                {sale.dodoSessionId && (
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} className="pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Session</span>
+                      <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.45)" }}>{sale.dodoSessionId.slice(0, 16)}…</span>
+                    </div>
+                  </div>
+                )}
                 {sale.solanaSignature && (
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} className="pt-3">
                     <div className="flex items-center justify-between">
@@ -194,10 +217,16 @@ export default function Buy() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {/* Product info */}
             <div className="md:col-span-3">
-              <div className="mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="text-[11px] font-mono px-2.5 py-1 rounded-full" style={{ background: `${tc}15`, color: tc, border: `1px solid ${tc}25` }}>
                   {typeLabels[product.type] ?? product.type}
                 </span>
+                {product.dodoProductId && (
+                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-full flex items-center gap-1" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                    <ExternalLink className="w-3 h-3" />
+                    Dodo Verified Product
+                  </span>
+                )}
               </div>
               <h1 className="text-3xl font-bold text-white mt-4 mb-3 leading-tight">{product.title}</h1>
               <p className="text-base mb-6 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>by <span className="text-white font-medium">{product.creatorName}</span></p>
@@ -207,7 +236,7 @@ export default function Buy() {
               <div className="space-y-3">
                 {[
                   { icon: Zap, text: "Instant delivery — settled on Solana in &lt;3 seconds", color: "#00ff88" },
-                  { icon: ShieldCheck, text: "Zero chargebacks — USDG stablecoin, immutable on-chain", color: "#a78bfa" },
+                  { icon: ShieldCheck, text: product.dodoProductId ? "Verified on Dodo Payments — zero chargebacks, USDG stablecoin" : "Zero chargebacks — USDG stablecoin, immutable on-chain", color: "#a78bfa" },
                   { icon: Clock, text: `${product.salesCount} people have already purchased this`, color: "#38bdf8" },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-center gap-3">
@@ -276,7 +305,7 @@ export default function Buy() {
                     {submitting ? (
                       <>
                         <div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                        Settling on Solana…
+                        {product.dodoProductId ? "Redirecting to Dodo…" : "Settling on Solana…"}
                       </>
                     ) : (
                       <>
@@ -287,7 +316,9 @@ export default function Buy() {
                   </button>
 
                   <p className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.28)" }}>
-                    Powered by FlowPay · Solana blockchain · USDG stablecoin
+                    {product.dodoProductId
+                      ? "Powered by FlowPay · Dodo Payments · Solana blockchain"
+                      : "Powered by FlowPay · Solana blockchain · USDG stablecoin"}
                   </p>
                 </form>
               </div>

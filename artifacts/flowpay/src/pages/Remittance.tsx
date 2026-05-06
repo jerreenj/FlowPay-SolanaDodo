@@ -58,6 +58,7 @@ export default function Remittance() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ senderName: user?.name ?? "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
   const [success, setSuccess] = useState<Remittance | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -78,6 +79,7 @@ export default function Remittance() {
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setFormError(null);
     try {
       const res = await apiFetch("/api/remittances", {
         method: "POST",
@@ -85,12 +87,14 @@ export default function Remittance() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error ?? "Failed to send remittance");
       setSuccess(data);
       setShowForm(false);
-      setForm({ senderName: "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
+      setForm({ senderName: user?.name ?? "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
       await load();
-    } catch { }
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : "Something went wrong");
+    }
     finally { setSubmitting(false); }
   }
 
@@ -114,7 +118,7 @@ export default function Remittance() {
             </div>
           </div>
           <button
-            onClick={() => { setShowForm(true); setSuccess(null); }}
+            onClick={() => { setShowForm(true); setSuccess(null); setFormError(null); }}
             className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
             style={{ background: ACCENT, color: "#000" }}
           >
@@ -225,6 +229,11 @@ export default function Remittance() {
                   </p>
                 )}
               </div>
+              {formError && (
+                <div className="col-span-2 rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+                  {formError}
+                </div>
+              )}
               <div className="col-span-2 flex gap-3 pt-1">
                 <button type="submit" disabled={submitting}
                   className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"

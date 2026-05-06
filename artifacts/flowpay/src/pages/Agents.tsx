@@ -37,6 +37,7 @@ interface Tx {
 
 export default function Agents() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [txs, setTxs] = useState<Record<number, Tx[]>>({});
   const [showForm, setShowForm] = useState(false);
@@ -44,9 +45,11 @@ export default function Agents() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [action, setAction] = useState<"fund" | "pay" | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", ownerName: "", x402Enabled: false });
+  const [form, setForm] = useState({ name: "", description: "", ownerName: user?.name ?? "", x402Enabled: false });
   const [fundAmount, setFundAmount] = useState("");
   const [payForm, setPayForm] = useState({ recipientName: "", recipientAddress: "", amountUsdg: "", purpose: "" });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -68,49 +71,63 @@ export default function Agents() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setFormError(null);
     try {
       const res = await apiFetch("/api/agents", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to deploy agent");
       setShowForm(false);
-      setForm({ name: "", description: "", ownerName: "", x402Enabled: false });
+      setForm({ name: "", description: "", ownerName: user?.name ?? "", x402Enabled: false });
       await load();
-    } catch { }
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : "Something went wrong");
+    }
     finally { setSubmitting(false); }
   }
 
   async function handleFund(agentId: number) {
     setSubmitting(true);
+    setActionError(null);
     try {
-      await apiFetch(`/api/agents/${agentId}/fund`, {
+      const res = await apiFetch(`/api/agents/${agentId}/fund`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify({ amountUsdg: fundAmount }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to fund agent");
       setAction(null);
       setFundAmount("");
       await load();
       if (txs[agentId]) await loadTxs(agentId);
-    } catch { }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Something went wrong");
+    }
     finally { setSubmitting(false); }
   }
 
   async function handlePay(agentId: number) {
     setSubmitting(true);
+    setActionError(null);
     try {
-      await apiFetch(`/api/agents/${agentId}/pay`, {
+      const res = await apiFetch(`/api/agents/${agentId}/pay`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(payForm),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to execute payment");
       setAction(null);
       setPayForm({ recipientName: "", recipientAddress: "", amountUsdg: "", purpose: "" });
       await load();
       if (txs[agentId]) await loadTxs(agentId);
-    } catch { }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Something went wrong");
+    }
     finally { setSubmitting(false); }
   }
 
@@ -137,7 +154,7 @@ export default function Agents() {
               <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Autonomous AI agent wallets on Solana — machine-to-machine payments at &lt;500ms</p>
             </div>
           </div>
-          <button onClick={() => setShowForm(true)}
+          <button onClick={() => { setShowForm(true); setFormError(null); }}
             className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
             style={{ background: ACCENT, color: "#000" }}>
             <Plus className="w-4 h-4" /> Deploy Agent
@@ -205,6 +222,11 @@ export default function Agents() {
                   </div>
                 </label>
               </div>
+              {formError && (
+                <div className="col-span-2 rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+                  {formError}
+                </div>
+              )}
               <div className="flex gap-3">
                 <button type="submit" disabled={submitting}
                   className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
@@ -281,12 +303,12 @@ export default function Agents() {
                       </button>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => { setSelectedAgent(agent); setAction("fund"); }}
+                      <button onClick={() => { setSelectedAgent(agent); setAction("fund"); setActionError(null); }}
                         className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                         style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>
                         <ArrowDownLeft className="w-3 h-3" /> Fund
                       </button>
-                      <button onClick={() => { setSelectedAgent(agent); setAction("pay"); }}
+                      <button onClick={() => { setSelectedAgent(agent); setAction("pay"); setActionError(null); }}
                         className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                         style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}>
                         <ArrowUpRight className="w-3 h-3" /> Pay
@@ -314,8 +336,11 @@ export default function Agents() {
                         style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "…" : "Fund"}
                       </button>
-                      <button onClick={() => setAction(null)} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
+                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
+                    {actionError && (
+                      <p className="mt-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>
+                    )}
                   </div>
                 )}
 
@@ -337,13 +362,16 @@ export default function Agents() {
                           onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")} />
                       ))}
                     </div>
+                    {actionError && (
+                      <p className="mb-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>
+                    )}
                     <div className="flex gap-2">
                       <button onClick={() => handlePay(agent.id)} disabled={submitting || !payForm.recipientName || !payForm.amountUsdg || !payForm.purpose}
                         className="flex-1 text-sm font-bold py-2 rounded-lg transition-all disabled:opacity-50"
                         style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "Sending…" : "Execute Payment"}
                       </button>
-                      <button onClick={() => setAction(null)} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
+                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
                   </div>
                 )}

@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql, count } from "drizzle-orm";
 import { db, payrollPaymentsTable } from "@workspace/db";
 import { CreatePayrollPaymentBody, GetPayrollPaymentParams } from "@workspace/api-zod";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -18,9 +19,8 @@ function calcInr(usdg: string): string {
   return (parseFloat(usdg) * 83.5).toFixed(2);
 }
 
-router.get("/payroll/payments", async (_req, res): Promise<void> => {
-  const payments = await db.select().from(payrollPaymentsTable).orderBy(sql`created_at DESC`);
-  res.json(payments.map((p) => ({
+function mapPayment(p: typeof payrollPaymentsTable.$inferSelect) {
+  return {
     id: p.id,
     senderName: p.senderName,
     senderCompany: p.senderCompany,
@@ -33,8 +33,14 @@ router.get("/payroll/payments", async (_req, res): Promise<void> => {
     solanaSignature: p.solanaSignature ?? null,
     settlementSeconds: p.settlementSeconds ? parseFloat(p.settlementSeconds) : null,
     dodoPaymentId: p.dodoPaymentId ?? null,
+    dodoCheckoutUrl: p.dodoCheckoutUrl ?? null,
     createdAt: p.createdAt,
-  })));
+  };
+}
+
+router.get("/payroll/payments", async (_req, res): Promise<void> => {
+  const payments = await db.select().from(payrollPaymentsTable).orderBy(sql`created_at DESC`);
+  res.json(payments.map(mapPayment));
 });
 
 router.post("/payroll/payments", async (req, res): Promise<void> => {
@@ -49,7 +55,51 @@ router.post("/payroll/payments", async (req, res): Promise<void> => {
   const amountInr = calcInr(amountUsdg);
   const settlementSeconds = (1.8 + Math.random() * 1.5).toFixed(1);
   const solanaSignature = generateSolanaSignature();
-  const dodoPaymentId = `dodo_${Date.now()}`;
+
+  // Amount in smallest denomination (cents) — USDG treated as USD, 1 USDG = 100 cents
+  const amountInCents = Math.round(parseFloat(amountUsdg) * 100);
+
+  let dodoPaymentId = `dodo_${Date.now()}`;
+  let dodoCheckoutUrl: string | null = null;
+
+  if (dodoEnabled) {
+    try {
+      // Create a one-time Dodo product for this specific payroll payment
+      const product = await dodo.products.create({
+        name: `Payroll: ${senderCompany} → ${recipientName}`,
+        description: `USDG payroll payment of $${amountUsdg} from ${senderCompany}. UPI: ${recipientUpiId ?? "N/A"}`,
+        tax_category: "digital_products",
+        price: {
+          currency: "USD",
+          discount: 0,
+          price: amountInCents,
+          purchasing_power_parity: false,
+          type: "one_time_price",
+        },
+        metadata: {
+          sender_name: senderName,
+          sender_company: senderCompany,
+          recipient_upi: recipientUpiId ?? "",
+          amount_usdg: amountUsdg,
+          solana_sig: solanaSignature,
+          source: "flowpay_payroll",
+        },
+      });
+
+      const session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: product.product_id, quantity: 1 }],
+        customer: {
+          email: recipientEmail,
+          name: recipientName,
+        },
+        return_url: `${DODO_RETURN_URL_BASE}/payroll`,
+      });
+      dodoPaymentId = session.session_id;
+      dodoCheckoutUrl = session.checkout_url ?? null;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo checkout session creation failed — using mock id");
+    }
+  }
 
   const [payment] = await db.insert(payrollPaymentsTable).values({
     senderName,
@@ -64,23 +114,10 @@ router.post("/payroll/payments", async (req, res): Promise<void> => {
     solanaSignature,
     settlementSeconds,
     dodoPaymentId,
+    dodoCheckoutUrl,
   }).returning();
 
-  res.status(201).json({
-    id: payment.id,
-    senderName: payment.senderName,
-    senderCompany: payment.senderCompany,
-    recipientName: payment.recipientName,
-    recipientEmail: payment.recipientEmail,
-    amountUsdg: payment.amountUsdg,
-    feeUsdg: payment.feeUsdg,
-    amountInr: payment.amountInr,
-    status: payment.status,
-    solanaSignature: payment.solanaSignature ?? null,
-    settlementSeconds: payment.settlementSeconds ? parseFloat(payment.settlementSeconds) : null,
-    dodoPaymentId: payment.dodoPaymentId ?? null,
-    createdAt: payment.createdAt,
-  });
+  res.status(201).json(mapPayment(payment));
 });
 
 router.get("/payroll/payments/:id", async (req, res): Promise<void> => {
@@ -96,21 +133,7 @@ router.get("/payroll/payments/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json({
-    id: payment.id,
-    senderName: payment.senderName,
-    senderCompany: payment.senderCompany,
-    recipientName: payment.recipientName,
-    recipientEmail: payment.recipientEmail,
-    amountUsdg: payment.amountUsdg,
-    feeUsdg: payment.feeUsdg,
-    amountInr: payment.amountInr,
-    status: payment.status,
-    solanaSignature: payment.solanaSignature ?? null,
-    settlementSeconds: payment.settlementSeconds ? parseFloat(payment.settlementSeconds) : null,
-    dodoPaymentId: payment.dodoPaymentId ?? null,
-    createdAt: payment.createdAt,
-  });
+  res.json(mapPayment(payment));
 });
 
 router.get("/payroll/stats", async (_req, res): Promise<void> => {

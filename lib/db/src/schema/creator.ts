@@ -13,6 +13,7 @@ export const creatorProductsTable = pgTable("creator_products", {
   salesCount: integer("sales_count").notNull().default(0),
   totalRevenue: text("total_revenue").notNull().default("0.00"),
   isActive: text("is_active").notNull().default("true"),
+  dodoProductId: text("dodo_product_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
