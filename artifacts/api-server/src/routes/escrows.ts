@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, escrowsTable } from "@workspace/db";
 import { CreateEscrowBody, GetEscrowParams, ReleaseEscrowParams, DisputeEscrowParams } from "@workspace/api-zod";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -35,6 +36,8 @@ function mapEscrow(e: typeof escrowsTable.$inferSelect) {
     status: e.status,
     solanaAddress: e.solanaAddress ?? null,
     solanaSignature: e.solanaSignature ?? null,
+    dodoPaymentId: e.dodoPaymentId ?? null,
+    dodoCheckoutUrl: e.dodoCheckoutUrl ?? null,
     createdAt: e.createdAt,
   };
 }
@@ -55,6 +58,47 @@ router.post("/escrows", async (req, res): Promise<void> => {
   const feeUsdg = calcFee(amountUsdg);
   const solanaAddress = generateSolanaAddress();
   const solanaSignature = generateSolanaSignature();
+  const amountInCents = Math.round(parseFloat(amountUsdg) * 100);
+
+  let dodoPaymentId: string | null = null;
+  let dodoCheckoutUrl: string | null = null;
+
+  if (dodoEnabled) {
+    try {
+      const product = await dodo.products.create({
+        name: `EscrowX: ${projectTitle}`,
+        description: `Smart contract escrow of $${amountUsdg} USDG. Client: ${clientName}, Freelancer: ${freelancerName}. Milestones: ${milestones ?? 1}`,
+        tax_category: "digital_products",
+        price: {
+          currency: "USD",
+          discount: 0,
+          price: amountInCents,
+          purchasing_power_parity: false,
+          type: "one_time_price",
+        },
+        metadata: {
+          client_name: clientName,
+          freelancer_name: freelancerName,
+          project: projectTitle,
+          milestones: String(milestones ?? 1),
+          solana_address: solanaAddress,
+          source: "flowpay_escrow",
+        },
+      });
+      const session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: product.product_id, quantity: 1 }],
+        customer: {
+          email: clientEmail,
+          name: clientName,
+        },
+        return_url: `${DODO_RETURN_URL_BASE}/escrow`,
+      });
+      dodoPaymentId = session.session_id;
+      dodoCheckoutUrl = session.checkout_url ?? null;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo escrow session creation failed");
+    }
+  }
 
   const [row] = await db.insert(escrowsTable).values({
     clientName,
@@ -70,6 +114,8 @@ router.post("/escrows", async (req, res): Promise<void> => {
     status: "active",
     solanaAddress,
     solanaSignature,
+    dodoPaymentId,
+    dodoCheckoutUrl,
   }).returning();
 
   res.status(201).json(mapEscrow(row));

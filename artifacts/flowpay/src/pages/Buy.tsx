@@ -85,12 +85,6 @@ export default function Buy() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Purchase failed"); return; }
 
-      // If Dodo returned a real checkout URL, redirect the buyer there
-      if (data.dodoCheckoutUrl) {
-        window.location.href = data.dodoCheckoutUrl;
-        return;
-      }
-
       setSale(data);
     } catch {
       setError("Network error — please try again");
@@ -179,11 +173,21 @@ export default function Buy() {
                   <span className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>Creator Receives</span>
                   <span className="text-sm font-mono" style={{ color: "#4ade80" }}>${parseFloat(sale.creatorReceives).toFixed(4)} USDG</span>
                 </div>
-                {sale.dodoSessionId && (
+                {sale.dodoCheckoutUrl && (
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} className="pt-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Session</span>
-                      <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.45)" }}>{sale.dodoSessionId.slice(0, 16)}…</span>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs shrink-0" style={{ color: "rgba(255,255,255,0.35)" }}>Dodo Checkout</span>
+                      <a
+                        href={sale.dodoCheckoutUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[11px] font-mono truncate transition-opacity hover:opacity-80"
+                        style={{ color: ACCENT }}
+                      >
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}30`, color: ACCENT }}>Dodo ✓</span>
+                        <span className="truncate">{sale.dodoSessionId ?? sale.dodoCheckoutUrl}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                      </a>
                     </div>
                   </div>
                 )}
@@ -305,7 +309,7 @@ export default function Buy() {
                     {submitting ? (
                       <>
                         <div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-                        {product.dodoProductId ? "Redirecting to Dodo…" : "Settling on Solana…"}
+                        {"Settling on Solana…"}
                       </>
                     ) : (
                       <>

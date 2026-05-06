@@ -32,6 +32,8 @@ interface Tx {
   purpose: string;
   solanaSignature: string | null;
   settlementMs: number | null;
+  dodoSessionId: string | null;
+  dodoCheckoutUrl: string | null;
   createdAt: string;
 }
 
@@ -391,6 +393,13 @@ export default function Agents() {
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-white">{tx.purpose}</p>
                             {tx.recipientName && <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>→ {tx.recipientName}</p>}
+                            {tx.dodoCheckoutUrl && (
+                              <a href={tx.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
+                                className="text-[10px] font-mono underline underline-offset-2 mt-0.5 inline-block"
+                                style={{ color: "#fb923c" }}>
+                                Pay via Dodo ↗
+                              </a>
+                            )}
                           </div>
                           <div className="text-right">
                             <p className="text-xs font-mono font-semibold" style={{ color: tx.type === "fund" ? "#4ade80" : ACCENT }}>

@@ -29,6 +29,8 @@ export const creatorSalesTable = pgTable("creator_sales", {
   feeUsdg: text("fee_usdg").notNull().default("0.00"),
   creatorReceives: text("creator_receives").notNull(),
   solanaSignature: text("solana_signature"),
+  dodoSessionId: text("dodo_session_id"),
+  dodoCheckoutUrl: text("dodo_checkout_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

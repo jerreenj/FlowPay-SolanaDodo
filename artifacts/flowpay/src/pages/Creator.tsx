@@ -30,6 +30,8 @@ interface Sale {
   feeUsdg: string;
   creatorReceives: string;
   solanaSignature: string | null;
+  dodoSessionId: string | null;
+  dodoCheckoutUrl: string | null;
   createdAt: string;
 }
 
@@ -379,16 +381,49 @@ export default function Creator() {
           </div>
         ) : (
           <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+            {/* Column headers */}
+            <div className="flex items-center gap-4 px-6 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+              <p className="flex-1 text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Sale</p>
+              <p className="w-52 shrink-0 text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Dodo</p>
+              <p className="w-28 shrink-0 text-right text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Amount</p>
+            </div>
             <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
               {sales.length === 0 ? (
                 <div className="px-6 py-12 text-center text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No sales yet</div>
               ) : sales.map((s) => (
                 <div key={s.id} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]">
+                  {/* Sale info column */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white font-medium">{s.buyerName} purchased "{s.productTitle}"</p>
+                    <p className="text-sm text-white font-medium truncate">{s.buyerName} <span style={{ color: "rgba(255,255,255,0.45)" }}>purchased</span> "{s.productTitle}"</p>
                     <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>by {s.creatorName} · {new Date(s.createdAt).toLocaleString()}</p>
                   </div>
-                  <div className="text-right shrink-0">
+                  {/* Dodo column */}
+                  <div className="w-52 shrink-0">
+                    {s.dodoSessionId ? (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full w-fit" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, color: ACCENT }}>Dodo ✓</span>
+                        {s.dodoCheckoutUrl ? (
+                          <a
+                            href={s.dodoCheckoutUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-[11px] font-mono truncate transition-opacity hover:opacity-70"
+                            style={{ color: "rgba(255,255,255,0.4)" }}
+                            title={s.dodoSessionId}
+                          >
+                            <span className="truncate">{s.dodoSessionId}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="text-[11px] font-mono truncate" style={{ color: "rgba(255,255,255,0.35)" }} title={s.dodoSessionId}>{s.dodoSessionId}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>—</span>
+                    )}
+                  </div>
+                  {/* Amount column */}
+                  <div className="w-28 text-right shrink-0">
                     <p className="text-sm font-mono font-semibold text-white">${parseFloat(s.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     <p className="text-xs mt-0.5" style={{ color: ACCENT }}>+${parseFloat(s.creatorReceives).toFixed(4)} earned</p>
                   </div>

@@ -21,6 +21,8 @@ interface Escrow {
   status: string;
   solanaAddress: string | null;
   solanaSignature: string | null;
+  dodoPaymentId: string | null;
+  dodoCheckoutUrl: string | null;
   createdAt: string;
 }
 
@@ -134,12 +136,24 @@ export default function EscrowPage() {
               <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.55)" }}>
                 <span className="text-white">{success.projectTitle}</span> — ${success.amountUsdg} USDG locked across {success.milestones} milestones
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>Contract: {success.solanaAddress?.slice(0, 20)}…</span>
                 <button onClick={() => navigator.clipboard.writeText(success.solanaAddress ?? "")} className="hover:text-white/60 transition-colors" style={{ color: "rgba(255,255,255,0.25)" }}>
                   <Copy className="w-3 h-3" />
                 </button>
               </div>
+              {success.dodoPaymentId && (
+                <p className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  Dodo: {success.dodoPaymentId.startsWith("cks_") ? success.dodoPaymentId.slice(0, 16) + "…" : "pending"}
+                </p>
+              )}
+              {success.dodoCheckoutUrl && (
+                <a href={success.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium mt-1 underline underline-offset-2"
+                  style={{ color: ACCENT }}>
+                  Fund escrow via Dodo ↗
+                </a>
+              )}
             </div>
             <button onClick={() => setSuccess(null)} className="text-white/20 hover:text-white/50 transition-colors"><X className="w-4 h-4" /></button>
           </div>
@@ -258,7 +272,7 @@ export default function EscrowPage() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {e.solanaAddress && (
                         <>
                           <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>Contract: {e.solanaAddress.slice(0, 12)}…</span>
@@ -266,6 +280,13 @@ export default function EscrowPage() {
                             <Copy className="w-3 h-3" />
                           </button>
                         </>
+                      )}
+                      {e.dodoCheckoutUrl && (
+                        <a href={e.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-[10px] font-medium underline underline-offset-2"
+                          style={{ color: ACCENT }}>
+                          Fund via Dodo ↗
+                        </a>
                       )}
                     </div>
                     {e.status === "active" && (

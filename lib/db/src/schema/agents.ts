@@ -30,6 +30,8 @@ export const agentTransactionsTable = pgTable("agent_transactions", {
   purpose: text("purpose").notNull(),
   solanaSignature: text("solana_signature"),
   settlementMs: text("settlement_ms"),
+  dodoSessionId: text("dodo_session_id"),
+  dodoCheckoutUrl: text("dodo_checkout_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

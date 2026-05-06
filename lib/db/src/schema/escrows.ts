@@ -18,6 +18,8 @@ export const escrowsTable = pgTable("escrows", {
   status: text("status").notNull().default("active"),
   solanaAddress: text("solana_address"),
   solanaSignature: text("solana_signature"),
+  dodoPaymentId: text("dodo_payment_id"),
+  dodoCheckoutUrl: text("dodo_checkout_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -171,6 +171,8 @@ router.post("/creator/products/:id/purchase", async (req, res): Promise<void> =>
     feeUsdg,
     creatorReceives,
     solanaSignature,
+    dodoSessionId,
+    dodoCheckoutUrl,
   }).returning();
 
   await db.update(creatorProductsTable)
@@ -210,6 +212,8 @@ router.get("/creator/sales", async (_req, res): Promise<void> => {
     feeUsdg: s.feeUsdg,
     creatorReceives: s.creatorReceives,
     solanaSignature: s.solanaSignature ?? null,
+    dodoSessionId: s.dodoSessionId ?? null,
+    dodoCheckoutUrl: s.dodoCheckoutUrl ?? null,
     createdAt: s.createdAt,
   })));
 });

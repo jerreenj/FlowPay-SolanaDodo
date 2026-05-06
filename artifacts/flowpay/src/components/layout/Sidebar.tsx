@@ -8,13 +8,13 @@ import {
 import { useState } from "react";
 
 const navItems = [
+  { href: "/profile",    label: "Profile",       icon: UserCircle,     accent: "#94a3b8" },
   { href: "/payroll",    label: "PayRails",      icon: Users,          accent: "#00ff88" },
   { href: "/remittance", label: "RemitDirect",   icon: ArrowRightLeft, accent: "#38bdf8" },
   { href: "/escrow",     label: "EscrowX",       icon: ShieldCheck,    accent: "#a78bfa" },
   { href: "/creator",    label: "CreatorPay",    icon: Sparkles,       accent: "#f472b6" },
   { href: "/agents",     label: "AgentBank",     icon: Bot,            accent: "#fb923c" },
   { href: "/wallet",     label: "Wallet",        icon: Wallet,         accent: "#94a3b8" },
-  { href: "/profile",    label: "Profile",       icon: UserCircle,     accent: "#94a3b8" },
 ];
 
 function truncateAddress(addr: string) {

@@ -41,7 +41,8 @@ lib/db/src/schema.ts               — Drizzle ORM schema (source of truth)
 - **Settlement simulation** — `setTimeout(1500–3000ms)` per payment to mimic real Solana finality for demo
 - **USDG = $1** — exchange rates hardcoded: 1 USDG = 83.52 INR, 3.67 AED, 0.79 GBP (live-ish via `/api/rates`)
 - **Monorepo code-gen contract** — frontend never imports directly from backend; all types flow through `lib/api-zod`
-- **Dodo Payments integration** — PayRails creates a Dodo product + checkout session per payment (real `cks_…` session ID + `https://test.checkout.dodopayments.com/session/…` URL stored in DB). CreatorPay creates a real Dodo product (`pdt_…`) on listing, then a checkout session per purchase which redirects the buyer to Dodo's hosted checkout. Currency must be uppercase `"USD"`. Return URLs must be absolute HTTPS. Dodo SDK: `dodopayments@2.31.0`. Module: `artifacts/api-server/src/lib/dodo.ts`.
+- **Dodo Payments integration** — All 5 modules create real Dodo products + checkout sessions (real `cks_…` IDs + `https://test.checkout.dodopayments.com/session/…` URLs stored in DB and shown in UI). PayRails: product+session per payment. RemitDirect: product+session per remittance. EscrowX: product+session on contract creation. CreatorPay: product on listing, session on purchase. AgentBank: product+session on fund. Currency must be uppercase `"USD"`. Return URLs must be absolute HTTPS. Dodo SDK: `dodopayments@2.31.0`. Module: `artifacts/api-server/src/lib/dodo.ts`.
+- **Sidebar order**: Profile → PayRails → RemitDirect → EscrowX → CreatorPay → AgentBank → Wallet
 
 ## Product
 

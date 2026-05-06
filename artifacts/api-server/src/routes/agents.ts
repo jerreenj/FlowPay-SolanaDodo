@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, agentsTable, agentTransactionsTable } from "@workspace/db";
 import { CreateAgentBody, GetAgentParams, FundAgentParams, FundAgentBody, AgentPayParams, AgentPayBody, ListAgentTransactionsParams } from "@workspace/api-zod";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -101,6 +102,47 @@ router.post("/agents/:id/fund", async (req, res): Promise<void> => {
   const newBalance = (parseFloat(agent.usdgBalance) + parseFloat(body.data.amountUsdg)).toFixed(4);
   const newReceived = (parseFloat(agent.totalReceived) + parseFloat(body.data.amountUsdg)).toFixed(4);
   const signature = generateSolanaSignature();
+  const amountInCents = Math.round(parseFloat(body.data.amountUsdg) * 100);
+
+  let dodoSessionId: string | null = null;
+  let dodoCheckoutUrl: string | null = null;
+
+  if (dodoEnabled) {
+    try {
+      const product = await dodo.products.create({
+        name: `AgentBank: Fund "${agent.name}"`,
+        description: `Fund AI agent wallet with $${body.data.amountUsdg} USDG. Agent: ${agent.name}, Owner: ${agent.ownerName}. Wallet: ${agent.walletAddress}`,
+        tax_category: "digital_products",
+        price: {
+          currency: "USD",
+          discount: 0,
+          price: amountInCents,
+          purchasing_power_parity: false,
+          type: "one_time_price",
+        },
+        metadata: {
+          agent_name: agent.name,
+          agent_id: String(agent.id),
+          agent_wallet: agent.walletAddress,
+          amount_usdg: body.data.amountUsdg,
+          solana_sig: signature,
+          source: "flowpay_agent_fund",
+        },
+      });
+      const session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: product.product_id, quantity: 1 }],
+        customer: {
+          email: `${agent.ownerName.toLowerCase().replace(/\s+/g, ".")}@agent.flowpay`,
+          name: agent.ownerName,
+        },
+        return_url: `${DODO_RETURN_URL_BASE}/agents`,
+      });
+      dodoSessionId = session.session_id;
+      dodoCheckoutUrl = session.checkout_url ?? null;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo agent fund session creation failed");
+    }
+  }
 
   const [updated] = await db.update(agentsTable)
     .set({ usdgBalance: newBalance, totalReceived: newReceived, transactionCount: agent.transactionCount + 1 })
@@ -112,9 +154,13 @@ router.post("/agents/:id/fund", async (req, res): Promise<void> => {
     agentName: agent.name,
     type: "fund",
     amountUsdg: body.data.amountUsdg,
-    purpose: "Wallet funded via Dodo Payments",
+    purpose: dodoCheckoutUrl
+      ? `Wallet funded via Dodo Payments (${dodoSessionId?.slice(0, 16)}…)`
+      : "Wallet funded via Dodo Payments",
     solanaSignature: signature,
     settlementMs: (Math.random() * 500 + 200).toFixed(0),
+    dodoSessionId,
+    dodoCheckoutUrl,
   });
 
   res.json(mapAgent(updated));
@@ -177,6 +223,8 @@ router.post("/agents/:id/pay", async (req, res): Promise<void> => {
     purpose: tx.purpose,
     solanaSignature: tx.solanaSignature ?? null,
     settlementMs: tx.settlementMs ? parseFloat(tx.settlementMs) : null,
+    dodoSessionId: tx.dodoSessionId ?? null,
+    dodoCheckoutUrl: tx.dodoCheckoutUrl ?? null,
     createdAt: tx.createdAt,
   });
 });
@@ -203,6 +251,8 @@ router.get("/agents/:id/transactions", async (req, res): Promise<void> => {
     purpose: t.purpose,
     solanaSignature: t.solanaSignature ?? null,
     settlementMs: t.settlementMs ? parseFloat(t.settlementMs) : null,
+    dodoSessionId: t.dodoSessionId ?? null,
+    dodoCheckoutUrl: t.dodoCheckoutUrl ?? null,
     createdAt: t.createdAt,
   })));
 });

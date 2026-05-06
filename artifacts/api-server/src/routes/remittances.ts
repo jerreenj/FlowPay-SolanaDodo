@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql, count } from "drizzle-orm";
 import { db, remittancesTable } from "@workspace/db";
 import { CreateRemittanceBody, GetRemittanceParams } from "@workspace/api-zod";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -33,6 +34,7 @@ router.get("/remittances", async (_req, res): Promise<void> => {
     solanaSignature: r.solanaSignature ?? null,
     settlementSeconds: r.settlementSeconds ? parseFloat(r.settlementSeconds) : null,
     dodoPaymentId: r.dodoPaymentId ?? null,
+    dodoCheckoutUrl: r.dodoCheckoutUrl ?? null,
     createdAt: r.createdAt,
   })));
 });
@@ -49,7 +51,47 @@ router.post("/remittances", async (req, res): Promise<void> => {
   const amountInr = calcInr(amountUsdg);
   const settlementSeconds = (1.2 + Math.random() * 2).toFixed(1);
   const solanaSignature = generateSolanaSignature();
-  const dodoPaymentId = `dodo_${Date.now()}`;
+  const amountInCents = Math.round(parseFloat(amountUsdg) * 100);
+
+  let dodoPaymentId = `dodo_${Date.now()}`;
+  let dodoCheckoutUrl: string | null = null;
+
+  if (dodoEnabled) {
+    try {
+      const product = await dodo.products.create({
+        name: `RemitDirect: ${senderCountry} → India`,
+        description: `Cross-border remittance of $${amountUsdg} USDG from ${senderName} (${senderCountry}) to ${recipientName}. UPI: ${recipientUpiId}`,
+        tax_category: "digital_products",
+        price: {
+          currency: "USD",
+          discount: 0,
+          price: amountInCents,
+          purchasing_power_parity: false,
+          type: "one_time_price",
+        },
+        metadata: {
+          sender_name: senderName,
+          sender_country: senderCountry,
+          recipient_upi: recipientUpiId,
+          amount_usdg: amountUsdg,
+          solana_sig: solanaSignature,
+          source: "flowpay_remittance",
+        },
+      });
+      const session = await dodo.checkoutSessions.create({
+        product_cart: [{ product_id: product.product_id, quantity: 1 }],
+        customer: {
+          email: `${recipientUpiId.replace(/[@.]/g, "_")}@upi.flowpay`,
+          name: recipientName,
+        },
+        return_url: `${DODO_RETURN_URL_BASE}/remittance`,
+      });
+      dodoPaymentId = session.session_id;
+      dodoCheckoutUrl = session.checkout_url ?? null;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo remittance session creation failed — using mock id");
+    }
+  }
 
   const [row] = await db.insert(remittancesTable).values({
     senderName,
@@ -63,6 +105,7 @@ router.post("/remittances", async (req, res): Promise<void> => {
     solanaSignature,
     settlementSeconds,
     dodoPaymentId,
+    dodoCheckoutUrl,
   }).returning();
 
   res.status(201).json({
@@ -78,6 +121,7 @@ router.post("/remittances", async (req, res): Promise<void> => {
     solanaSignature: row.solanaSignature ?? null,
     settlementSeconds: row.settlementSeconds ? parseFloat(row.settlementSeconds) : null,
     dodoPaymentId: row.dodoPaymentId ?? null,
+    dodoCheckoutUrl: row.dodoCheckoutUrl ?? null,
     createdAt: row.createdAt,
   });
 });
@@ -130,6 +174,7 @@ router.get("/remittances/:id", async (req, res): Promise<void> => {
     solanaSignature: row.solanaSignature ?? null,
     settlementSeconds: row.settlementSeconds ? parseFloat(row.settlementSeconds) : null,
     dodoPaymentId: row.dodoPaymentId ?? null,
+    dodoCheckoutUrl: row.dodoCheckoutUrl ?? null,
     createdAt: row.createdAt,
   });
 });

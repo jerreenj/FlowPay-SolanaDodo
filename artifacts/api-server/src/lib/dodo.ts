@@ -9,6 +9,4 @@ export const dodo = new DodoPayments({
 
 export const dodoEnabled = Boolean(apiKey);
 
-export const DODO_CHECKOUT_BASE = "https://test.checkout.dodopayments.com/session";
-
 export const DODO_RETURN_URL_BASE = "https://flowpay.replit.app";
