@@ -176,7 +176,6 @@ export default function Creator() {
   }
 
   const setNP = (k: string, v: string) => setNewProduct((f) => ({ ...f, [k]: v }));
-
   const totalRevenue = sales.reduce((sum, s) => sum + parseFloat(s.creatorReceives || "0"), 0);
 
   return (
@@ -184,18 +183,18 @@ export default function Creator() {
       {shareProduct && <ShareModal productId={shareProduct.id} productTitle={shareProduct.title} onClose={() => setShareProduct(null)} />}
 
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
-          <div className="flex items-center gap-4">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}10 0%, transparent 70%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
+          <div className="flex items-start gap-4 min-w-0">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
               <Sparkles className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <h1 className="text-xl font-bold text-white tracking-tight">CreatorPay</h1>
+            <div className="min-w-0 max-w-[54rem]">
+              <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">CreatorPay</h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>2% fee</span>
               </div>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Sell digital products in USDG — instant settlement, zero chargebacks</p>
+              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Sell digital products in USDG — instant settlement, zero chargebacks</p>
             </div>
           </div>
           <button onClick={() => setShowForm(true)}
@@ -207,7 +206,7 @@ export default function Creator() {
       </div>
 
       <div className="p-8">
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {[
             { label: "Products Listed", value: products.length.toString(), colored: true },
             { label: "Total Sales", value: sales.length.toString(), colored: false },
