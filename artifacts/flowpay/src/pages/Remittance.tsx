@@ -50,12 +50,13 @@ function StatusPill({ status }: { status: string }) {
 
 export default function Remittance() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const [remittances, setRemittances] = useState<Remittance[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ senderName: "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
+  const [form, setForm] = useState({ senderName: user?.name ?? "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
   const [success, setSuccess] = useState<Remittance | null>(null);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
