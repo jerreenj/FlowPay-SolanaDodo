@@ -13,9 +13,9 @@ function isValidSolanaAddress(address: string): boolean {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 }
 
-// Wallet-based auth — connect wallet → create or find account
+// Wallet-based auth — connect wallet → instantly in, no username needed
 router.post("/auth/wallet", async (req, res): Promise<void> => {
-  const { walletAddress, name } = req.body;
+  const { walletAddress } = req.body;
 
   if (!walletAddress || typeof walletAddress !== "string") {
     res.status(400).json({ error: "walletAddress is required" });
@@ -27,7 +27,7 @@ router.post("/auth/wallet", async (req, res): Promise<void> => {
     return;
   }
 
-  // Check if user exists by wallet address
+  // Return existing user immediately
   const existing = await db
     .select()
     .from(usersTable)
@@ -49,18 +49,13 @@ router.post("/auth/wallet", async (req, res): Promise<void> => {
     return;
   }
 
-  // New wallet — require name before creating account
-  if (!name || typeof name !== "string" || name.trim().length < 1) {
-    res.status(202).json({ newUser: true, message: "Username required for new wallet" });
-    return;
-  }
-
-  const trimmedName = name.trim().slice(0, 32);
+  // New wallet — auto-create with a generated handle, no username prompt
+  const handle = `user_${walletAddress.slice(0, 8)}`;
 
   const [user] = await db
     .insert(usersTable)
     .values({
-      name: trimmedName,
+      name: handle,
       email: `${walletAddress.toLowerCase()}@wallet.flowpay`,
       password: "",
       userType: "freelancer",
@@ -79,7 +74,7 @@ router.post("/auth/wallet", async (req, res): Promise<void> => {
   });
 
   const token = generateToken(user.id);
-  req.log.info({ userId: user.id }, "New wallet user created");
+  req.log.info({ userId: user.id }, "New wallet user auto-created");
 
   res.status(201).json({
     token,
@@ -92,7 +87,7 @@ router.post("/auth/wallet", async (req, res): Promise<void> => {
   });
 });
 
-// Keep /auth/me for token validation
+// /auth/me for token validation
 router.get("/auth/me", async (req, res): Promise<void> => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
