@@ -177,11 +177,13 @@ export default function Landing() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="mb-5 leading-none"
+            className="mb-5"
             style={{
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
+              fontFamily: "'Cormorant Garamond', serif",
+              fontWeight: 700,
+              letterSpacing: "-0.01em",
+              lineHeight: 1.05,
+              paddingBottom: "0.08em",
               fontSize: "clamp(4.5rem, 13vw, 9.5rem)",
               backgroundImage: "linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.75) 100%)",
               WebkitBackgroundClip: "text",
