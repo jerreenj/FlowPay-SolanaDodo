@@ -5,6 +5,7 @@ interface Character {
   x: number;
   y: number;
   speed: number;
+  opacity: number;
 }
 
 const ALL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$₹⚡#@!%^&*";
@@ -14,12 +15,13 @@ export default function RainingLetters() {
   const [activeIndices, setActiveIndices] = useState<Set<number>>(new Set());
 
   const createCharacters = useCallback(() => {
-    const count = 200;
-    return Array.from({ length: count }, () => ({
+    const count = 80;
+    return Array.from({ length: count }, (_, i) => ({
       char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
-      x: Math.random() * 100,
+      x: (i / 80) * 100 + Math.random() * 1.2,
       y: Math.random() * 100,
-      speed: 0.06 + Math.random() * 0.18,
+      speed: 0.008 + Math.random() * 0.012,
+      opacity: 0.04 + Math.random() * 0.08,
     }));
   }, []);
 
@@ -27,61 +29,58 @@ export default function RainingLetters() {
     setCharacters(createCharacters());
   }, [createCharacters]);
 
+  // Slowly light up a few letters at a time
   useEffect(() => {
     const id = setInterval(() => {
       const next = new Set<number>();
-      const n = Math.floor(Math.random() * 4) + 3;
+      const n = Math.floor(Math.random() * 3) + 1;
       for (let i = 0; i < n; i++) {
-        next.add(Math.floor(Math.random() * 200));
+        next.add(Math.floor(Math.random() * 80));
       }
       setActiveIndices(next);
-    }, 60);
+    }, 800);
     return () => clearInterval(id);
   }, []);
 
+  // Slow fall using setInterval instead of rAF to avoid 60fps churn
   useEffect(() => {
-    let raf: number;
-    const tick = () => {
+    const id = setInterval(() => {
       setCharacters((prev) =>
         prev.map((c) => {
           if (c.y >= 105) {
             return {
               char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
               x: Math.random() * 100,
-              y: -5,
-              speed: 0.06 + Math.random() * 0.18,
+              y: -8,
+              speed: 0.008 + Math.random() * 0.012,
+              opacity: 0.04 + Math.random() * 0.08,
             };
           }
           return { ...c, y: c.y + c.speed };
         })
       );
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    }, 50);
+    return () => clearInterval(id);
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
       {characters.map((c, i) => {
         const active = activeIndices.has(i);
         return (
           <span
             key={i}
-            className="absolute select-none"
             style={{
+              position: "absolute",
               left: `${c.x}%`,
               top: `${c.y}%`,
-              fontSize: "1.5rem",
+              fontSize: "1.1rem",
               fontFamily: "monospace",
-              fontWeight: active ? 700 : 300,
-              color: active ? "#a78bfa" : "rgba(139,92,246,0.18)",
-              textShadow: active
-                ? "0 0 10px rgba(167,139,250,0.9), 0 0 20px rgba(139,92,246,0.5)"
-                : "none",
-              opacity: active ? 1 : 0.55,
-              transform: `translate(-50%, -50%) ${active ? "scale(1.2)" : "scale(1)"}`,
-              transition: "color 0.08s, text-shadow 0.08s, transform 0.08s",
+              fontWeight: active ? 600 : 300,
+              color: active ? "rgba(255,255,255,0.55)" : `rgba(255,255,255,${c.opacity})`,
+              textShadow: active ? "0 0 12px rgba(255,255,255,0.25)" : "none",
+              transform: "translate(-50%, -50%)",
+              transition: "color 1.2s ease, text-shadow 1.2s ease",
               willChange: "top",
             }}
           >
