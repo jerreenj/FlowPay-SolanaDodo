@@ -123,13 +123,13 @@ export default function ModuleSelect() {
 
       {/* Header */}
       <div className="relative z-10 px-8 pt-14 pb-10 text-center">
-        <p className="text-[11px] font-mono text-white/35 tracking-[0.3em] uppercase mb-4">
-          {user?.name ? `Welcome back, ${user.name}` : "Wallet connected"}
+        <p className="text-[11px] font-mono text-white/60 tracking-[0.35em] uppercase mb-4">
+          Welcome back
         </p>
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-3 leading-tight">
           Which rail today?
         </h1>
-        <p className="text-white/50 text-base max-w-sm mx-auto">
+        <p className="text-white/55 text-base max-w-sm mx-auto">
           Five purpose-built payment modules on Solana. Pick one.
         </p>
       </div>
@@ -170,6 +170,13 @@ export default function ModuleSelect() {
             );
           })}
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-10 text-center pb-8 pt-4">
+        <p className="text-[11px] font-mono text-white/45 tracking-[0.25em] uppercase">
+          Solana · USDG · Dodo Payments
+        </p>
       </div>
 
     </div>
