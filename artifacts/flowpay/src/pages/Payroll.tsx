@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { Users, Plus, CheckCircle, Clock, ChevronRight, Copy } from "lucide-react";
+import { Users, Plus, CheckCircle, Copy, X } from "lucide-react";
+
+const ACCENT = "#00ff88";
 
 interface Payment {
   id: number;
@@ -33,14 +35,29 @@ function truncateSig(sig: string | null) {
   return sig.slice(0, 8) + "…" + sig.slice(-8);
 }
 
+function StatusPill({ status }: { status: string }) {
+  const s = status.toLowerCase();
+  const style =
+    s === "completed"
+      ? { color: ACCENT, background: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }
+      : s === "pending"
+      ? { color: "#fbbf24", background: "#fbbf2415", border: "1px solid #fbbf2430" }
+      : { color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" };
+  return (
+    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={style}>
+      {status}
+    </span>
+  );
+}
+
 export default function Payroll() {
   const token = useAuthStore((s) => s.token);
+  const user = useAuthStore((s) => s.user);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const user = useAuthStore((s) => s.user);
   const [form, setForm] = useState({ senderName: user?.name ?? "", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
   const [success, setSuccess] = useState<Payment | null>(null);
 
@@ -54,7 +71,7 @@ export default function Payroll() {
       ]);
       setPayments(p);
       setStats(s);
-    } catch { /* ignore */ }
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -75,7 +92,7 @@ export default function Payroll() {
       setShowForm(false);
       setForm({ senderName: user?.name ?? "", senderCompany: "", recipientName: "", recipientEmail: "", amountUsdg: "", recipientUpiId: "" });
       await load();
-    } catch { /* ignore */ }
+    } catch { }
     finally { setSubmitting(false); }
   }
 
@@ -83,104 +100,119 @@ export default function Payroll() {
 
   return (
     <AppLayout>
-      <div className="p-8">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="w-5 h-5 text-white/60" />
-              <h1 className="text-2xl font-bold text-white">PayRails</h1>
-              <span className="text-xs bg-white/8 text-white/50 border border-white/12 px-2 py-0.5 rounded-full font-mono">0.5% fee</span>
+      <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
+              <Users className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <p className="text-white/50 text-sm">Stablecoin payroll for remote teams — settled on Solana in &lt;3s</p>
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <h1 className="text-xl font-bold text-white tracking-tight">PayRails</h1>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.5% fee</span>
+              </div>
+              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Stablecoin payroll for remote teams — settled on Solana in &lt;3s</p>
+            </div>
           </div>
-          <button onClick={() => { setShowForm(true); setSuccess(null); }}
-            className="flex items-center gap-2 bg-white hover:bg-white/90 text-black text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+          <button
+            onClick={() => { setShowForm(true); setSuccess(null); }}
+            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
+            style={{ background: ACCENT, color: "#000" }}
+          >
             <Plus className="w-4 h-4" /> New Payment
           </button>
         </div>
+      </div>
 
-        {/* Stats */}
+      <div className="p-8">
         {stats && (
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: "Total Payments", value: stats.totalPayments.toString() },
-              { label: "Volume (USDG)", value: `$${parseFloat(stats.totalVolume).toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
-              { label: "Fees Earned", value: `$${parseFloat(stats.totalFees).toFixed(2)}` },
-              { label: "Avg Settlement", value: `${stats.avgSettlementSeconds}s` },
-            ].map(({ label, value }) => (
-              <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p className="text-xs text-white/50 uppercase tracking-wide">{label}</p>
-                <p className="text-xl font-bold text-white font-mono mt-1">{value}</p>
+              { label: "Total Payments", value: stats.totalPayments.toString(), colored: true },
+              { label: "Volume (USDG)", value: `$${parseFloat(stats.totalVolume).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, colored: false },
+              { label: "Fees Earned", value: `$${parseFloat(stats.totalFees).toFixed(2)}`, colored: false },
+              { label: "Avg Settlement", value: `${stats.avgSettlementSeconds}s`, colored: false },
+            ].map(({ label, value, colored }) => (
+              <div key={label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-2xl font-bold font-mono tracking-tight" style={{ color: colored ? ACCENT : "white" }}>{value}</p>
               </div>
             ))}
           </div>
         )}
 
-        {/* Success notification */}
         {success && (
-          <div className="bg-white/5 border border-white/15 rounded-xl p-5 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="w-5 h-5 text-white" />
-              <span className="text-white font-semibold">Payment sent in {success.settlementSeconds}s!</span>
-            </div>
-            <div className="text-sm text-white/60 space-y-1">
-              <p>{success.recipientName} received <span className="text-white font-mono">${success.amountUsdg} USDG</span> (₹{parseFloat(success.amountInr).toLocaleString()})</p>
+          <div className="rounded-2xl p-5 mb-6 flex items-start gap-4" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}25` }}>
+            <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: ACCENT }} />
+            <div className="flex-1">
+              <p className="text-white font-semibold mb-1">Payment settled in {success.settlementSeconds}s</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+                {success.recipientName} received <span className="text-white font-mono">${success.amountUsdg} USDG</span> · ₹{parseFloat(success.amountInr).toLocaleString()}
+              </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="font-mono text-xs text-white/40">Solana Sig:</span>
-                <span className="font-mono text-xs text-white/50">{truncateSig(success.solanaSignature)}</span>
-                <button onClick={() => navigator.clipboard.writeText(success.solanaSignature ?? "")} className="text-white/30 hover:text-white/70">
+                <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>Sig: {truncateSig(success.solanaSignature)}</span>
+                <button onClick={() => navigator.clipboard.writeText(success.solanaSignature ?? "")} style={{ color: "rgba(255,255,255,0.3)" }} className="hover:text-white/60 transition-colors">
                   <Copy className="w-3 h-3" />
                 </button>
               </div>
             </div>
+            <button onClick={() => setSuccess(null)} className="text-white/20 hover:text-white/50 transition-colors"><X className="w-4 h-4" /></button>
           </div>
         )}
 
-        {/* Send form */}
         {showForm && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-            <h2 className="text-base font-semibold text-white mb-5">Send Payroll Payment</h2>
+          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-semibold text-white">Send Payroll Payment</h2>
+              <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
+            </div>
             <form onSubmit={handleSend} className="grid grid-cols-2 gap-4">
+              {[
+                { key: "senderName", label: "Sender Name", placeholder: "Your Name" },
+                { key: "senderCompany", label: "Company", placeholder: "Acme Corp" },
+                { key: "recipientName", label: "Recipient Name", placeholder: "Priya Patel" },
+                { key: "recipientEmail", label: "Recipient Email", placeholder: "priya@gmail.com", type: "email" },
+              ].map(({ key, label, placeholder, type }) => (
+                <div key={key}>
+                  <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</label>
+                  <input type={type ?? "text"} value={(form as any)[key]} onChange={(e) => set(key, e.target.value)} required placeholder={placeholder}
+                    className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                </div>
+              ))}
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Sender Name</label>
-                <input value={form.senderName} onChange={(e) => set("senderName", e.target.value)} required
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Company</label>
-                <input value={form.senderCompany} onChange={(e) => set("senderCompany", e.target.value)} required placeholder="Acme Corp"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Recipient Name</label>
-                <input value={form.recipientName} onChange={(e) => set("recipientName", e.target.value)} required placeholder="Priya Patel"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Recipient Email</label>
-                <input type="email" value={form.recipientEmail} onChange={(e) => set("recipientEmail", e.target.value)} required placeholder="priya@gmail.com"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
-              </div>
-              <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">Amount (USDG)</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Amount (USDG)</label>
                 <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="500.00"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
                 {form.amountUsdg && (
-                  <p className="text-xs text-white/40 mt-1">≈ ₹{(parseFloat(form.amountUsdg || "0") * 83.5).toLocaleString()} · Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG</p>
+                  <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                    ≈ ₹{(parseFloat(form.amountUsdg || "0") * 83.5).toLocaleString()} · Fee: ${(parseFloat(form.amountUsdg || "0") * 0.005).toFixed(4)} USDG
+                  </p>
                 )}
               </div>
               <div>
-                <label className="text-xs text-white/50 uppercase tracking-wide">UPI ID (optional)</label>
+                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>UPI ID (optional)</label>
                 <input value={form.recipientUpiId} onChange={(e) => set("recipientUpiId", e.target.value)} placeholder="priya@okaxis"
-                  className="w-full mt-1.5 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30 transition-all" />
+                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
-              <div className="col-span-2 flex gap-3 mt-2">
+              <div className="col-span-2 flex gap-3 pt-1">
                 <button type="submit" disabled={submitting}
-                  className="flex-1 bg-white hover:bg-white/90 text-black text-sm font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50">
+                  className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
+                  style={{ background: ACCENT, color: "#000" }}>
                   {submitting ? "Sending on Solana…" : "Send Payment"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
-                  className="px-4 bg-white/5 hover:bg-white/10 text-white/60 text-sm rounded-lg transition-colors">
+                  className="px-5 text-sm rounded-xl transition-all"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}>
                   Cancel
                 </button>
               </div>
@@ -188,38 +220,36 @@ export default function Payroll() {
           </div>
         )}
 
-        {/* Payments list */}
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/10">
-            <h2 className="text-sm font-semibold text-white">Recent Payments</h2>
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+            <h2 className="text-[13px] font-semibold text-white">Recent Payments</h2>
+            {payments.length > 0 && <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{payments.length} total</span>}
           </div>
           {loading ? (
-            <div className="divide-y divide-white/5">
-              {[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse bg-white/3" />)}
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+              {[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse" style={{ background: "rgba(255,255,255,0.02)" }} />)}
             </div>
           ) : payments.length === 0 ? (
-            <div className="px-6 py-10 text-center text-white/40 text-sm">No payments yet</div>
+            <div className="px-6 py-12 text-center text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No payments yet — send your first one</div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
               {payments.map((p) => (
-                <div key={p.id} className="flex items-center gap-4 px-6 py-4 hover:bg-white/3 transition-colors">
-                  <div className="w-9 h-9 rounded-lg bg-white/8 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4 text-white/40" />
+                <div key={p.id} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}20` }}>
+                    <Users className="w-4 h-4" style={{ color: ACCENT }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white font-medium">{p.senderCompany} → {p.recipientName}</p>
-                    <p className="text-xs text-white/40 mt-0.5">{p.recipientEmail} · {new Date(p.createdAt).toLocaleString()}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{p.recipientEmail} · {new Date(p.createdAt).toLocaleString()}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-mono font-semibold text-white">${parseFloat(p.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-xs text-white/40">₹{parseFloat(p.amountInr).toLocaleString()} · {p.settlementSeconds}s</p>
+                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>₹{parseFloat(p.amountInr).toLocaleString()} · {p.settlementSeconds}s</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/50">
-                      {p.status}
-                    </span>
+                    <StatusPill status={p.status} />
                     {p.solanaSignature && (
-                      <button onClick={() => navigator.clipboard.writeText(p.solanaSignature ?? "")} className="text-white/20 hover:text-white/60 transition-colors">
+                      <button onClick={() => navigator.clipboard.writeText(p.solanaSignature ?? "")} className="transition-colors hover:text-white/60" style={{ color: "rgba(255,255,255,0.18)" }}>
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                     )}
