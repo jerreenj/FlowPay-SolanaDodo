@@ -135,20 +135,27 @@ export default function Landing() {
         />
 
         {/* Nav */}
-        <nav className="relative z-10 flex items-center justify-end px-8 py-6 gap-4">
-          <div className="flex items-center gap-2">
+        <nav className="relative z-10 flex items-center justify-end px-8 py-6 gap-3">
+          <div className="flex items-center gap-2 mr-1">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]" />
             </span>
             <span className="text-xs font-mono text-[#00ff88]/75 tracking-[0.2em]">MAINNET</span>
           </div>
-          {token && (
+          {token ? (
             <Link
               href="/select"
               className="flex items-center gap-2 bg-[#00ff88] hover:bg-[#00e87a] text-black text-sm font-bold px-4 py-2 rounded-xl transition-colors"
             >
               Open App <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors border border-white/10 hover:border-white/25 px-3 py-1.5 rounded-lg"
+            >
+              Sign in
             </Link>
           )}
         </nav>
