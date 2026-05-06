@@ -193,7 +193,7 @@ export default function Landing() {
           >
             {"FlowPay".split("").map((char, i) =>
               char === char.toLowerCase()
-                ? <span key={i} style={{ fontSize: "0.78em", verticalAlign: "baseline" }}>{char}</span>
+                ? <span key={i} style={{ fontSize: "0.62em", verticalAlign: "baseline" }}>{char}</span>
                 : <span key={i}>{char}</span>
             )}
           </motion.h1>
