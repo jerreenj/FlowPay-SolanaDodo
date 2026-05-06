@@ -96,18 +96,18 @@ export default function EscrowPage() {
   return (
     <AppLayout>
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 55% 120% at 0% 0%, ${ACCENT}0a 0%, transparent 65%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7">
-          <div className="flex items-center gap-4">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}10 0%, transparent 70%)` }} />
+        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
+          <div className="flex items-start gap-4 min-w-0">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
               <ShieldCheck className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5 mb-1">
-                <h1 className="text-xl font-bold text-white tracking-tight">EscrowX</h1>
+            <div className="min-w-0 max-w-[54rem]">
+              <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">EscrowX</h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.5% fee</span>
               </div>
-              <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.42)" }}>Smart contract escrow on Solana — trustless milestone payments for freelancers</p>
+              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Smart contract escrow on Solana — trustless milestone payments for freelancers</p>
             </div>
           </div>
           <button
@@ -224,12 +224,12 @@ export default function EscrowPage() {
             escrows.map((e) => (
               <div key={e.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="p-5">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
+                  <div className="flex items-start justify-between mb-2 gap-4">
+                    <div className="min-w-0">
                       <h3 className="text-white font-semibold text-[15px]">{e.projectTitle}</h3>
                       <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{e.clientName} → {e.freelancerName}</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 shrink-0">
                       <StatusPill status={e.status} />
                       <p className="text-xl font-bold text-white font-mono">${parseFloat(e.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
@@ -247,7 +247,7 @@ export default function EscrowPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       {e.solanaAddress && (
                         <>
@@ -259,7 +259,7 @@ export default function EscrowPage() {
                       )}
                     </div>
                     {e.status === "active" && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 shrink-0">
                         <button onClick={() => release(e.id)}
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                           style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}30` }}>
