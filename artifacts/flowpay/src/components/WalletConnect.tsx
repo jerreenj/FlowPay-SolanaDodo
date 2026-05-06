@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { X, ChevronRight, Loader2, ExternalLink } from "lucide-react";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 
 declare global {
   interface Window {
@@ -76,7 +77,7 @@ const WALLETS = [
 ];
 
 async function safePost(url: string, body: object) {
-  const res = await fetch(url, {
+  const res = await apiFetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -126,14 +127,16 @@ export default function WalletConnect({ variant = "default" }: Props) {
       setPendingAddress(address);
       setShowUsername(true);
       setUsername(name ?? "");
-    } else if (ok && data?.token && data?.user) {
+      return;
+    }
+    if (ok && data?.token && data?.user) {
       setAuth(data.token as string, data.user as any);
       setOpen(false);
       setShowUsername(false);
       setLocation("/select");
-    } else {
-      throw new Error((data.error as string) ?? "Authentication failed");
+      return;
     }
+    throw new Error((data.error as string) ?? "Authentication failed");
   }
 
   async function handleConnect(walletId: string) {
