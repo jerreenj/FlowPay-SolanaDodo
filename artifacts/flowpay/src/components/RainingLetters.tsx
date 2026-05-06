@@ -1,97 +1,81 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
-interface Character {
-  char: string;
-  x: number;
-  y: number;
-  speed: number;
-  opacity: number;
-}
-
-const ALL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$₹⚡#@!%^&*";
+const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01₹$#%ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const FONT_SIZE = 15;
+const SPEED_MS = 75; // ms between steps — controls fall pace
 
 export default function RainingLetters() {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [activeIndices, setActiveIndices] = useState<Set<number>>(new Set());
-
-  const createCharacters = useCallback(() => {
-    const count = 80;
-    return Array.from({ length: count }, (_, i) => ({
-      char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
-      x: (i / 80) * 100 + Math.random() * 1.2,
-      y: Math.random() * 100,
-      speed: 0.022 + Math.random() * 0.028,
-      opacity: 0.22 + Math.random() * 0.22,
-    }));
-  }, []);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    setCharacters(createCharacters());
-  }, [createCharacters]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
 
-  // Light up a healthy batch of letters each tick
-  useEffect(() => {
-    const id = setInterval(() => {
-      const next = new Set<number>();
-      const n = Math.floor(Math.random() * 6) + 4; // 4–9 active at once
-      for (let i = 0; i < n; i++) {
-        next.add(Math.floor(Math.random() * 80));
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    let cols = Math.floor(W / FONT_SIZE);
+    // Start each column at a random negative row so they stagger in
+    let drops = Array.from({ length: cols }, () => -Math.floor(Math.random() * 40));
+
+    let animId: number;
+    let last = 0;
+
+    function draw(ts: number) {
+      animId = requestAnimationFrame(draw);
+      if (ts - last < SPEED_MS) return;
+      last = ts;
+
+      // Fade trail: paint a semi-transparent dark layer every frame
+      ctx.fillStyle = "rgba(8, 8, 8, 0.18)";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.font = `${FONT_SIZE}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const y = drops[i] * FONT_SIZE;
+        if (y < 0) { drops[i]++; continue; }
+
+        const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+
+        // Head glyph — bright white
+        ctx.fillStyle = "rgba(230, 230, 255, 0.85)";
+        ctx.fillText(char, i * FONT_SIZE, y);
+
+        // Randomly reset column after it passes bottom
+        if (y > H && Math.random() > 0.977) {
+          drops[i] = -Math.floor(Math.random() * 20);
+        }
+        drops[i]++;
       }
-      setActiveIndices(next);
-    }, 700);
-    return () => clearInterval(id);
-  }, []);
+    }
 
-  // Slow, steady fall
-  useEffect(() => {
-    const id = setInterval(() => {
-      setCharacters((prev) =>
-        prev.map((c) => {
-          if (c.y >= 105) {
-            return {
-              char: ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)],
-              x: Math.random() * 100,
-              y: -8,
-              speed: 0.022 + Math.random() * 0.028,
-              opacity: 0.22 + Math.random() * 0.22,
-            };
-          }
-          return { ...c, y: c.y + c.speed };
-        })
-      );
-    }, 50);
-    return () => clearInterval(id);
+    animId = requestAnimationFrame(draw);
+
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas!.width = W;
+      canvas!.height = H;
+      cols = Math.floor(W / FONT_SIZE);
+      drops = Array.from({ length: cols }, () => -Math.floor(Math.random() * 40));
+    }
+
+    window.addEventListener("resize", resize);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-      {characters.map((c, i) => {
-        const active = activeIndices.has(i);
-        return (
-          <span
-            key={i}
-            style={{
-              position: "absolute",
-              left: `${c.x}%`,
-              top: `${c.y}%`,
-              fontSize: "1.1rem",
-              fontFamily: "monospace",
-              fontWeight: active ? 700 : 400,
-              color: active
-                ? "rgba(255,255,255,0.92)"
-                : `rgba(255,255,255,${c.opacity})`,
-              textShadow: active
-                ? "0 0 18px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.25)"
-                : "none",
-              transform: "translate(-50%, -50%)",
-              transition: "color 0.9s ease, text-shadow 0.9s ease",
-              willChange: "top",
-            }}
-          >
-            {c.char}
-          </span>
-        );
-      })}
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ opacity: 0.28 }}
+    />
   );
 }
