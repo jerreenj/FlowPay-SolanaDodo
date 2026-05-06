@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { ArrowRightLeft, Plus, CheckCircle, Copy, Globe } from "lucide-react";
 
 interface Remittance {
@@ -45,8 +46,8 @@ export default function Remittance() {
   async function load() {
     try {
       const [r, s] = await Promise.all([
-        fetch("/api/remittances", { headers: authHeaders }).then((r) => r.json()),
-        fetch("/api/remittances/stats", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/remittances", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/remittances/stats", { headers: authHeaders }).then((r) => r.json()),
       ]);
       setRemittances(r);
       setStats(s);
@@ -60,7 +61,7 @@ export default function Remittance() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/remittances", {
+      const res = await apiFetch("/api/remittances", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(form),
