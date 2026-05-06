@@ -139,8 +139,13 @@ export default function Landing() {
     <div className="bg-black text-white overflow-x-hidden">
       <section className="relative h-screen w-full flex flex-col overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+        <div
+          className="absolute inset-0 z-[1] pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
+          }}
+        />
 
-        {/* Nav */}
         <nav className="relative z-10 flex items-center justify-end px-8 py-6">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
@@ -151,18 +156,7 @@ export default function Landing() {
           </div>
         </nav>
 
-        {/* Dark radial vignette — makes center text pop without whitening everything */}
-        <div
-          className="absolute inset-0 z-[1] pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
-          }}
-        />
-
-        {/* Hero content */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6">
-
-          {/* Title */}
           <motion.h1
             custom={0}
             variants={fadeUp}
@@ -183,21 +177,19 @@ export default function Landing() {
             FlowPay
           </motion.h1>
 
-          {/* Primary tagline — with subtle backdrop so it reads over canvas */}
           <motion.p
             custom={1}
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="text-xl md:text-2xl font-semibold text-white max-w-lg mx-auto mb-11 leading-snug px-4 py-2 rounded-xl"
+            className="text-xl md:text-2xl font-semibold text-white max-w-3xl mx-auto mb-11 leading-snug px-4 py-2 rounded-xl"
             style={{
               textShadow: "0 0 40px rgba(0,0,0,0.9), 0 2px 12px rgba(0,0,0,0.8)",
             }}
           >
-            India's stablecoin payment super-layer.
+            India's stablecoin payment super-layer. Five payment rails on one Solana platform, payroll, remittance, escrow, creator commerce, and AI agent payments.
           </motion.p>
 
-          {/* Module pills */}
           <motion.div
             custom={2}
             variants={fadeUp}
@@ -221,7 +213,6 @@ export default function Landing() {
             ))}
           </motion.div>
 
-          {/* CTA */}
           <motion.div
             custom={3}
             variants={fadeUp}

@@ -122,11 +122,11 @@ export default function WalletConnect({ variant = "default" }: Props) {
       walletAddress: address,
       name: name ?? null,
     });
-    // 202 = new wallet, needs username — check BEFORE ok (202 is in 2xx so ok=true)
-    if (status === 202) {
+    if (status === 202 || (data as any)?.newUser) {
       setPendingAddress(address);
       setShowUsername(true);
-    } else if (ok) {
+      setUsername(name ?? "");
+    } else if (ok && data?.token && data?.user) {
       setAuth(data.token as string, data.user as any);
       setOpen(false);
       setShowUsername(false);
@@ -145,11 +145,7 @@ export default function WalletConnect({ variant = "default" }: Props) {
 
     try {
       if (!wallet.detect()) {
-        // Not installed — open install page but don't throw, just inform
-        window.open(wallet.installUrl, "_blank");
-        setError(`${wallet.name} not detected. Install it and refresh this page.`);
-        setLoading(null);
-        return;
+        throw new Error(`${wallet.name} is not detected in this browser.`);
       }
       const address = await wallet.connect();
       if (!address) throw new Error("Connection cancelled or rejected");
@@ -219,7 +215,6 @@ export default function WalletConnect({ variant = "default" }: Props) {
         (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(167,139,250,0.35)";
       }}
     >
-      {/* shimmer sweep */}
       <span
         className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"
         style={{
@@ -248,7 +243,6 @@ export default function WalletConnect({ variant = "default" }: Props) {
 
           <div className="relative z-10 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111]">
             {showUsername ? (
-              /* ── Username prompt ── */
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="font-bold text-white text-base">One last thing</h2>
@@ -280,7 +274,6 @@ export default function WalletConnect({ variant = "default" }: Props) {
                 </button>
               </div>
             ) : (
-              /* ── Wallet picker ── */
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -303,9 +296,7 @@ export default function WalletConnect({ variant = "default" }: Props) {
                         disabled={!!loading}
                         className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border border-white/8 bg-white/3 hover:bg-white/7 hover:border-white/15 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-left group"
                       >
-                        {/* Real wallet logo */}
-                        <div className="shrink-0 w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center"
-                          style={{ background: wallet.bgColor }}>
+                        <div className="shrink-0 w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center" style={{ background: wallet.bgColor }}>
                           <img
                             src={wallet.logo}
                             alt={wallet.name}
