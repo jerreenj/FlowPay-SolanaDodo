@@ -11,9 +11,9 @@ const modules = [
     name: "PayRails",
     tag: "Payroll",
     icon: Users,
-    color: "#3b82f6",
-    glow: "rgba(59,130,246,0.12)",
-    border: "rgba(59,130,246,0.2)",
+    color: "#ffffff",
+    glow: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.12)",
     headline: "Pay your team in USDG",
     bullets: [
       "Stablecoin salaries to Indian contractors",
@@ -27,9 +27,9 @@ const modules = [
     name: "RemitDirect",
     tag: "Remittance",
     icon: ArrowRightLeft,
-    color: "#a855f7",
-    glow: "rgba(168,85,247,0.12)",
-    border: "rgba(168,85,247,0.2)",
+    color: "#ffffff",
+    glow: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.12)",
     headline: "Cross-border transfers via USDG",
     bullets: [
       "UAE, US, UK, Singapore → India corridors",
@@ -43,9 +43,9 @@ const modules = [
     name: "EscrowX",
     tag: "Escrow",
     icon: ShieldCheck,
-    color: "#eab308",
-    glow: "rgba(234,179,8,0.12)",
-    border: "rgba(234,179,8,0.2)",
+    color: "#ffffff",
+    glow: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.12)",
     headline: "On-chain smart contract escrow",
     bullets: [
       "Trustless escrow with milestone releases",
@@ -59,9 +59,9 @@ const modules = [
     name: "CreatorPay",
     tag: "Creator Commerce",
     icon: Sparkles,
-    color: "#ec4899",
-    glow: "rgba(236,72,153,0.12)",
-    border: "rgba(236,72,153,0.2)",
+    color: "#ffffff",
+    glow: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.12)",
     headline: "Sell digital products globally",
     bullets: [
       "Courses, ebooks, templates, newsletters",
@@ -75,9 +75,9 @@ const modules = [
     name: "AgentBank",
     tag: "AI Payments",
     icon: Bot,
-    color: "#00ff88",
-    glow: "rgba(0,255,136,0.12)",
-    border: "rgba(0,255,136,0.2)",
+    color: "#ffffff",
+    glow: "rgba(255,255,255,0.05)",
+    border: "rgba(255,255,255,0.12)",
     headline: "Wallets for autonomous AI agents",
     bullets: [
       "Deploy Solana wallets for AI agents",
@@ -119,8 +119,8 @@ export default function ModuleSelect() {
       {/* Top nav */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#00ff88]/15 border border-[#00ff88]/25 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-[#00ff88]" />
+          <div className="w-8 h-8 rounded-xl bg-white/8 border border-white/15 flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold text-lg tracking-tight">FlowPay</span>
         </div>
@@ -131,7 +131,7 @@ export default function ModuleSelect() {
               onClick={copyAddress}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/20 transition-all"
             >
-              {copied ? <CheckCheck className="w-3 h-3 text-[#00ff88]" /> : <Copy className="w-3 h-3" />}
+              {copied ? <CheckCheck className="w-3 h-3 text-white/60" /> : <Copy className="w-3 h-3" />}
               {truncateAddress(user.walletAddress)}
             </button>
           )}
