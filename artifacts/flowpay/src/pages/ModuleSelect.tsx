@@ -1,8 +1,7 @@
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/auth";
-import { Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, Zap, LogOut, Copy, CheckCheck } from "lucide-react";
-import { useState } from "react";
+import { Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, LogOut, Copy, CheckCheck, ArrowRight } from "lucide-react";
 import RainingLetters from "@/components/RainingLetters";
 
 const modules = [
@@ -11,15 +10,10 @@ const modules = [
     name: "PayRails",
     tag: "Payroll",
     icon: Users,
-    color: "#ffffff",
-    glow: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.12)",
+    accent: "#00ff88",
+    fee: "0.5%",
     headline: "Pay your team in USDG",
-    bullets: [
-      "Stablecoin salaries to Indian contractors",
-      "UPI delivery in INR at live rates",
-      "Solana on-chain confirmation per payment",
-    ],
+    sub: "Stablecoin salaries · UPI delivery · Solana in 2.3s",
     route: "/payroll",
   },
   {
@@ -27,15 +21,10 @@ const modules = [
     name: "RemitDirect",
     tag: "Remittance",
     icon: ArrowRightLeft,
-    color: "#ffffff",
-    glow: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.12)",
-    headline: "Cross-border transfers via USDG",
-    bullets: [
-      "UAE, US, UK, Singapore → India corridors",
-      "60× cheaper than SWIFT or Western Union",
-      "Recipient gets INR to their UPI in seconds",
-    ],
+    accent: "#38bdf8",
+    fee: "0.75%",
+    headline: "Cross-border in 2 seconds",
+    sub: "UAE · US · UK → India · 60× cheaper than SWIFT",
     route: "/remittance",
   },
   {
@@ -43,15 +32,10 @@ const modules = [
     name: "EscrowX",
     tag: "Escrow",
     icon: ShieldCheck,
-    color: "#ffffff",
-    glow: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.12)",
+    accent: "#a78bfa",
+    fee: "0.5%",
     headline: "On-chain smart contract escrow",
-    bullets: [
-      "Trustless escrow with milestone releases",
-      "Freelancers and clients on equal footing",
-      "Raise disputes — funds held until resolved",
-    ],
+    sub: "Trustless milestone releases · dispute protection",
     route: "/escrow",
   },
   {
@@ -59,15 +43,10 @@ const modules = [
     name: "CreatorPay",
     tag: "Creator Commerce",
     icon: Sparkles,
-    color: "#ffffff",
-    glow: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.12)",
+    accent: "#f472b6",
+    fee: "2%",
     headline: "Sell digital products globally",
-    bullets: [
-      "Courses, ebooks, templates, newsletters",
-      "USDG payments — no chargebacks possible",
-      "Instant settlement, keep 98% of revenue",
-    ],
+    sub: "Courses · ebooks · templates · zero chargebacks",
     route: "/creator",
   },
   {
@@ -75,15 +54,10 @@ const modules = [
     name: "AgentBank",
     tag: "AI Payments",
     icon: Bot,
-    color: "#ffffff",
-    glow: "rgba(255,255,255,0.05)",
-    border: "rgba(255,255,255,0.12)",
+    accent: "#fb923c",
+    fee: "1%",
     headline: "Wallets for autonomous AI agents",
-    bullets: [
-      "Deploy Solana wallets for AI agents",
-      "x402 protocol for HTTP-gated payments",
-      "Machine-to-machine payments in <500ms",
-    ],
+    sub: "x402 protocol · machine-to-machine · <500ms",
     route: "/agents",
   },
 ];
@@ -114,30 +88,35 @@ export default function ModuleSelect() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#070707] text-white overflow-hidden">
+    <div className="relative min-h-screen bg-[#080808] text-white overflow-hidden">
       <RainingLetters />
-      {/* Top nav */}
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-white/8 border border-white/15 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-lg tracking-tight">FlowPay</span>
-        </div>
 
+      {/* Ambient glow top-center */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at top, rgba(255,255,255,0.03) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* Nav */}
+      <nav className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+        <div className="text-xs font-mono text-white/20 tracking-widest uppercase">
+          FlowPay · Select Module
+        </div>
         <div className="flex items-center gap-3">
           {user?.walletAddress && (
             <button
               onClick={copyAddress}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/50 hover:text-white hover:border-white/20 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/4 border border-white/8 text-xs text-white/40 hover:text-white/70 hover:border-white/15 transition-all"
             >
-              {copied ? <CheckCheck className="w-3 h-3 text-white/60" /> : <Copy className="w-3 h-3" />}
+              {copied ? <CheckCheck className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
               {truncateAddress(user.walletAddress)}
             </button>
           )}
           <button
             onClick={() => { logout(); setLocation("/"); }}
-            className="flex items-center gap-1.5 text-xs text-white/30 hover:text-red-400 transition-colors px-2 py-1.5"
+            className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors px-2 py-1.5"
           >
             <LogOut className="w-3.5 h-3.5" />
             Disconnect
@@ -146,21 +125,21 @@ export default function ModuleSelect() {
       </nav>
 
       {/* Header */}
-      <div className="px-8 pt-16 pb-10 text-center">
-        <p className="text-xs font-mono text-white/25 tracking-widest uppercase mb-3">
-          {user?.name ? `Welcome, ${user.name}` : "Connected"}
+      <div className="relative z-10 px-8 pt-14 pb-12 text-center">
+        <p className="text-[11px] font-mono text-white/20 tracking-[0.3em] uppercase mb-4">
+          {user?.name ? `Welcome back, ${user.name}` : "Wallet connected"}
         </p>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-3">
-          Which rail are you using today?
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-3 leading-tight">
+          Which rail today?
         </h1>
-        <p className="text-white/35 text-base">
-          Each module is purpose-built. Pick one and get started.
+        <p className="text-white/30 text-base max-w-sm mx-auto">
+          Five purpose-built payment modules on Solana. Pick one.
         </p>
       </div>
 
       {/* Module grid */}
-      <div className="px-6 sm:px-8 pb-20 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {modules.map(({ id, name, tag, icon: Icon, color, glow, border, headline, bullets, route }) => {
+      <div className="relative z-10 px-6 sm:px-8 pb-24 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {modules.map(({ id, name, tag, icon: Icon, accent, fee, headline, sub, route }) => {
           const isHovered = hovered === id;
           return (
             <button
@@ -168,70 +147,89 @@ export default function ModuleSelect() {
               onClick={() => setLocation(route)}
               onMouseEnter={() => setHovered(id)}
               onMouseLeave={() => setHovered(null)}
-              className="relative text-left rounded-2xl p-6 border transition-all duration-300 overflow-hidden group"
+              className="group relative text-left rounded-2xl p-6 border overflow-hidden transition-all duration-300"
               style={{
                 background: isHovered
-                  ? `radial-gradient(ellipse at top left, ${glow} 0%, rgba(255,255,255,0.03) 60%)`
-                  : "rgba(255,255,255,0.02)",
-                borderColor: isHovered ? color : border,
-                transform: isHovered ? "translateY(-3px)" : "translateY(0)",
-                boxShadow: isHovered ? `0 20px 60px ${glow}` : "none",
+                  ? `linear-gradient(135deg, ${accent}0d 0%, rgba(255,255,255,0.02) 100%)`
+                  : "rgba(255,255,255,0.025)",
+                borderColor: isHovered ? `${accent}50` : "rgba(255,255,255,0.07)",
+                transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+                boxShadow: isHovered
+                  ? `0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px ${accent}20, inset 0 1px 0 ${accent}15`
+                  : "0 2px 8px rgba(0,0,0,0.2)",
               }}
             >
-              {/* Icon + tag */}
-              <div className="flex items-start justify-between mb-6">
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: `${color}18`,
-                    border: `1px solid ${color}35`,
-                    boxShadow: isHovered ? `0 0 20px ${color}20` : "none",
-                  }}
-                >
-                  <Icon className="w-5 h-5" style={{ color }} />
-                </div>
-                <span
-                  className="text-[10px] font-mono px-2.5 py-1 rounded-full"
-                  style={{
-                    background: `${color}12`,
-                    color,
-                    border: `1px solid ${color}25`,
-                  }}
-                >
-                  {tag}
-                </span>
-              </div>
-
-              {/* Name + headline */}
-              <h2 className="text-lg font-bold text-white mb-1">{name}</h2>
-              <p className="text-sm font-medium mb-4" style={{ color }}>{headline}</p>
-
-              {/* Bullets */}
-              <ul className="space-y-2 mb-6">
-                {bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2 text-xs text-white/40">
-                    <span className="mt-0.5 w-1 h-1 rounded-full shrink-0" style={{ background: color, marginTop: "5px" }} />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-
-              {/* Enter button */}
+              {/* Top glow blob on hover */}
               <div
-                className="flex items-center gap-2 text-sm font-semibold transition-all"
-                style={{ color: isHovered ? color : "rgba(255,255,255,0.3)" }}
-              >
-                Open {name}
-                <span
-                  className="transition-transform duration-200"
-                  style={{ transform: isHovered ? "translateX(4px)" : "translateX(0)" }}
+                className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl transition-opacity duration-500 pointer-events-none"
+                style={{
+                  background: accent,
+                  opacity: isHovered ? 0.08 : 0,
+                }}
+              />
+
+              {/* Icon row */}
+              <div className="flex items-start justify-between mb-5">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300"
+                  style={{
+                    background: `${accent}12`,
+                    border: `1px solid ${accent}25`,
+                    boxShadow: isHovered ? `0 0 20px ${accent}20` : "none",
+                  }}
                 >
-                  →
-                </span>
+                  <Icon className="w-5 h-5 transition-transform duration-300" style={{ color: accent, transform: isHovered ? "scale(1.1)" : "scale(1)" }} />
+                </div>
+
+                <div className="text-right">
+                  <span
+                    className="inline-block text-[10px] font-mono px-2 py-0.5 rounded-full mb-1"
+                    style={{ background: `${accent}10`, color: accent, border: `1px solid ${accent}20` }}
+                  >
+                    {tag}
+                  </span>
+                  <p className="text-[10px] text-white/20 font-mono">{fee} fee</p>
+                </div>
               </div>
+
+              {/* Text */}
+              <h2 className="text-base font-bold text-white mb-1 leading-snug">{name}</h2>
+              <p
+                className="text-sm font-medium mb-2 leading-snug transition-colors duration-300"
+                style={{ color: isHovered ? accent : "rgba(255,255,255,0.45)" }}
+              >
+                {headline}
+              </p>
+              <p className="text-xs text-white/25 leading-relaxed mb-5">{sub}</p>
+
+              {/* CTA */}
+              <div
+                className="flex items-center gap-1.5 text-xs font-semibold transition-all duration-300"
+                style={{ color: isHovered ? accent : "rgba(255,255,255,0.2)" }}
+              >
+                Enter
+                <ArrowRight
+                  className="w-3.5 h-3.5 transition-transform duration-300"
+                  style={{ transform: isHovered ? "translateX(4px)" : "translateX(0)" }}
+                />
+              </div>
+
+              {/* Bottom border line that fills on hover */}
+              <div
+                className="absolute bottom-0 left-0 h-[1px] transition-all duration-500"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+                  width: isHovered ? "100%" : "0%",
+                }}
+              />
             </button>
           );
         })}
+      </div>
+
+      {/* Footer hint */}
+      <div className="relative z-10 text-center pb-8">
+        <p className="text-[10px] font-mono text-white/10 tracking-widest">SOLANA · USDG · DODO PAYMENTS</p>
       </div>
     </div>
   );
