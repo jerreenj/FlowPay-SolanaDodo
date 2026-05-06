@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/lib/auth";
 import { Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, Zap, LogOut, Copy, CheckCheck } from "lucide-react";
 import { useState } from "react";
+import RainingLetters from "@/components/RainingLetters";
 
 const modules = [
   {
@@ -113,7 +114,8 @@ export default function ModuleSelect() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070707] text-white">
+    <div className="relative min-h-screen bg-[#070707] text-white overflow-hidden">
+      <RainingLetters />
       {/* Top nav */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-white/5">
         <div className="flex items-center gap-2.5">
