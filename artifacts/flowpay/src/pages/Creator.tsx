@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
+import { apiFetch } from "@/lib/apiFetch";
 import { Sparkles, Plus, ShoppingCart, TrendingUp } from "lucide-react";
 
 interface Product {
@@ -62,8 +63,8 @@ export default function Creator() {
   async function load() {
     try {
       const [p, s] = await Promise.all([
-        fetch("/api/creator/products", { headers: authHeaders }).then((r) => r.json()),
-        fetch("/api/creator/sales", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/creator/products", { headers: authHeaders }).then((r) => r.json()),
+        apiFetch("/api/creator/sales", { headers: authHeaders }).then((r) => r.json()),
       ]);
       setProducts(p);
       setSales(s);
@@ -77,7 +78,7 @@ export default function Creator() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const res = await fetch("/api/creator/products", {
+      const res = await apiFetch("/api/creator/products", {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(newProduct),
@@ -93,7 +94,7 @@ export default function Creator() {
   async function handleBuy(productId: number) {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/creator/products/${productId}/purchase`, {
+      const res = await apiFetch(`/api/creator/products/${productId}/purchase`, {
         method: "POST",
         headers: authHeaders,
         body: JSON.stringify(buyForm),
