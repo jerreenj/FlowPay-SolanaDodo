@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/lib/auth";
 
 import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import ModuleSelect from "@/pages/ModuleSelect";
 import Dashboard from "@/pages/Dashboard";
 import Payroll from "@/pages/Payroll";
@@ -31,6 +33,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/select">
         <ProtectedRoute component={ModuleSelect} />
       </Route>
