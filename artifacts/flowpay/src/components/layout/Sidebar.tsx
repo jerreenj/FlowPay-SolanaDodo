@@ -2,28 +2,19 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth";
 import {
-  Users,
-  ArrowRightLeft,
-  ShieldCheck,
-  Sparkles,
-  Bot,
-  Wallet,
-  LogOut,
-  Zap,
-  Grid2x2,
-  Copy,
-  CheckCheck,
+  Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
+  Wallet, LogOut, Zap, Grid2x2, Copy, CheckCheck,
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
-  { href: "/select", label: "All Modules", icon: Grid2x2 },
-  { href: "/payroll", label: "PayRails", icon: Users },
-  { href: "/remittance", label: "RemitDirect", icon: ArrowRightLeft },
-  { href: "/escrow", label: "EscrowX", icon: ShieldCheck },
-  { href: "/creator", label: "CreatorPay", icon: Sparkles },
-  { href: "/agents", label: "AgentBank", icon: Bot },
-  { href: "/wallet", label: "Wallet", icon: Wallet },
+  { href: "/select",     label: "All Modules",  icon: Grid2x2,        accent: null },
+  { href: "/payroll",    label: "PayRails",      icon: Users,          accent: "#00ff88" },
+  { href: "/remittance", label: "RemitDirect",   icon: ArrowRightLeft, accent: "#38bdf8" },
+  { href: "/escrow",     label: "EscrowX",       icon: ShieldCheck,    accent: "#a78bfa" },
+  { href: "/creator",    label: "CreatorPay",    icon: Sparkles,       accent: "#f472b6" },
+  { href: "/agents",     label: "AgentBank",     icon: Bot,            accent: "#fb923c" },
+  { href: "/wallet",     label: "Wallet",        icon: Wallet,         accent: "#94a3b8" },
 ];
 
 function truncateAddress(addr: string) {
@@ -45,80 +36,145 @@ export function Sidebar() {
     }
   }
 
-  const initials = user?.name
-    ? user.name.slice(0, 2).toUpperCase()
-    : user?.walletAddress
-    ? user.walletAddress.slice(0, 2).toUpperCase()
-    : "??";
+  const initials = user?.name ? user.name.slice(0, 2).toUpperCase() : "FP";
+
+  const activeItem = navItems.find(
+    (item) => item.href !== "/select" && location.startsWith(item.href)
+  );
+  const activeAccent = activeItem?.accent ?? null;
 
   return (
-    <aside className="flex flex-col w-60 min-h-screen bg-[#090909] border-r border-white/8 shrink-0">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-white/8">
-        <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/8 border border-white/15">
-          <Zap className="w-4 h-4 text-white" />
+    <aside
+      className="flex flex-col w-60 min-h-screen shrink-0 relative"
+      style={{ background: "#090909", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+    >
+      {activeAccent && (
+        <div
+          className="absolute top-0 left-0 right-0 h-48 pointer-events-none z-0"
+          style={{
+            background: `radial-gradient(ellipse at top left, ${activeAccent}0e 0%, transparent 70%)`,
+          }}
+        />
+      )}
+
+      <div
+        className="relative z-10 flex items-center gap-3 px-5 py-[18px]"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div
+          className="flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-500"
+          style={{
+            background: activeAccent ? `${activeAccent}18` : "rgba(255,255,255,0.07)",
+            border: `1px solid ${activeAccent ? activeAccent + "30" : "rgba(255,255,255,0.12)"}`,
+            boxShadow: activeAccent ? `0 0 14px ${activeAccent}20` : "none",
+          }}
+        >
+          <Zap className="w-4 h-4" style={{ color: activeAccent ?? "rgba(255,255,255,0.8)" }} />
         </div>
         <div>
-          <span className="text-white font-bold text-base tracking-tight">FlowPay</span>
-          <div className="text-[9px] text-white/30 font-mono leading-none mt-0.5">SOLANA · USDG</div>
+          <div className="text-white font-bold text-[15px] tracking-tight leading-none">FlowPay</div>
+          <div
+            className="text-[9px] font-mono mt-1 tracking-widest transition-colors duration-500"
+            style={{ color: activeAccent ? `${activeAccent}90` : "rgba(255,255,255,0.25)" }}
+          >
+            SOLANA · USDG
+          </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = location === href || (href !== "/select" && location.startsWith(href));
+      <nav className="relative z-10 flex-1 px-3 py-4 space-y-0.5">
+        {navItems.map(({ href, label, icon: Icon, accent }) => {
+          const isActive =
+            location === href ||
+            (href !== "/select" && location.startsWith(href));
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
                 isActive
-                  ? "bg-white/8 text-white"
-                  : "text-white/40 hover:text-white/70 hover:bg-white/4"
+                  ? "text-white"
+                  : "text-white/35 hover:text-white/65 hover:bg-white/[0.04]"
               )}
+              style={
+                isActive
+                  ? {
+                      background: accent ? `${accent}10` : "rgba(255,255,255,0.07)",
+                      border: `1px solid ${accent ? accent + "22" : "rgba(255,255,255,0.10)"}`,
+                    }
+                  : {}
+              }
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span>{label}</span>
-              {isActive && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+              <Icon
+                className="w-4 h-4 shrink-0 transition-colors duration-200"
+                style={{ color: isActive ? (accent ?? "white") : undefined }}
+              />
+              <span className="flex-1">{label}</span>
+              {isActive && accent && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{
+                    background: accent,
+                    boxShadow: `0 0 5px ${accent}`,
+                  }}
+                />
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* User */}
-      <div className="px-3 py-4 border-t border-white/8 space-y-1">
+      <div
+        className="relative z-10 px-3 py-4 space-y-1"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
         {user && (
           <button
             onClick={copyAddress}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 hover:bg-white/6 transition-all text-left"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all hover:bg-white/[0.04]"
+            style={{
+              background: "rgba(255,255,255,0.025)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
           >
-            <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
-              <span className="text-white/70 text-[10px] font-bold">{initials}</span>
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all duration-500"
+              style={{
+                background: activeAccent ? `${activeAccent}18` : "rgba(255,255,255,0.09)",
+                border: `1px solid ${activeAccent ? activeAccent + "28" : "rgba(255,255,255,0.14)"}`,
+              }}
+            >
+              <span
+                className="text-[10px] font-bold transition-colors duration-500"
+                style={{ color: activeAccent ?? "rgba(255,255,255,0.65)" }}
+              >
+                {initials}
+              </span>
             </div>
             <div className="flex-1 min-w-0">
               {user.name && (
-                <div className="text-xs text-white font-medium truncate">{user.name}</div>
+                <div className="text-xs text-white font-medium truncate leading-tight">
+                  {user.name}
+                </div>
               )}
-              <div className="text-[10px] text-white/35 font-mono truncate">
+              <div className="text-[10px] text-white/30 font-mono truncate mt-0.5">
                 {truncateAddress(user.walletAddress)}
               </div>
             </div>
-            {copied
-              ? <CheckCheck className="w-3.5 h-3.5 text-white/60 shrink-0" />
-              : <Copy className="w-3.5 h-3.5 text-white/20 shrink-0" />
-            }
+            {copied ? (
+              <CheckCheck className="w-3.5 h-3.5 text-white/50 shrink-0" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-white/15 shrink-0" />
+            )}
           </button>
         )}
         <button
           onClick={logout}
-          className="flex items-center gap-2.5 w-full px-3 py-2 text-sm text-white/30 hover:text-white/60 transition-colors rounded-xl hover:bg-white/5"
+          className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] text-white/25 hover:text-white/55 transition-colors rounded-xl hover:bg-white/[0.04]"
         >
-          <LogOut className="w-4 h-4" />
-          Disconnect wallet
+          <LogOut className="w-3.5 h-3.5" />
+          Sign out
         </button>
       </div>
     </aside>
