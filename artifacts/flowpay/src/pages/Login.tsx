@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { Zap, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [, navigate] = useLocation();
@@ -39,8 +39,8 @@ export default function Login() {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/8 border border-white/15">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden">
+              <img src="/logo.avif" alt="FlowPay" className="w-full h-full object-cover" />
             </div>
             <span className="text-white font-bold text-2xl">FlowPay</span>
           </div>

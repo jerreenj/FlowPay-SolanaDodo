@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Zap, ArrowRight, Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, TrendingUp, Globe } from "lucide-react";
+import { ArrowRight, Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot, TrendingUp, Globe } from "lucide-react";
 
 const modules = [
   { name: "PayRails", icon: Users, fee: "0.5%", desc: "Stablecoin payroll for remote teams. Salary in USDG, settled on Solana in 2.3s." },
@@ -15,8 +15,8 @@ export default function Home() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white/8 border border-white/15 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img src="/logo.avif" alt="FlowPay" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-lg">FlowPay</span>
         </div>
