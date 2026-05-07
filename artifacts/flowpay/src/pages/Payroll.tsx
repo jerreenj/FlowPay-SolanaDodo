@@ -110,7 +110,7 @@ export default function Payroll() {
       <div className="flex flex-col" style={{ height: "100vh" }}>
 
         {/* ── Compact header ── */}
-        <div className="shrink-0 flex items-center gap-4 px-6 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="shrink-0 flex items-center gap-4 pl-14 pr-6 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}28` }}>
             <Users className="w-4 h-4" style={{ color: ACCENT }} />
           </div>
@@ -134,8 +134,8 @@ export default function Payroll() {
                 { label: "avg settle", value: stats.avgSettlementSeconds ? `${stats.avgSettlementSeconds}s` : "<3s" },
               ].map(({ label, value }) => (
                 <div key={label} className="text-center">
-                  <p className="text-[14px] font-bold font-mono text-white leading-none">{value}</p>
-                  <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.50)" }}>{label}</p>
+                  <p className="text-[18px] font-bold font-mono text-white leading-none">{value}</p>
+                  <p className="text-[13px] mt-1 font-semibold capitalize" style={{ color: "rgba(255,255,255,0.62)" }}>{label}</p>
                 </div>
               ))}
             </div>
