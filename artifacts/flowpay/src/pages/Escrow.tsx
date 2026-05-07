@@ -201,7 +201,7 @@ export default function EscrowPage() {
 
             {/* Escrow cards */}
             <div>
-              <p className="text-[11px] uppercase tracking-widest mb-3 px-1" style={{ color: "rgba(255,255,255,0.3)" }}>Contracts</p>
+              <p className="text-[13px] uppercase tracking-widest mb-3 px-1 font-semibold" style={{ color: "rgba(255,255,255,0.60)" }}>Contracts</p>
               {loading ? (
                 [...Array(2)].map((_, i) => <div key={i} className="h-36 rounded-2xl mb-3 animate-pulse" style={{ background: "rgba(255,255,255,0.03)" }} />)
               ) : escrows.length === 0 ? (
@@ -223,8 +223,8 @@ export default function EscrowPage() {
                             <ArrowRight className="w-3 h-3" style={{ color: "rgba(255,255,255,0.2)" }} />
                             <Avatar name={e.freelancerName} color={ACCENT} />
                             <div className="ml-1">
-                              <p className="text-[13px] text-white font-semibold">{e.projectTitle}</p>
-                              <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{e.clientName} → {e.freelancerName}</p>
+                              <p className="text-[14px] text-white font-bold">{e.projectTitle}</p>
+                              <p className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>{e.clientName} → {e.freelancerName}</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
@@ -233,12 +233,12 @@ export default function EscrowPage() {
                           </div>
                         </div>
 
-                        <p className="text-[12px] mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>{e.description}</p>
+                        <p className="text-[14px] mb-3 font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{e.description}</p>
 
                         <div className="mb-3">
                           <div className="flex justify-between mb-1.5">
-                            <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{e.completedMilestones}/{e.milestones} milestones · ${msVal} each</span>
-                            <span className="text-[10px] font-mono" style={{ color: ACCENT }}>{pct}%</span>
+                            <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>{e.completedMilestones}/{e.milestones} milestones · ${msVal} each</span>
+                            <span className="text-[13px] font-mono font-bold" style={{ color: ACCENT }}>{pct}%</span>
                           </div>
                           <MilestoneDots total={e.milestones} completed={e.completedMilestones} />
                         </div>
@@ -247,20 +247,20 @@ export default function EscrowPage() {
                           <div className="flex items-center gap-2">
                             {e.solanaAddress && (
                               <>
-                                <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{e.solanaAddress.slice(0, 10)}…</span>
+                                <span className="text-[12px] font-mono" style={{ color: "rgba(255,255,255,0.45)" }}>{e.solanaAddress.slice(0, 10)}…</span>
                                 <button onClick={() => navigator.clipboard.writeText(e.solanaAddress ?? "")} style={{ color: "rgba(255,255,255,0.2)" }}><Copy className="w-3 h-3" /></button>
                               </>
                             )}
                             {e.dodoCheckoutUrl && (
-                              <a href={e.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] underline underline-offset-2" style={{ color: ACCENT }}>Fund via Dodo ↗</a>
+                              <a href={e.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" className="text-[12px] font-semibold underline underline-offset-2" style={{ color: ACCENT }}>Fund via Dodo ↗</a>
                             )}
                           </div>
                           {e.status === "active" && (
                             <div className="flex gap-2">
-                              <button onClick={() => release(e.id)} className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>
+                              <button onClick={() => release(e.id)} className="flex items-center gap-1 text-[13px] font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>
                                 <Unlock className="w-3 h-3" /> Release
                               </button>
-                              <button onClick={() => dispute(e.id)} className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.22)" }}>
+                              <button onClick={() => dispute(e.id)} className="flex items-center gap-1 text-[13px] font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.22)" }}>
                                 <AlertTriangle className="w-3 h-3" /> Dispute
                               </button>
                             </div>
