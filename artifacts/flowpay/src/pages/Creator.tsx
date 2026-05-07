@@ -133,7 +133,7 @@ export default function Creator() {
 
       <div className="flex flex-col" style={{ height: "100vh" }}>
         {/* ── Compact header ── */}
-        <div className="shrink-0 flex items-center gap-4 px-6 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.01)" }}>
+        <div className="shrink-0 flex items-center gap-4 pl-14 pr-6 py-3.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.01)" }}>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}25` }}>
             <Sparkles className="w-4 h-4" style={{ color: ACCENT }} />
           </div>
@@ -151,8 +151,8 @@ export default function Creator() {
               { label: "earned", value: `$${totalRevenue.toFixed(2)}` },
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
-                <p className="text-[14px] font-bold font-mono text-white leading-none">{value}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-[18px] font-bold font-mono text-white leading-none">{value}</p>
+                <p className="text-[13px] mt-1 font-semibold capitalize" style={{ color: "rgba(255,255,255,0.62)" }}>{label}</p>
               </div>
             ))}
             <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 text-[12px] font-bold px-3 py-2 rounded-xl ml-2" style={{ background: ACCENT, color: "#000" }}>
