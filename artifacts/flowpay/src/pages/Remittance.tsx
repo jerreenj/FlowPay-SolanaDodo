@@ -42,9 +42,9 @@ function StatusPill({ status }: { status: string }) {
 }
 
 const CORRIDORS = [
-  { flag: "🇦🇪", from: "UAE", label: "UAE → India" },
-  { flag: "🇺🇸", from: "US",  label: "US → India" },
-  { flag: "🇬🇧", from: "UK",  label: "UK → India" },
+  { code: "AE", from: "UAE", label: "UAE → India", color: "#38bdf8" },
+  { code: "US", from: "US",  label: "US → India",  color: "#00ff88" },
+  { code: "GB", from: "UK",  label: "UK → India",  color: "#a78bfa" },
 ];
 
 export default function Remittance() {
@@ -212,8 +212,8 @@ export default function Remittance() {
             {/* Corridors */}
             <div className="grid grid-cols-3 gap-3">
               {CORRIDORS.map((c) => (
-                <div key={c.from} className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <p className="text-3xl mb-2">{c.flag}</p>
+                <div key={c.from} className="rounded-xl p-4 text-center" style={{ background: `${c.color}08`, border: `1px solid ${c.color}30` }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 text-[17px] font-black tracking-tight" style={{ background: `${c.color}20`, color: c.color, border: `1px solid ${c.color}45` }}>{c.code}</div>
                   <p className="text-[15px] font-bold text-white">{c.label}</p>
                   <p className="text-[14px] mt-1.5 font-mono font-bold" style={{ color: ACCENT }}>₹{INR.toFixed(2)}/USDG</p>
                   <p className="text-[13px] mt-1 font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>⚡ &lt;3s · 0.75%</p>
