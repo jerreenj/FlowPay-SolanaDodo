@@ -109,19 +109,19 @@ export default function Remittance() {
               <h1 className="text-[15px] font-bold text-white">RemitDirect</h1>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.75% fee</span>
             </div>
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.58)" }}>Cross-border → India in &lt;3 seconds on Solana</p>
+            <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.72)" }}>Cross-border → India in &lt;3 seconds on Solana</p>
           </div>
 
           {/* Live rate pill */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}18` }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: ratesLoading ? "#fbbf24" : ACCENT, boxShadow: ratesLoading ? undefined : `0 0 5px ${ACCENT}` }} />
-            <span className="text-[12px] font-mono font-bold" style={{ color: ACCENT }}>
+            <span className="text-[14px] font-mono font-bold" style={{ color: ACCENT }}>
               1 USDG = ₹{INR.toFixed(2)}
             </span>
-            <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.38)" }}>
+            <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>
               {fmtUpdated(rates.fetchedAt)}
             </span>
-            {rates.stale && <span className="text-[10px]" style={{ color: "#fbbf24" }}>est.</span>}
+            {rates.stale && <span className="text-[12px]" style={{ color: "#fbbf24" }}>est.</span>}
           </div>
 
           {stats && (
@@ -160,8 +160,8 @@ export default function Remittance() {
                 {/* Send box */}
                 <div className="rounded-xl p-4" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="flex items-baseline justify-between mb-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}>You send</p>
-                    <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.42)" }}>USDG ≈ $1.00</span>
+                    <p className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.70)" }}>You send</p>
+                    <span className="text-[13px] font-mono" style={{ color: "rgba(255,255,255,0.60)" }}>USDG ≈ $1.00</span>
                   </div>
                   <input
                     type="number" min="0" step="0.01"
@@ -171,7 +171,7 @@ export default function Remittance() {
                     className="w-full bg-transparent text-[2rem] font-bold font-mono text-white outline-none placeholder:text-white/20"
                   />
                   {convFee && (
-                    <p className="text-[11px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    <p className="text-[13px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.70)" }}>
                       Fee: <span className="font-mono">${convFee}</span> · You send net: <span className="font-mono">{(parseFloat(converterAmt) * (1 - FEE)).toFixed(2)} USDG</span>
                     </p>
                   )}
@@ -188,13 +188,13 @@ export default function Remittance() {
                 {/* Receive box */}
                 <div className="rounded-xl p-4" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="flex items-baseline justify-between mb-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}>🇮🇳 Recipient gets</p>
-                    <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.42)" }}>1 USDG = ₹{INR.toFixed(2)}</span>
+                    <p className="text-[13px] font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.70)" }}>🇮🇳 Recipient gets</p>
+                    <span className="text-[13px] font-mono" style={{ color: "rgba(255,255,255,0.60)" }}>1 USDG = ₹{INR.toFixed(2)}</span>
                   </div>
                   <p className="text-[2rem] font-bold font-mono" style={{ color: convNet ? ACCENT : "rgba(255,255,255,0.18)" }}>
                     ₹{convNet ?? "0"}
                   </p>
-                  <p className="text-[11px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  <p className="text-[13px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.70)" }}>
                     Delivered to UPI · <span className="font-mono">settlement &lt;3 seconds on Solana</span>
                   </p>
                 </div>
@@ -295,7 +295,7 @@ export default function Remittance() {
           <div className="w-80 shrink-0 border-l overflow-y-auto p-5 space-y-3" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
             <div>
               <p className="text-[13px] font-bold text-white mb-0.5">Send Remittance</p>
-              <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.58)" }}>
+              <p className="text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
                 {FLAGS[form.senderCountry] ?? "🌍"} → 🇮🇳 · USDG → Solana → UPI
               </p>
             </div>
@@ -311,14 +311,14 @@ export default function Remittance() {
               ))}
 
               <select value={form.senderCountry} onChange={(e) => set("senderCountry", e.target.value)}
-                className="w-full rounded-xl px-3 py-2 text-white text-[13px] outline-none"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}>
-                <option value="UAE">🇦🇪 UAE</option>
-                <option value="US">🇺🇸 United States</option>
-                <option value="UK">🇬🇧 United Kingdom</option>
-                <option value="SG">🇸🇬 Singapore</option>
-                <option value="CA">🇨🇦 Canada</option>
-                <option value="AU">🇦🇺 Australia</option>
+                className="w-full rounded-xl px-3 py-2 text-[14px] font-semibold outline-none"
+                style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.18)", color: "white" }}>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="UAE">🇦🇪 UAE — Dirham</option>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="US">🇺🇸 United States — USD</option>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="UK">🇬🇧 United Kingdom — GBP</option>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="SG">🇸🇬 Singapore — SGD</option>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="CA">🇨🇦 Canada — CAD</option>
+                <option style={{ background: "#1c1c1c", color: "white" }} value="AU">🇦🇺 Australia — AUD</option>
               </select>
 
               <div>
@@ -331,7 +331,7 @@ export default function Remittance() {
                 {formInr && (
                   <div className="flex items-center justify-between mt-1.5 px-1">
                     <span className="text-[12px] font-bold font-mono" style={{ color: ACCENT }}>≈ ₹{formInr}</span>
-                    <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.50)" }}>fee ${formFee}</span>
+                    <span className="text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.68)" }}>fee ${formFee}</span>
                   </div>
                 )}
               </div>
