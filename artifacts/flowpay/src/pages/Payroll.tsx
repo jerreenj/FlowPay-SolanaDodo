@@ -149,7 +149,7 @@ export default function Payroll() {
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* How it works */}
             <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <p className="text-[10px] uppercase tracking-widest mb-4 font-semibold" style={{ color: "rgba(255,255,255,0.42)" }}>How PayRails Works</p>
+              <p className="text-[12px] uppercase tracking-widest mb-4 font-semibold" style={{ color: "rgba(255,255,255,0.60)" }}>How PayRails Works</p>
               <div className="flex items-center gap-2">
                 {FLOW_NODES.map((node, i) => (
                   <div key={i} className="flex items-center gap-2 flex-1">
@@ -170,7 +170,7 @@ export default function Payroll() {
 
             {/* vs comparison */}
             <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="px-5 py-2.5 grid grid-cols-3 text-[10px] uppercase tracking-widest font-semibold" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.42)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="px-5 py-2.5 grid grid-cols-3 text-[12px] uppercase tracking-widest font-semibold" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.60)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <span>Method</span><span className="text-center">Settlement</span><span className="text-right">Fee</span>
               </div>
               {COMPARE.map((c, i) => (
@@ -184,7 +184,7 @@ export default function Payroll() {
 
             {/* History */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-3 px-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.40)" }}>Payment History</p>
+              <p className="text-[12px] uppercase tracking-widest mb-3 px-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.60)" }}>Payment History</p>
               {success && (
                 <div className="rounded-2xl p-4 mb-3" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}22` }}>
                   <div className="flex items-start gap-3">
@@ -220,11 +220,11 @@ export default function Payroll() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[13px] font-semibold text-white">{p.recipientName}</p>
-                          <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.58)" }}>{p.senderCompany || p.recipientEmail}</p>
+                          <p className="text-[13px] mt-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.76)" }}>{p.senderCompany || p.recipientEmail}</p>
                         </div>
                         <div className="text-right shrink-0 mr-2">
                           <p className="text-[13px] font-mono font-bold text-white">${parseFloat(p.amountUsdg).toFixed(2)}</p>
-                          <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>₹{parseFloat(p.amountInr).toLocaleString("en-IN")}{p.settlementSeconds ? ` · ${p.settlementSeconds}s` : ""}</p>
+                          <p className="text-[13px] mt-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.76)" }}>₹{parseFloat(p.amountInr).toLocaleString("en-IN")}{p.settlementSeconds ? ` · ${p.settlementSeconds}s` : ""}</p>
                         </div>
                         <StatusDot status={p.status} />
                         {p.dodoCheckoutUrl && <a href={p.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }}><ExternalLink className="w-3.5 h-3.5" /></a>}
