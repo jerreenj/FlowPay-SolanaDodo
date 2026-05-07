@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, escrowsTable } from "@workspace/db";
 import { CreateEscrowBody, GetEscrowParams, ReleaseEscrowParams, DisputeEscrowParams } from "@workspace/api-zod";
-import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
+import { dodo, dodoEnabled, createDodoCustomer, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -175,6 +175,50 @@ router.patch("/escrows/:id/dispute", async (req, res): Promise<void> => {
   }
 
   res.json(mapEscrow(row));
+});
+
+router.post("/escrows/:id/refund", async (req, res): Promise<void> => {
+  const params = DisputeEscrowParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [escrow] = await db.select().from(escrowsTable).where(eq(escrowsTable.id, params.data.id));
+  if (!escrow) {
+    res.status(404).json({ error: "Escrow not found" });
+    return;
+  }
+
+  let dodoRefundId: string | null = null;
+  let dodoRefundStatus: string | null = null;
+
+  if (dodoEnabled && escrow.dodoPaymentId && !escrow.dodoPaymentId.startsWith("dodo_")) {
+    try {
+      const refund = await dodo.refunds.create({
+        payment_id: escrow.dodoPaymentId,
+        reason: `EscrowX dispute refund — project: ${escrow.projectTitle}`,
+        metadata: {
+          escrow_id: String(escrow.id),
+          client_name: escrow.clientName,
+          freelancer_name: escrow.freelancerName,
+          source: "flowpay_escrow_refund",
+        },
+      });
+      dodoRefundId = refund.payment_id;
+      dodoRefundStatus = refund.status;
+    } catch (err: unknown) {
+      req.log?.warn({ err }, "Dodo refund creation failed — marking disputed without Dodo refund");
+    }
+  }
+
+  const [updated] = await db
+    .update(escrowsTable)
+    .set({ status: "disputed" })
+    .where(eq(escrowsTable.id, params.data.id))
+    .returning();
+
+  res.json({ ...mapEscrow(updated!), dodoRefundId, dodoRefundStatus });
 });
 
 export default router;
