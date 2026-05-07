@@ -1,17 +1,28 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
+import { Starfield } from "@/components/ui/starfield";
 import { PanelLeft } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#070707] relative">
+    <div className="flex min-h-screen relative" style={{ background: "#070707" }}>
+      {/* Starfield background — fixed, behind everything */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Starfield
+          bgColor="rgba(7,7,7,1)"
+          starColor="rgba(255,255,255,0.85)"
+          speed={0.5}
+          quantity={280}
+        />
+      </div>
+
       {/* Backdrop — click outside to close */}
       {open && (
         <div
           className="fixed inset-0 z-20"
-          style={{ background: "rgba(0,0,0,0.45)" }}
+          style={{ background: "rgba(0,0,0,0.55)" }}
           onClick={() => setOpen(false)}
         />
       )}
@@ -24,7 +35,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar onClose={() => setOpen(false)} />
       </div>
 
-      {/* Toggle button — moves right when sidebar opens so it never overlaps */}
+      {/* Toggle button — moves right when sidebar opens */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="fixed z-40 w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
@@ -32,7 +43,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           top: "14px",
           left: open ? "calc(240px + 14px)" : "14px",
           background: open ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: "1px solid rgba(255,255,255,0.12)",
         }}
         title="Toggle navigation"
       >
@@ -41,7 +52,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main content — shifts right when sidebar is open */}
       <main
-        className="flex-1 overflow-auto relative transition-all duration-300"
+        className="flex-1 overflow-auto relative z-10 transition-all duration-300"
         style={{ marginLeft: open ? "240px" : "0" }}
       >
         {children}
