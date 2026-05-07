@@ -63,7 +63,7 @@ export default function WalletPage() {
       {/* Header */}
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}0d 0%, transparent 70%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
+        <div className="relative z-10 flex items-start justify-between pl-14 pr-8 pt-6 pb-5 min-w-0 gap-6">
           <div className="flex items-start gap-4 min-w-0">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
               <WalletIcon className="w-5 h-5" style={{ color: ACCENT }} />
@@ -83,14 +83,14 @@ export default function WalletPage() {
 
       <div className="p-8">
         {loading ? (
-          <div className="max-w-2xl space-y-4">
+          <div className="max-w-4xl mx-auto space-y-4">
             <div className="h-52 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />
             <div className="grid grid-cols-3 gap-4">
               {[...Array(3)].map((_, i) => <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />)}
             </div>
           </div>
         ) : wallet ? (
-          <div className="max-w-2xl">
+          <div className="max-w-4xl mx-auto">
             {/* Balance card */}
             <div className="relative overflow-hidden rounded-2xl p-8 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${ACCENT}18`, boxShadow: `0 0 40px ${ACCENT}06` }}>
               <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 80% 70% at 0% 0%, ${ACCENT}08 0%, transparent 70%)` }} />
@@ -133,9 +133,9 @@ export default function WalletPage() {
                     <div className="p-1.5 rounded-lg" style={{ background: `${accent}10` }}>
                       <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
                     </div>
-                    <p className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                    <p className="text-[13px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.55)" }}>{label}</p>
                   </div>
-                  <p className="text-xl font-bold font-mono" style={{ color: accent === "#f87171" ? "white" : accent }}>{value}</p>
+                  <p className="text-2xl font-bold font-mono" style={{ color: accent === "#f87171" ? "white" : accent }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -155,10 +155,10 @@ export default function WalletPage() {
                 {RATES.map(({ pair, key, decimals }) => {
                   const val = rates[key];
                   return (
-                    <div key={pair} className="flex items-center justify-between py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                      <span className="text-sm font-mono" style={{ color: "rgba(255,255,255,0.5)" }}>{pair}</span>
+                    <div key={pair} className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                      <span className="text-[16px] font-mono font-semibold" style={{ color: "rgba(255,255,255,0.80)" }}>{pair}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-mono font-semibold text-white">{val?.toFixed(decimals) ?? "—"}</span>
+                        <span className="text-[20px] font-mono font-bold text-white">{val?.toFixed(decimals) ?? "—"}</span>
                         {pair === "USDG / INR" && (
                           <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}10`, color: ACCENT }}>LIVE</span>
                         )}
