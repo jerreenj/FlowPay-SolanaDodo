@@ -9,6 +9,7 @@ import escrowsRouter from "./escrows";
 import creatorRouter from "./creator";
 import agentsRouter from "./agents";
 import ratesRouter from "./rates";
+import webhooksRouter from "./webhooks";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(escrowsRouter);
 router.use(creatorRouter);
 router.use(agentsRouter);
 router.use(ratesRouter);
+router.use(webhooksRouter);
 
 export default router;
