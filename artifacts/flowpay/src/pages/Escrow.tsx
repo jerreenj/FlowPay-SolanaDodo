@@ -133,9 +133,9 @@ export default function EscrowPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-[15px] font-bold text-white">EscrowX</h1>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>0.5% fee</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.09)" }}>Smart Contract</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.09)" }}>Smart Contract</span>
             </div>
-            <p className="text-[11px] leading-tight" style={{ color: "rgba(255,255,255,0.45)" }}>Trustless milestone escrow on Solana</p>
+            <p className="text-[11px] leading-tight font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>Trustless milestone escrow on Solana</p>
           </div>
           <div className="ml-auto flex items-center gap-5">
             {[
@@ -145,7 +145,7 @@ export default function EscrowPage() {
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
                 <p className="text-[14px] font-bold font-mono text-white leading-none">{value}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.52)" }}>{label}</p>
               </div>
             ))}
           </div>
@@ -166,13 +166,13 @@ export default function EscrowPage() {
                         {step.icon}
                       </div>
                       <p className="text-[12px] font-semibold text-white">{step.label}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.38)" }}>{step.sub}</p>
+                      <p className="text-[12px] mt-1 font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>{step.sub}</p>
                     </div>
                     {i < FLOW_STEPS.length - 1 && <ArrowRight className="w-4 h-4 shrink-0" style={{ color: "rgba(255,255,255,0.2)" }} />}
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] mt-4 pt-4 text-center" style={{ color: "rgba(255,255,255,0.3)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <p className="text-[12px] mt-4 pt-4 text-center font-medium" style={{ color: "rgba(255,255,255,0.62)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                 Funds are locked on Solana until milestones are approved — neither party can withdraw unilaterally
               </p>
             </div>
@@ -184,7 +184,7 @@ export default function EscrowPage() {
                   <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: ACCENT }} />
                   <div className="flex-1">
                     <p className="text-sm text-white font-semibold">Escrow deployed on Solana</p>
-                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+                    <p className="text-[12px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.70)" }}>
                       {success.projectTitle} · ${success.amountUsdg} USDG across {success.milestones} milestones
                     </p>
                     {success.solanaAddress && <p className="text-[11px] font-mono mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>{success.solanaAddress.slice(0, 20)}…</p>}
@@ -207,7 +207,7 @@ export default function EscrowPage() {
               ) : escrows.length === 0 ? (
                 <div className="rounded-2xl py-10 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                   <ShieldCheck className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(255,255,255,0.15)" }} />
-                  <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No contracts yet — create your first escrow using the form →</p>
+                  <p className="text-[13px] font-medium" style={{ color: "rgba(255,255,255,0.52)" }}>No contracts yet — create your first escrow using the form →</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -224,7 +224,7 @@ export default function EscrowPage() {
                             <Avatar name={e.freelancerName} color={ACCENT} />
                             <div className="ml-1">
                               <p className="text-[13px] text-white font-semibold">{e.projectTitle}</p>
-                              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.38)" }}>{e.clientName} → {e.freelancerName}</p>
+                              <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{e.clientName} → {e.freelancerName}</p>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
@@ -237,7 +237,7 @@ export default function EscrowPage() {
 
                         <div className="mb-3">
                           <div className="flex justify-between mb-1.5">
-                            <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>{e.completedMilestones}/{e.milestones} milestones · ${msVal} each</span>
+                            <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{e.completedMilestones}/{e.milestones} milestones · ${msVal} each</span>
                             <span className="text-[10px] font-mono" style={{ color: ACCENT }}>{pct}%</span>
                           </div>
                           <MilestoneDots total={e.milestones} completed={e.completedMilestones} />
@@ -278,7 +278,7 @@ export default function EscrowPage() {
           <div className="w-80 shrink-0 overflow-y-auto border-l p-5 space-y-3" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
             <div>
               <p className="text-[13px] font-bold text-white mb-0.5">Create Contract</p>
-              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>Funds locked on Solana until delivery</p>
+              <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>Funds locked on Solana until delivery</p>
             </div>
 
             <form onSubmit={handleCreate} className="space-y-2.5">
