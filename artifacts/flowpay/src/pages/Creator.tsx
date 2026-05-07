@@ -49,17 +49,17 @@ function ShareModal({ productId, productTitle, onClose }: { productId: number; p
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)" }} onClick={onClose}>
       <div className="w-96 rounded-2xl p-6 mx-4" style={{ background: "#0f0f0f", border: "1px solid rgba(255,255,255,0.12)" }} onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between mb-4">
-          <div><h2 className="text-[14px] font-bold text-white">Share & Sell</h2><p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{productTitle}</p></div>
+          <div><h2 className="text-[14px] font-bold text-white">Share & Sell</h2><p className="text-[13px] mt-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.68)" }}>{productTitle}</p></div>
           <button onClick={onClose} style={{ color: "rgba(255,255,255,0.3)" }}><X className="w-4 h-4" /></button>
         </div>
         <div className="flex items-center gap-2 rounded-xl px-3 py-2.5 mb-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
           <ExternalLink className="w-3.5 h-3.5 shrink-0" style={{ color: ACCENT }} />
-          <span className="text-[12px] font-mono flex-1 truncate" style={{ color: "rgba(255,255,255,0.6)" }}>{url}</span>
+          <span className="text-[13px] font-mono flex-1 truncate" style={{ color: "rgba(255,255,255,0.75)" }}>{url}</span>
           <button onClick={copy} style={{ color: copied ? ACCENT : "rgba(255,255,255,0.3)" }}>
             {copied ? <CheckCheck className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
-        <p className="text-[11px] mb-4" style={{ color: "rgba(255,255,255,0.35)" }}>Anyone with this link can purchase — no account required.</p>
+        <p className="text-[13px] mb-4 font-medium" style={{ color: "rgba(255,255,255,0.62)" }}>Anyone with this link can purchase — no account required.</p>
         <button onClick={copy} className="w-full flex items-center justify-center gap-2 text-[13px] font-bold py-2.5 rounded-xl" style={{ background: ACCENT, color: "#000" }}>
           {copied ? <><CheckCheck className="w-4 h-4" /> Copied!</> : <><Copy className="w-4 h-4" /> Copy Share Link</>}
         </button>
@@ -142,7 +142,7 @@ export default function Creator() {
               <h1 className="text-[15px] font-bold text-white">CreatorPay</h1>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>2% fee</span>
             </div>
-            <p className="text-[11px] leading-tight" style={{ color: "rgba(255,255,255,0.45)" }}>Sell digital products · instant USDG settlement</p>
+            <p className="text-[13px] leading-tight font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>Sell digital products · instant USDG settlement</p>
           </div>
           <div className="ml-auto flex items-center gap-4">
             {[
@@ -180,9 +180,9 @@ export default function Creator() {
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
                   onFocus={(e) => (e.target.style.borderColor = `${ACCENT}55`)} onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
                 <select value={newProduct.type} onChange={(e) => setNP("type", e.target.value)}
-                  className="col-span-1 rounded-xl px-3 py-2 text-white text-[13px] outline-none"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}>
-                  {Object.entries(TYPE_CFG).map(([v, { label }]) => <option key={v} value={v}>{label}</option>)}
+                  className="col-span-1 rounded-xl px-3 py-2 text-[13px] outline-none"
+                  style={{ background: "#1c1c1c", border: "1px solid rgba(255,255,255,0.15)", color: "white" }}>
+                  {Object.entries(TYPE_CFG).map(([v, { label }]) => <option key={v} value={v} style={{ background: "#1c1c1c", color: "white" }}>{label}</option>)}
                 </select>
                 <textarea value={newProduct.description} onChange={(e) => setNP("description", e.target.value)} required rows={2}
                   placeholder="What does the buyer get? Be specific."
@@ -194,7 +194,7 @@ export default function Creator() {
                     className="w-full rounded-xl px-3 py-2 text-white text-[13px] outline-none font-mono"
                     style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
                     onFocus={(e) => (e.target.style.borderColor = `${ACCENT}55`)} onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
-                  {newProduct.priceUsdg && <p className="text-[10px] mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>You get ${(parseFloat(newProduct.priceUsdg) * 0.98).toFixed(2)}</p>}
+                  {newProduct.priceUsdg && <p className="text-[12px] mt-1 font-medium" style={{ color: "rgba(255,255,255,0.62)" }}>You get ${(parseFloat(newProduct.priceUsdg) * 0.98).toFixed(2)}</p>}
                 </div>
                 <button type="submit" disabled={submitting} className="col-span-4 text-[13px] font-bold py-2.5 rounded-xl disabled:opacity-50" style={{ background: ACCENT, color: "#000" }}>
                   {submitting ? "Listing on Dodo…" : "List Product & Get Share Link"}
@@ -238,7 +238,7 @@ export default function Creator() {
                             </div>
                             <div className="text-right">
                               <p className="text-xl font-bold font-mono text-white">${parseFloat(p.priceUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                              <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>USDG</p>
+                              <p className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.60)" }}>USDG</p>
                             </div>
                           </div>
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded" style={{ background: `${cfg.accent}20`, color: cfg.accent, border: `1px solid ${cfg.accent}28` }}>{cfg.label}</span>
@@ -247,13 +247,13 @@ export default function Creator() {
                         {/* Body */}
                         <div className="p-4 flex-1 flex flex-col">
                           <h3 className="text-white font-semibold text-[14px] leading-snug mb-0.5">{p.title}</h3>
-                          <p className="text-[12px] mb-1 font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>by {p.creatorName}</p>
+                          <p className="text-[13px] mb-1 font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>by {p.creatorName}</p>
                           <p className="text-[13px] mb-3 flex-1 line-clamp-2 font-medium" style={{ color: "rgba(255,255,255,0.72)" }}>{p.description}</p>
                           <div className="flex items-center justify-between mb-3">
                             <span className="flex items-center gap-1 text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.60)" }}>
                               <TrendingUp className="w-3 h-3" /> {p.salesCount} sold · ${parseFloat(p.totalRevenue).toFixed(2)} earned
                             </span>
-                            <button onClick={() => setShareProduct(p)} className="text-[11px] flex items-center gap-1" style={{ color: ACCENT }}>
+                            <button onClick={() => setShareProduct(p)} className="text-[13px] font-semibold flex items-center gap-1" style={{ color: ACCENT }}>
                               <ExternalLink className="w-3 h-3" /> Share
                             </button>
                           </div>
@@ -287,7 +287,7 @@ export default function Creator() {
             </div>
           ) : (
             <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
-              <div className="grid grid-cols-4 gap-4 px-5 py-2.5 text-[10px] uppercase tracking-widest" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.3)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="grid grid-cols-4 gap-4 px-5 py-2.5 text-[12px] uppercase tracking-widest font-semibold" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.58)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <span className="col-span-2">Sale</span><span>Dodo Status</span><span className="text-right">Amount</span>
               </div>
               {sales.length === 0 ? (
@@ -296,10 +296,10 @@ export default function Creator() {
                 <div key={s.id} className="grid grid-cols-4 gap-4 items-center px-5 py-3.5 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
                   <div className="col-span-2 min-w-0">
                     <p className="text-[13px] text-white">{s.buyerName} <span style={{ color: "rgba(255,255,255,0.4)" }}>bought</span> "{s.productTitle}"</p>
-                    <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>by {s.creatorName} · {new Date(s.createdAt).toLocaleDateString()}</p>
+                    <p className="text-[12px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>by {s.creatorName} · {new Date(s.createdAt).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={
+                    <span className="text-[12px] font-bold px-1.5 py-0.5 rounded-full" style={
                       s.dodoPaymentStatus === "paid" ? { background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.25)" } :
                       s.dodoPaymentStatus === "failed" ? { background: "rgba(248,113,113,0.12)", color: "#f87171", border: "1px solid rgba(248,113,113,0.25)" } :
                       { background: "rgba(251,146,60,0.12)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.25)" }
@@ -308,7 +308,7 @@ export default function Creator() {
                   </div>
                   <div className="text-right">
                     <p className="text-[13px] font-mono font-semibold text-white">${parseFloat(s.amountUsdg).toFixed(2)}</p>
-                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>You: ${parseFloat(s.creatorReceives).toFixed(2)}</p>
+                    <p className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.58)" }}>You: ${parseFloat(s.creatorReceives).toFixed(2)}</p>
                   </div>
                 </div>
               ))}
