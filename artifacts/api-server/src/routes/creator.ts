@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql, count } from "drizzle-orm";
 import { db, creatorProductsTable, creatorSalesTable } from "@workspace/db";
 import { CreateCreatorProductBody, GetCreatorProductParams, PurchaseCreatorProductBody, PurchaseCreatorProductParams } from "@workspace/api-zod";
-import { dodo, dodoEnabled, dodoWebhookKey, DODO_RETURN_URL_BASE } from "../lib/dodo";
+import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -249,81 +249,61 @@ router.get("/creator/sales", async (_req, res): Promise<void> => {
   })));
 });
 
-router.post("/webhooks/dodo", async (req, res): Promise<void> => {
-  const rawBody = req.body instanceof Buffer ? req.body.toString("utf-8") : null;
-
-  if (!rawBody) {
-    res.status(400).json({ error: "Raw body required — ensure Content-Type is application/json" });
+router.post("/creator/products/:id/payment-link", async (req, res): Promise<void> => {
+  const params = GetCreatorProductParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
     return;
   }
 
-  interface ParsedEvent {
-    type: string;
-    data: Record<string, unknown>;
-  }
-  let event: ParsedEvent | null = null;
+  const [product] = await db
+    .select()
+    .from(creatorProductsTable)
+    .where(eq(creatorProductsTable.id, params.data.id));
 
-  if (dodoWebhookKey) {
-    try {
-      const headers: Record<string, string> = {};
-      for (const [k, v] of Object.entries(req.headers)) {
-        if (typeof v === "string") headers[k] = v;
-        else if (Array.isArray(v)) headers[k] = v[0] ?? "";
-      }
-      const verified = dodo.webhooks.unwrap(rawBody, { headers });
-      event = verified as unknown as ParsedEvent;
-    } catch (err) {
-      req.log?.warn({ err }, "Dodo webhook signature verification failed");
-      res.status(401).json({ error: "Webhook signature verification failed" });
-      return;
-    }
-  } else {
-    if (process.env.NODE_ENV === "production") {
-      req.log?.error("DODO_WEBHOOK_KEY is not set in production — rejecting unsigned webhook");
-      res.status(401).json({ error: "Webhook verification is required in production. Set DODO_WEBHOOK_KEY." });
-      return;
-    }
-    req.log?.warn("DODO_WEBHOOK_KEY not set — skipping signature verification (development mode only)");
-    try {
-      event = JSON.parse(rawBody) as ParsedEvent;
-    } catch {
-      res.status(400).json({ error: "Invalid JSON body" });
-      return;
-    }
-  }
-
-  if (!event || typeof event.type !== "string") {
-    res.status(400).json({ error: "Missing or invalid event type" });
+  if (!product) {
+    res.status(404).json({ error: "Product not found" });
     return;
   }
 
-  let newStatus: string | null = null;
-  if (event.type === "payment.succeeded") newStatus = "paid";
-  else if (event.type === "payment.failed") newStatus = "failed";
-  else {
-    req.log?.info({ event_type: event.type }, "Dodo webhook received but ignored (not a payment event)");
-    res.json({ received: true, action: "ignored" });
+  if (!dodoEnabled || !product.dodoProductId) {
+    res.json({
+      shareUrl: `${DODO_RETURN_URL_BASE}/buy/${product.id}`,
+      dodoCheckoutUrl: null,
+      note: "Dodo not enabled — share the FlowPay buy page link",
+    });
     return;
   }
 
-  const data = event.data;
-  const sessionId = (typeof data.checkout_session_id === "string" ? data.checkout_session_id
-    : typeof data.payment_id === "string" ? data.payment_id : undefined);
+  try {
+    const session = await dodo.checkoutSessions.create({
+      product_cart: [{ product_id: product.dodoProductId, quantity: 1 }],
+      customer: {
+        email: `buyer@flowpay.in`,
+        name: "FlowPay Buyer",
+      },
+      metadata: {
+        product_title: product.title,
+        creator_name: product.creatorName,
+        source: "flowpay_creator_payment_link",
+      },
+      return_url: `${DODO_RETURN_URL_BASE}/buy/${product.id}?status=success`,
+    });
 
-  if (!sessionId) {
-    req.log?.warn({ event_type: event.type }, "Dodo webhook missing session/payment id in data");
-    res.status(400).json({ error: "Missing session or payment id in event data" });
-    return;
+    res.json({
+      shareUrl: `${DODO_RETURN_URL_BASE}/buy/${product.id}`,
+      dodoCheckoutUrl: session.checkout_url ?? null,
+      sessionId: session.session_id,
+      note: "Share the dodoCheckoutUrl for a direct Dodo checkout experience",
+    });
+  } catch (err: unknown) {
+    req.log?.warn({ err }, "Dodo payment link creation failed");
+    res.json({
+      shareUrl: `${DODO_RETURN_URL_BASE}/buy/${product.id}`,
+      dodoCheckoutUrl: null,
+      note: "Dodo session creation failed — use the FlowPay share link",
+    });
   }
-
-  const result = await db
-    .update(creatorSalesTable)
-    .set({ dodoPaymentStatus: newStatus })
-    .where(eq(creatorSalesTable.dodoSessionId, sessionId))
-    .returning({ id: creatorSalesTable.id });
-
-  req.log?.info({ event_type: event.type, session_id: sessionId, updated: result.length }, "Dodo webhook processed");
-  res.json({ received: true, updated: result.length });
 });
 
 router.get("/creator/stats", async (_req, res): Promise<void> => {
