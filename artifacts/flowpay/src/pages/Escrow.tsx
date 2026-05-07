@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
@@ -78,6 +78,14 @@ export default function EscrowPage() {
   const [form, setForm] = useState({ clientName: user?.name ?? "", clientEmail: "", freelancerName: "", freelancerEmail: "", projectTitle: "", description: "", amountUsdg: "", milestones: "2" });
   const [success, setSuccess] = useState<Escrow | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [msOpen, setMsOpen] = useState(false);
+  const msRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function close(e: MouseEvent) { if (msRef.current && !msRef.current.contains(e.target as Node)) setMsOpen(false); }
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
 
   const authHeaders = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
@@ -305,10 +313,34 @@ export default function EscrowPage() {
                   <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="Amount (USDG)"
                     className={`${inp} font-mono`} style={inpSt} onFocus={onFo} onBlur={onBl} />
                 </div>
-                <select value={form.milestones} onChange={(e) => set("milestones", e.target.value)}
-                  className={inp} style={inpSt} onFocus={onFo} onBlur={onBl}>
-                  {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} milestone{n > 1 ? "s" : ""}</option>)}
-                </select>
+                <div ref={msRef} className="relative">
+                  <button type="button" onClick={() => setMsOpen((o) => !o)}
+                    className={`${inp} flex items-center justify-between w-full`}
+                    style={{ ...inpSt, borderColor: msOpen ? `${ACCENT}55` : "rgba(255,255,255,0.09)" }}>
+                    <span>{form.milestones} milestone{parseInt(form.milestones) > 1 ? "s" : ""}</span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.5, transform: msOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                      <path d="M2 4l4 4 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  {msOpen && (
+                    <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden"
+                      style={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <button key={n} type="button"
+                          onClick={() => { set("milestones", String(n)); setMsOpen(false); }}
+                          className="w-full px-3 py-2 text-left text-[13px] transition-colors"
+                          style={{
+                            color: form.milestones === String(n) ? ACCENT : "rgba(255,255,255,0.85)",
+                            background: form.milestones === String(n) ? `${ACCENT}18` : "transparent",
+                          }}
+                          onMouseEnter={(e) => { if (form.milestones !== String(n)) (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)"; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = form.milestones === String(n) ? `${ACCENT}18` : "transparent"; }}>
+                          {n} milestone{n > 1 ? "s" : ""}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               {perMs && (
                 <p className="text-[11px] px-1" style={{ color: "rgba(255,255,255,0.35)" }}>
