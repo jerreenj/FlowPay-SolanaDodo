@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth";
 import {
   Users, ArrowRightLeft, ShieldCheck, Sparkles, Bot,
-  Wallet, LogOut, Copy, CheckCheck, UserCircle,
+  Wallet, LogOut, Copy, CheckCheck, UserCircle, X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -22,7 +22,7 @@ function truncateAddress(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const [location] = useLocation();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
@@ -38,16 +38,15 @@ export function Sidebar() {
 
   const initials = user?.name ? user.name.slice(0, 2).toUpperCase() : "FP";
 
-  const activeItem = navItems.find(
-    (item) => location.startsWith(item.href)
-  );
+  const activeItem = navItems.find((item) => location.startsWith(item.href));
   const activeAccent = activeItem?.accent ?? null;
 
   return (
     <aside
-      className="flex flex-col w-60 min-h-screen shrink-0 relative"
-      style={{ background: "#090909", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+      className="flex flex-col w-60 h-full shrink-0 relative"
+      style={{ background: "#090909", borderRight: "1px solid rgba(255,255,255,0.08)" }}
     >
+      {/* Accent glow */}
       {activeAccent && (
         <div
           className="absolute top-0 left-0 right-0 h-48 pointer-events-none z-0"
@@ -57,19 +56,18 @@ export function Sidebar() {
         />
       )}
 
+      {/* Header row — logo + close button */}
       <div
-        className="relative z-10 flex items-center gap-3 px-5 py-[18px]"
+        className="relative z-10 flex items-center gap-3 px-4 py-[18px]"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div
           className="flex items-center justify-center w-8 h-8 rounded-xl overflow-hidden shrink-0 transition-all duration-500"
-          style={{
-            boxShadow: activeAccent ? `0 0 14px ${activeAccent}30` : "none",
-          }}
+          style={{ boxShadow: activeAccent ? `0 0 14px ${activeAccent}30` : "none" }}
         >
           <img src="/logo.avif" alt="FlowPay" className="w-full h-full object-cover" />
         </div>
-        <div>
+        <div className="flex-1">
           <div className="text-white font-bold text-[15px] tracking-tight leading-none">FlowPay</div>
           <div
             className="text-[9px] font-mono mt-1 tracking-widest transition-colors duration-500"
@@ -78,17 +76,27 @@ export function Sidebar() {
             SOLANA · USDG
           </div>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="w-6 h-6 flex items-center justify-center rounded-lg transition-all hover:bg-white/[0.07] shrink-0"
+            style={{ color: "rgba(255,255,255,0.30)" }}
+            title="Close"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
+      {/* Nav */}
       <nav className="relative z-10 flex-1 px-3 py-4 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon, accent }) => {
-          const isActive =
-            location === href ||
-            location.startsWith(href);
+          const isActive = location === href || location.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
                 isActive
@@ -112,10 +120,7 @@ export function Sidebar() {
               {isActive && accent && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0"
-                  style={{
-                    background: accent,
-                    boxShadow: `0 0 5px ${accent}`,
-                  }}
+                  style={{ background: accent, boxShadow: `0 0 5px ${accent}` }}
                 />
               )}
             </Link>
@@ -123,6 +128,7 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Footer */}
       <div
         className="relative z-10 px-3 py-4 space-y-1"
         style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
