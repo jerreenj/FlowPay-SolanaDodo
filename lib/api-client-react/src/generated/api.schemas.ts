@@ -301,6 +301,15 @@ export interface PurchaseProductBody {
   buyerName: string;
 }
 
+export type CreatorSaleDodoPaymentStatus =
+  (typeof CreatorSaleDodoPaymentStatus)[keyof typeof CreatorSaleDodoPaymentStatus];
+
+export const CreatorSaleDodoPaymentStatus = {
+  pending: "pending",
+  paid: "paid",
+  failed: "failed",
+} as const;
+
 export interface CreatorSale {
   id: number;
   productId: number;
@@ -313,7 +322,31 @@ export interface CreatorSale {
   creatorReceives: string;
   /** @nullable */
   solanaSignature?: string | null;
+  /** @nullable */
+  dodoSessionId?: string | null;
+  /** @nullable */
+  dodoCheckoutUrl?: string | null;
+  dodoPaymentStatus: CreatorSaleDodoPaymentStatus;
   createdAt: string;
+}
+
+/**
+ * Event payload — for payment events contains checkout_session_id and payment_id
+ */
+export type DodoWebhookBodyData = {
+  checkout_session_id?: string;
+  payment_id?: string;
+  [key: string]: unknown;
+};
+
+/**
+ * Dodo Payments webhook event in the standardwebhooks format
+ */
+export interface DodoWebhookBody {
+  /** Event type, e.g. payment.succeeded or payment.failed */
+  type: string;
+  /** Event payload — for payment events contains checkout_session_id and payment_id */
+  data: DodoWebhookBodyData;
 }
 
 export type CreatorStatsTopProductsItem = {
