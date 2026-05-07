@@ -24,21 +24,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <Sidebar onClose={() => setOpen(false)} />
       </div>
 
-      {/* Main content — always full width */}
-      <main className="flex-1 overflow-auto relative">
-        {/* Toggle button — always visible top-left */}
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="fixed top-3.5 left-3.5 z-40 w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
-          style={{
-            background: open ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.10)",
-          }}
-          title="Toggle navigation"
-        >
-          <PanelLeft className="w-4 h-4" style={{ color: "rgba(255,255,255,0.65)" }} />
-        </button>
+      {/* Toggle button — moves right when sidebar opens so it never overlaps */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="fixed z-40 w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
+        style={{
+          top: "14px",
+          left: open ? "calc(240px + 14px)" : "14px",
+          background: open ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.10)",
+        }}
+        title="Toggle navigation"
+      >
+        <PanelLeft className="w-4 h-4" style={{ color: "rgba(255,255,255,0.70)" }} />
+      </button>
 
+      {/* Main content — shifts right when sidebar is open */}
+      <main
+        className="flex-1 overflow-auto relative transition-all duration-300"
+        style={{ marginLeft: open ? "240px" : "0" }}
+      >
         {children}
       </main>
     </div>
