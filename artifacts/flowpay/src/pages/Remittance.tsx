@@ -213,17 +213,17 @@ export default function Remittance() {
             <div className="grid grid-cols-3 gap-3">
               {CORRIDORS.map((c) => (
                 <div key={c.from} className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <p className="text-2xl mb-2">{c.flag}</p>
-                  <p className="text-[12px] font-semibold text-white">{c.label}</p>
-                  <p className="text-[11px] mt-1 font-mono font-bold" style={{ color: ACCENT }}>₹{INR.toFixed(2)}/USDG</p>
-                  <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.60)" }}>⚡ &lt;3s · 0.75%</p>
+                  <p className="text-3xl mb-2">{c.flag}</p>
+                  <p className="text-[15px] font-bold text-white">{c.label}</p>
+                  <p className="text-[14px] mt-1.5 font-mono font-bold" style={{ color: ACCENT }}>₹{INR.toFixed(2)}/USDG</p>
+                  <p className="text-[13px] mt-1 font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>⚡ &lt;3s · 0.75%</p>
                 </div>
               ))}
             </div>
 
             {/* vs banks */}
             <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="grid grid-cols-3 px-5 py-2.5 text-[10px] uppercase tracking-widest" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.42)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="grid grid-cols-3 px-5 py-2.5 text-[12px] uppercase tracking-widest font-semibold" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.55)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <span>Method</span><span className="text-center">Settlement</span><span className="text-right">Total Fee</span>
               </div>
               {[
@@ -232,9 +232,9 @@ export default function Remittance() {
                 { m: "RemitDirect ✓", t: "< 3 seconds", f: "0.75%", win: true },
               ].map((row, i) => (
                 <div key={i} className="grid grid-cols-3 items-center px-5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", background: row.win ? `${ACCENT}06` : "transparent" }}>
-                  <span className="text-[13px] font-semibold" style={{ color: row.win ? "white" : "rgba(255,255,255,0.52)" }}>{row.m}</span>
-                  <span className="text-center font-mono text-[13px] font-bold" style={{ color: row.win ? ACCENT : "#f87171" }}>{row.t}</span>
-                  <span className="text-right font-mono text-[13px] font-bold" style={{ color: row.win ? ACCENT : "#f87171" }}>{row.f}</span>
+                  <span className="text-[14px] font-semibold" style={{ color: row.win ? "white" : "rgba(255,255,255,0.75)" }}>{row.m}</span>
+                  <span className="text-center font-mono text-[14px] font-bold" style={{ color: row.win ? ACCENT : "#f87171" }}>{row.t}</span>
+                  <span className="text-right font-mono text-[14px] font-bold" style={{ color: row.win ? ACCENT : "#f87171" }}>{row.f}</span>
                 </div>
               ))}
             </div>
@@ -262,7 +262,7 @@ export default function Remittance() {
 
             {/* History */}
             <div>
-              <p className="text-[10px] uppercase tracking-widest mb-3 px-0.5" style={{ color: "rgba(255,255,255,0.40)" }}>Transfer History</p>
+              <p className="text-[12px] uppercase tracking-widest mb-3 px-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>Transfer History</p>
               {remittances.length === 0 ? (
                 <div className="rounded-2xl py-10 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                   <ArrowRightLeft className="w-8 h-8 mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
@@ -274,12 +274,12 @@ export default function Remittance() {
                     <div key={r.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors" style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
                       <span className="text-xl shrink-0">{FLAGS[r.senderCountry] ?? "🌍"}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-white">{r.senderName} <span style={{ color: "rgba(255,255,255,0.45)" }}>→</span> {r.recipientName}</p>
-                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.58)" }}>{r.senderCountry} → IN · {r.recipientUpiId}{r.settlementSeconds ? ` · ${r.settlementSeconds}s` : ""}</p>
+                        <p className="text-[15px] font-semibold text-white">{r.senderName} <span style={{ color: "rgba(255,255,255,0.55)" }}>→</span> {r.recipientName}</p>
+                        <p className="text-[13px] mt-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{r.senderCountry} → IN · {r.recipientUpiId}{r.settlementSeconds ? ` · ${r.settlementSeconds}s` : ""}</p>
                       </div>
                       <div className="text-right shrink-0 mr-2">
-                        <p className="text-[13px] font-mono font-bold text-white">${parseFloat(r.amountUsdg).toFixed(2)}</p>
-                        <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>₹{parseFloat(r.amountInr).toLocaleString("en-IN")}</p>
+                        <p className="text-[16px] font-mono font-bold text-white">${parseFloat(r.amountUsdg).toFixed(2)}</p>
+                        <p className="text-[13px] mt-0.5 font-semibold" style={{ color: "rgba(255,255,255,0.72)" }}>₹{parseFloat(r.amountInr).toLocaleString("en-IN")}</p>
                       </div>
                       <StatusPill status={r.status} />
                       {r.dodoCheckoutUrl && <a href={r.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }}><ExternalLink className="w-3.5 h-3.5" /></a>}
