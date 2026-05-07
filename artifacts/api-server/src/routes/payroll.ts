@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, sql, count } from "drizzle-orm";
 import { db, payrollPaymentsTable } from "@workspace/db";
 import { CreatePayrollPaymentBody, GetPayrollPaymentParams } from "@workspace/api-zod";
-import { dodo, dodoEnabled, DODO_RETURN_URL_BASE } from "../lib/dodo";
+import { dodo, dodoEnabled, createDodoCustomer, DODO_RETURN_URL_BASE } from "../lib/dodo";
 
 const router: IRouter = Router();
 
@@ -134,6 +134,90 @@ router.get("/payroll/payments/:id", async (req, res): Promise<void> => {
   }
 
   res.json(mapPayment(payment));
+});
+
+router.post("/payroll/subscriptions", async (req, res): Promise<void> => {
+  const { senderName, senderCompany, recipientName, recipientEmail, amountUsdg, billingInterval } = req.body as {
+    senderName?: string;
+    senderCompany?: string;
+    recipientName?: string;
+    recipientEmail?: string;
+    amountUsdg?: string;
+    billingInterval?: string;
+  };
+
+  if (!recipientName || !recipientEmail || !amountUsdg) {
+    res.status(400).json({ error: "recipientName, recipientEmail, and amountUsdg are required" });
+    return;
+  }
+  if (!dodoEnabled) {
+    res.status(503).json({ error: "Dodo Payments is not configured — set DODO_API_KEY" });
+    return;
+  }
+
+  const amountInCents = Math.round(parseFloat(amountUsdg) * 100);
+  if (isNaN(amountInCents) || amountInCents <= 0) {
+    res.status(400).json({ error: "Invalid amountUsdg value" });
+    return;
+  }
+
+  const interval = (billingInterval ?? "Month") as "Day" | "Week" | "Month" | "Year";
+
+  try {
+    const customerId = await createDodoCustomer(recipientName, recipientEmail);
+
+    const product = await dodo.products.create({
+      name: `Recurring Payroll: ${senderCompany ?? senderName ?? "Company"} → ${recipientName}`,
+      description: `Monthly payroll subscription of $${amountUsdg} USDG to ${recipientName} (${recipientEmail})`,
+      tax_category: "digital_products",
+      price: {
+        currency: "USD",
+        discount: 0,
+        price: amountInCents,
+        purchasing_power_parity: false,
+        type: "recurring_price",
+        payment_frequency_count: 1,
+        payment_frequency_interval: interval,
+        subscription_period_count: 1,
+        subscription_period_interval: interval,
+        trial_period_days: 0,
+      },
+      metadata: {
+        sender_company: senderCompany ?? "",
+        sender_name: senderName ?? "",
+        recipient_email: recipientEmail,
+        source: "flowpay_payroll_subscription",
+      },
+    });
+
+    const customerPayload = customerId
+      ? { customer_id: customerId }
+      : { email: recipientEmail, name: recipientName };
+
+    const subscription = await dodo.subscriptions.create({
+      product_id: product.product_id,
+      quantity: 1,
+      customer: customerPayload,
+      billing: { country: "IN" },
+    });
+
+    res.status(201).json({
+      subscriptionId: subscription.subscription_id,
+      paymentId: subscription.payment_id,
+      productId: product.product_id,
+      recipientName,
+      recipientEmail,
+      amountUsdg,
+      billingInterval: interval,
+      customerId: customerId ?? null,
+    });
+  } catch (err: unknown) {
+    req.log?.error({ err }, "Dodo subscription creation failed");
+    res.status(502).json({
+      error: "Failed to create Dodo subscription",
+      detail: err instanceof Error ? err.message : String(err),
+    });
+  }
 });
 
 router.get("/payroll/stats", async (_req, res): Promise<void> => {
