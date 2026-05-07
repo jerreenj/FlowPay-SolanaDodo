@@ -57,7 +57,7 @@ export default function Profile() {
       {/* Header */}
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}0d 0%, transparent 70%)` }} />
-        <div className="relative z-10 flex items-start gap-4 px-8 pt-8 pb-7">
+        <div className="relative z-10 flex items-start gap-4 pl-14 pr-8 pt-6 pb-5">
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
             <UserCircle className="w-5 h-5" style={{ color: ACCENT }} />
           </div>
@@ -73,7 +73,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="p-8 max-w-xl">
+      <div className="p-8 max-w-4xl mx-auto">
         {/* Avatar + name card */}
         <div className="rounded-2xl p-6 mb-6 relative overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${ACCENT}18` }}>
           <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 80% 70% at 0% 0%, ${ACCENT}07 0%, transparent 70%)` }} />
