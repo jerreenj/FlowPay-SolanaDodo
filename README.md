@@ -32,38 +32,39 @@
 
 ---
 
-FlowPay is a **full-stack stablecoin payment infrastructure** built for India — powered by **Dodo Payments** and settled on **Solana**. Five purpose-built payment rails in one platform: payroll, cross-border remittance, smart contract escrow, creator commerce, and autonomous AI agent payments.
+FlowPay is a **stablecoin payment platform built for India** — powered by **Dodo Payments** and settled on **Solana**. Five purpose-built payment products in one place: payroll, cross-border money transfers, smart contract escrow, creator product sales, and AI agent wallets.
 
-Every payment settles on-chain in under 3 seconds. Every transaction produces a Solana signature as an immutable receipt. Dodo Payments handles real checkout sessions and fiat delivery — converting USDG to INR and routing it to the right UPI handle, bank account, or API endpoint.
+Every payment settles on-chain in under 3 seconds. Every transaction produces a Solana signature as an immutable receipt. Dodo Payments handles the real checkout experience and fiat delivery — converting USDG to INR and routing it to the right bank account or UPI handle.
 
 ---
 
-## 🔶 Dodo Payments Integration — Real API Calls, Not Mocks
+## 🔶 Dodo Payments Integration
 
-**FlowPay uses the Dodo Payments SDK (`dodopayments@2.31.0`) for live API calls.** Every transaction in PayRails and CreatorPay hits the real Dodo test-mode API — creating real products and checkout sessions, not mocks.
+FlowPay is built on the Dodo Payments SDK. Every transaction — across all five modules — creates a real Dodo product and a real checkout session. No mocks, no simulations.
 
-### The Stack
+### What Dodo does in FlowPay
 
-```
-User Intent → USDG Transfer on Solana (<3s) → Dodo Checkout Session → INR / UPI / Fiat
-```
+Every time you send a payroll payment, remittance, escrow deposit, or product purchase, FlowPay:
+1. Creates a product entry in Dodo with the exact amount and description
+2. Creates a secure checkout session — a real `cks_…` link you can open and pay
+3. Tracks the payment and updates the status in the FlowPay dashboard
 
-| Layer | Role |
-|-------|------|
-| **Solana** | Trustless settlement. Immutable signatures. <3 second finality. |
-| **USDG** | Dodo's stablecoin. Stable value, programmable, Solana-native. |
-| **Dodo Payments** | Real checkout sessions. Product registry. Fiat on/off ramp. |
-| **FlowPay** | The application layer — five modules packaging Dodo + Solana into real payment products. |
+### New features added to the Dodo integration
 
-### How Dodo Powers Each Module
+**Payment confirmations**
+When someone completes a payment through Dodo, FlowPay now automatically receives the confirmation. The payment status in the dashboard updates on its own — no manual refresh, no guessing whether the payment went through.
 
-| Module | Dodo's Role |
-|--------|-------------|
-| **PayRails** | Creates a real Dodo product and checkout session per payroll payment |
-| **RemitDirect** | Handles cross-border corridors and INR delivery via UPI |
-| **EscrowX** | Processes milestone release payouts when contracts complete |
-| **CreatorPay** | Registers each product on Dodo; processes buyer checkout on purchase |
-| **AgentBank** | Enables AI agents to pay autonomously via the x402 protocol |
+**Customer accounts**
+Every buyer is now registered as a persistent customer in Dodo when they pay. This means repeat buyers are recognised, and future features like saved payment methods will work seamlessly.
+
+**Refunds**
+Disputed escrow contracts can now trigger a refund directly through Dodo. The money goes back to the original payment method automatically — no manual back-and-forth needed between client and freelancer.
+
+**Recurring payroll**
+PayRails can now set up monthly salary runs as Dodo subscriptions. Once a recurring payroll is configured, it repeats every billing cycle automatically — no manual action needed for each run.
+
+**Shareable direct buy links**
+CreatorPay products now have an on-demand Dodo checkout link. Creators can generate a direct payment link that takes the buyer straight to checkout — no FlowPay account required, no extra steps.
 
 ---
 
@@ -268,7 +269,7 @@ pnpm --filter @workspace/db run push
 
 | Criterion | FlowPay |
 |-----------|---------|
-| **Dodo Payments integration** | ✅ Real SDK calls — products and checkout sessions on every transaction |
+| **Dodo Payments integration** | ✅ Real SDK calls — products, checkout sessions, webhooks, refunds, subscriptions, customer accounts |
 | **Real working product** | ✅ Five fully functional modules, end-to-end |
 | **India-specific** | ✅ UPI delivery, INR conversion, six cross-border corridors |
 | **Solana-native** | ✅ Every payment produces a Solana transaction signature |
