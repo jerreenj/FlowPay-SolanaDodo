@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { Bot, Plus, Zap, ArrowUpRight, ArrowDownLeft, Copy, X } from "lucide-react";
+import { Bot, Plus, Zap, ArrowUpRight, ArrowDownLeft, Copy, X, Activity } from "lucide-react";
 
 const ACCENT = "#fb923c";
 
@@ -37,6 +37,12 @@ interface Tx {
   createdAt: string;
 }
 
+const X402_STEPS = [
+  { req: "GET /api/data", res: "402 Payment Required", note: "Agent requests resource", color: "#f87171" },
+  { req: "POST /x402/pay  0.001 USDG", res: "TX: Solana ⚡", note: "FlowPay sends micro-payment", color: ACCENT },
+  { req: "GET /api/data  X-Payment-Proof", res: "200 OK  { data }", note: "API returns response", color: "#4ade80" },
+];
+
 export default function Agents() {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
@@ -59,7 +65,7 @@ export default function Agents() {
     try {
       const data = await apiFetch("/api/agents", { headers: authHeaders }).then((r) => r.json());
       setAgents(data);
-    } catch { }
+    } catch {}
     finally { setLoading(false); }
   }
 
@@ -87,8 +93,7 @@ export default function Agents() {
       await load();
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Something went wrong");
-    }
-    finally { setSubmitting(false); }
+    } finally { setSubmitting(false); }
   }
 
   async function handleFund(agentId: number) {
@@ -108,8 +113,7 @@ export default function Agents() {
       if (txs[agentId]) await loadTxs(agentId);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Something went wrong");
-    }
-    finally { setSubmitting(false); }
+    } finally { setSubmitting(false); }
   }
 
   async function handlePay(agentId: number) {
@@ -129,98 +133,143 @@ export default function Agents() {
       if (txs[agentId]) await loadTxs(agentId);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Something went wrong");
-    }
-    finally { setSubmitting(false); }
+    } finally { setSubmitting(false); }
   }
 
   const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
-
   const totalBalance = agents.reduce((sum, a) => sum + parseFloat(a.usdgBalance || "0"), 0);
   const totalTxs = agents.reduce((sum, a) => sum + a.transactionCount, 0);
+  const activeCount = agents.filter((a) => a.isActive === "true").length;
 
   return (
     <AppLayout>
+      {/* Header */}
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}10 0%, transparent 70%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
-          <div className="flex items-start gap-4 min-w-0">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
-              <Bot className="w-5 h-5" style={{ color: ACCENT }} />
-            </div>
-            <div className="min-w-0 max-w-[54rem]">
-              <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">AgentBank</h1>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>1% fee</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.10)" }}>x402</span>
+        <div className="relative z-10 px-8 pt-8 pb-4">
+          <div className="flex items-start justify-between gap-6 mb-6">
+            <div className="flex items-start gap-4 min-w-0">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
+                <Bot className="w-5 h-5" style={{ color: ACCENT }} />
               </div>
-              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Autonomous AI agent wallets on Solana — machine-to-machine payments at &lt;500ms</p>
+              <div>
+                <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
+                  <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">AgentBank</h1>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>1% fee</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.10)" }}>x402 Protocol</span>
+                </div>
+                <p className="text-[13px] sm:text-sm" style={{ color: "rgba(255,255,255,0.56)" }}>
+                  Autonomous AI agent wallets on Solana — machine-to-machine payments at &lt;500ms
+                </p>
+              </div>
             </div>
+            <button onClick={() => { setShowForm(true); setFormError(null); }}
+              className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
+              style={{ background: ACCENT, color: "#000" }}>
+              <Plus className="w-4 h-4" /> Deploy Agent
+            </button>
           </div>
-          <button onClick={() => { setShowForm(true); setFormError(null); }}
-            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
-            style={{ background: ACCENT, color: "#000" }}>
-            <Plus className="w-4 h-4" /> Deploy Agent
-          </button>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 pb-7">
+            {[
+              { label: "Agents Deployed", value: agents.length.toString(), accent: true },
+              { label: "Active Now", value: activeCount.toString(), accent: false },
+              { label: "USDG Held", value: `$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, accent: false },
+              { label: "Transactions", value: totalTxs.toString(), accent: false },
+            ].map(({ label, value, accent }) => (
+              <div key={label} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-[clamp(1.3rem,2vw,1.65rem)] font-bold font-mono leading-none" style={{ color: accent ? ACCENT : "white" }}>{value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="p-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          {[
-            { label: "Agents Deployed", value: agents.length.toString(), colored: true },
-            { label: "Total USDG Held", value: `$${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, colored: false },
-            { label: "Total Transactions", value: totalTxs.toString(), colored: false },
-          ].map(({ label, value, colored }) => (
-            <div key={label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
-              <p className="text-2xl font-bold font-mono tracking-tight" style={{ color: colored ? ACCENT : "white" }}>{value}</p>
+      <div className="p-8 space-y-6">
+        {/* x402 Protocol explainer */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${ACCENT}20` }}>
+          <div className="px-5 py-3.5 flex items-center gap-3" style={{ borderBottom: `1px solid ${ACCENT}15`, background: `${ACCENT}06` }}>
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ACCENT, boxShadow: `0 0 6px ${ACCENT}` }} />
+            <p className="text-[12px] font-semibold" style={{ color: ACCENT }}>x402 Protocol — How Agents Pay for APIs</p>
+          </div>
+          <div className="p-5">
+            <div className="space-y-2">
+              {X402_STEPS.map((step, i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold mt-0.5" style={{ background: `${step.color}20`, color: step.color, border: `1px solid ${step.color}40` }}>
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <code className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)" }}>
+                        {step.req}
+                      </code>
+                      <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>→</span>
+                      <code className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: `${step.color}10`, color: step.color, border: `1px solid ${step.color}25` }}>
+                        {step.res}
+                      </code>
+                    </div>
+                    <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{step.note}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+            <p className="text-[11px] mt-4 pt-4" style={{ color: "rgba(255,255,255,0.3)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              Agents with x402 enabled autonomously pay micro-fees to access APIs — no human intervention required. Built on Solana for sub-second finality.
+            </p>
+          </div>
         </div>
 
+        {/* Deploy form */}
         {showForm && (
-          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
+          <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-semibold text-white">Deploy New Agent</h2>
+              <div>
+                <h2 className="text-sm font-semibold text-white">Deploy New Agent</h2>
+                <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Creates an on-chain wallet and registers on Dodo</p>
+              </div>
               <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleCreate} className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Agent Name</label>
-                <input value={form.name} onChange={(e) => set("name", e.target.value)} required placeholder="PayBot Alpha"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Agent Name</label>
+                <input value={form.name} onChange={(e) => set("name", e.target.value)} required placeholder="e.g. InvoiceBot"
+                  className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
                   onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
                   onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Owner</label>
-                <input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} required placeholder="TechVentures Inc"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
+                <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Owner / Team</label>
+                <input value={form.ownerName} onChange={(e) => set("ownerName", e.target.value)} required placeholder="Your name or company"
+                  className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
                   onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
                   onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
               <div className="col-span-2">
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Description</label>
-                <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required rows={2} placeholder="What does this agent do?"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all resize-none"
+                <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>What does this agent do?</label>
+                <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required rows={2}
+                  placeholder="Describe its purpose — e.g. 'Pays API providers for data access autonomously'"
+                  className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all resize-none"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
                   onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
                   onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
               </div>
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div className="col-span-2 flex items-center gap-3">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <div
-                    className="relative w-9 h-5 rounded-full transition-all cursor-pointer"
+                    className="relative w-9 h-5 rounded-full transition-all cursor-pointer shrink-0"
                     style={{ background: form.x402Enabled ? ACCENT : "rgba(255,255,255,0.12)" }}
                     onClick={() => set("x402Enabled", !form.x402Enabled)}
                   >
                     <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform" style={{ transform: form.x402Enabled ? "translateX(16px)" : "translateX(0)" }} />
                   </div>
                   <div>
-                    <div className="text-sm text-white">Enable x402 protocol</div>
-                    <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>HTTP payment-gated APIs</div>
+                    <div className="text-sm text-white">Enable x402 Protocol</div>
+                    <div className="text-[11px]" style={{ color: "rgba(255,255,255,0.35)" }}>Allow agent to autonomously pay for HTTP 402 API access</div>
                   </div>
                 </label>
               </div>
@@ -229,14 +278,14 @@ export default function Agents() {
                   {formError}
                 </div>
               )}
-              <div className="flex gap-3">
+              <div className="col-span-2 flex gap-3">
                 <button type="submit" disabled={submitting}
                   className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
                   style={{ background: ACCENT, color: "#000" }}>
-                  {submitting ? "Deploying…" : "Deploy Agent"}
+                  {submitting ? "Deploying on Solana…" : "Deploy Agent"}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)}
-                  className="px-4 text-sm rounded-xl transition-all"
+                  className="px-5 text-sm rounded-xl transition-all"
                   style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}>
                   Cancel
                 </button>
@@ -245,32 +294,49 @@ export default function Agents() {
           </div>
         )}
 
+        {/* Agent cards */}
         <div className="space-y-4">
-          {loading ? [...Array(3)].map((_, i) => (
-            <div key={i} className="h-44 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />
+          {loading ? [...Array(2)].map((_, i) => (
+            <div key={i} className="h-48 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }} />
           )) : agents.length === 0 ? (
-            <div className="rounded-2xl px-6 py-12 text-center text-sm" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.3)" }}>
-              No agents deployed yet
+            <div className="rounded-2xl px-6 py-16 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}20` }}>
+                <Bot className="w-5 h-5" style={{ color: `${ACCENT}80` }} />
+              </div>
+              <p className="text-sm font-medium text-white mb-1">No agents deployed yet</p>
+              <p className="text-[13px] max-w-sm mx-auto" style={{ color: "rgba(255,255,255,0.35)" }}>
+                Deploy your first AI agent wallet — it gets a Solana address and can autonomously pay for APIs via the x402 protocol.
+              </p>
             </div>
           ) : agents.map((agent) => {
             const isSelected = selectedAgent?.id === agent.id;
             const isActive = agent.isActive === "true";
+            const has402 = agent.x402Enabled === "true";
             return (
               <div key={agent.id} className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}25` }}>
-                        <Bot className="w-5 h-5" style={{ color: ACCENT }} />
+                      <div className="relative">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}25` }}>
+                          <Bot className="w-5 h-5" style={{ color: ACCENT }} />
+                        </div>
+                        {isActive && (
+                          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#070707]" style={{ background: "#4ade80", boxShadow: "0 0 6px #4ade80" }} />
+                        )}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-white font-semibold text-[15px]">{agent.name}</h3>
-                          {agent.x402Enabled === "true" && (
+                          {has402 && (
                             <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>x402</span>
                           )}
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={isActive ? { background: "#4ade8015", color: "#4ade80", border: "1px solid #4ade8025" } : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                            {isActive ? "active" : "inactive"}
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded" style={
+                            isActive
+                              ? { background: "#4ade8015", color: "#4ade80", border: "1px solid #4ade8025" }
+                              : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.10)" }
+                          }>
+                            {isActive ? "● active" : "inactive"}
                           </span>
                         </div>
                         <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Owner: {agent.ownerName}</p>
@@ -299,7 +365,9 @@ export default function Agents() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.28)" }}>{agent.walletAddress.slice(0, 14)}…</span>
+                      <span className="text-[11px] font-mono" style={{ color: "rgba(255,255,255,0.28)" }}>
+                        {agent.walletAddress.slice(0, 8)}…{agent.walletAddress.slice(-6)}
+                      </span>
                       <button onClick={() => navigator.clipboard.writeText(agent.walletAddress)} className="transition-colors hover:text-white/60" style={{ color: "rgba(255,255,255,0.2)" }}>
                         <Copy className="w-3 h-3" />
                       </button>
@@ -318,37 +386,37 @@ export default function Agents() {
                       <button onClick={() => { setSelectedAgent(isSelected ? null : agent); if (!txs[agent.id]) loadTxs(agent.id); }}
                         className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                         style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                        <Zap className="w-3 h-3" /> {isSelected ? "Hide" : "History"}
+                        <Activity className="w-3 h-3" /> {isSelected ? "Hide" : "History"}
                       </button>
                     </div>
                   </div>
                 </div>
 
+                {/* Fund panel */}
                 {selectedAgent?.id === agent.id && action === "fund" && (
                   <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-                    <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>Fund Agent Wallet</p>
+                    <p className="text-[10px] uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Fund Agent Wallet</p>
                     <div className="flex gap-2">
-                      <input type="number" min="0.01" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="Amount (USDG)"
-                        className="flex-1 rounded-lg px-3 py-2 text-white text-sm outline-none"
+                      <input type="number" min="0.01" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="Amount in USDG"
+                        className="flex-1 rounded-xl px-3 py-2 text-white text-sm outline-none"
                         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}
                         onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
                         onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")} />
                       <button onClick={() => handleFund(agent.id)} disabled={submitting || !fundAmount}
-                        className="text-sm font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                        className="text-sm font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
                         style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "…" : "Fund"}
                       </button>
-                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
+                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-xl" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
-                    {actionError && (
-                      <p className="mt-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>
-                    )}
+                    {actionError && <p className="mt-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>}
                   </div>
                 )}
 
+                {/* Pay panel */}
                 {selectedAgent?.id === agent.id && action === "pay" && (
                   <div className="px-5 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-                    <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>Execute Agent Payment</p>
+                    <p className="text-[10px] uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Execute Agent Payment</p>
                     <div className="grid grid-cols-2 gap-2 mb-2">
                       {[
                         { key: "recipientName", placeholder: "Recipient name" },
@@ -356,36 +424,39 @@ export default function Agents() {
                         { key: "amountUsdg", placeholder: "Amount (USDG)", type: "number" },
                         { key: "purpose", placeholder: "Purpose / memo" },
                       ].map(({ key, placeholder, type }) => (
-                        <input key={key} type={type ?? "text"} value={(payForm as any)[key]}
+                        <input key={key} type={type ?? "text"} value={(payForm as Record<string, string>)[key]}
                           onChange={(e) => setPayForm((f) => ({ ...f, [key]: e.target.value }))} placeholder={placeholder}
-                          className="rounded-lg px-3 py-2 text-white text-sm outline-none"
+                          className="rounded-xl px-3 py-2 text-white text-sm outline-none"
                           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.10)" }}
                           onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
                           onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")} />
                       ))}
                     </div>
-                    {actionError && (
-                      <p className="mb-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>
-                    )}
+                    {actionError && <p className="mb-2 text-xs rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.20)", color: "#f87171" }}>{actionError}</p>}
                     <div className="flex gap-2">
                       <button onClick={() => handlePay(agent.id)} disabled={submitting || !payForm.recipientName || !payForm.amountUsdg || !payForm.purpose}
-                        className="flex-1 text-sm font-bold py-2 rounded-lg transition-all disabled:opacity-50"
+                        className="flex-1 text-sm font-bold py-2 rounded-xl transition-all disabled:opacity-50"
                         style={{ background: ACCENT, color: "#000" }}>
                         {submitting ? "Sending…" : "Execute Payment"}
                       </button>
-                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-lg" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
+                      <button onClick={() => { setAction(null); setActionError(null); }} className="px-3 py-2 text-sm rounded-xl" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)" }}>✕</button>
                     </div>
                   </div>
                 )}
 
+                {/* Tx history */}
                 {isSelected && txs[agent.id] && (
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div className="px-5 py-2.5 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                      <Activity className="w-3 h-3" style={{ color: "rgba(255,255,255,0.3)" }} />
+                      <p className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.3)" }}>Transaction Log</p>
+                    </div>
                     <div className="max-h-56 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                       {txs[agent.id].length === 0 ? (
-                        <p className="px-5 py-4 text-xs text-center" style={{ color: "rgba(255,255,255,0.35)" }}>No transactions yet</p>
+                        <p className="px-5 py-6 text-xs text-center" style={{ color: "rgba(255,255,255,0.35)" }}>No transactions yet — fund or pay to start</p>
                       ) : txs[agent.id].map((tx) => (
                         <div key={tx.id} className="flex items-center gap-3 px-5 py-3">
-                          <div className="p-1.5 rounded-lg" style={{ background: tx.type === "fund" ? "rgba(74,222,128,0.10)" : `${ACCENT}10` }}>
+                          <div className="p-1.5 rounded-lg shrink-0" style={{ background: tx.type === "fund" ? "rgba(74,222,128,0.10)" : `${ACCENT}10` }}>
                             {tx.type === "fund"
                               ? <ArrowDownLeft className="w-3 h-3" style={{ color: "#4ade80" }} />
                               : <ArrowUpRight className="w-3 h-3" style={{ color: ACCENT }} />}
@@ -396,17 +467,22 @@ export default function Agents() {
                             {tx.dodoCheckoutUrl && (
                               <a href={tx.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
                                 className="text-[10px] font-mono underline underline-offset-2 mt-0.5 inline-block"
-                                style={{ color: "#fb923c" }}>
+                                style={{ color: ACCENT }}>
                                 Pay via Dodo ↗
                               </a>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <p className="text-xs font-mono font-semibold" style={{ color: tx.type === "fund" ? "#4ade80" : ACCENT }}>
-                              {tx.type === "fund" ? "+" : "-"}${parseFloat(tx.amountUsdg).toFixed(4)}
+                              {tx.type === "fund" ? "+" : "-"}${parseFloat(tx.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </p>
-                            {tx.settlementMs && <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.28)" }}>{tx.settlementMs.toFixed(0)}ms</p>}
+                            {tx.settlementMs && <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{tx.settlementMs}ms</p>}
                           </div>
+                          {tx.solanaSignature && (
+                            <button onClick={() => navigator.clipboard.writeText(tx.solanaSignature ?? "")} className="transition-colors hover:text-white/60 shrink-0" style={{ color: "rgba(255,255,255,0.15)" }}>
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
