@@ -167,7 +167,7 @@ export default function Creator() {
           {showForm && (
             <div className="rounded-2xl p-5 mb-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
               <div className="flex justify-between mb-4">
-                <div><p className="text-[13px] font-bold text-white">List New Product</p><p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>Get a shareable checkout link instantly via Dodo</p></div>
+                <div><p className="text-[13px] font-bold text-white">List New Product</p><p className="text-[12px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>Get a shareable checkout link instantly via Dodo</p></div>
                 <button onClick={() => setShowForm(false)} style={{ color: "rgba(255,255,255,0.25)" }}><X className="w-4 h-4" /></button>
               </div>
               <form onSubmit={handleCreateProduct} className="grid grid-cols-4 gap-3">
@@ -221,7 +221,7 @@ export default function Creator() {
                 <div className="rounded-2xl py-16 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
                   <Sparkles className="w-10 h-10 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.12)" }} />
                   <p className="text-[15px] font-semibold text-white mb-1">List your first product</p>
-                  <p className="text-sm max-w-sm mx-auto" style={{ color: "rgba(255,255,255,0.38)" }}>Click "List" above — get a Dodo checkout link and a shareable /buy/:id URL instantly. Anyone can purchase, no account needed.</p>
+                  <p className="text-sm max-w-sm mx-auto font-medium" style={{ color: "rgba(255,255,255,0.62)" }}>Click "List" above — get a Dodo checkout link and a shareable /buy/:id URL instantly. Anyone can purchase, no account needed.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -247,10 +247,10 @@ export default function Creator() {
                         {/* Body */}
                         <div className="p-4 flex-1 flex flex-col">
                           <h3 className="text-white font-semibold text-[14px] leading-snug mb-0.5">{p.title}</h3>
-                          <p className="text-[11px] mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>by {p.creatorName}</p>
-                          <p className="text-[12px] mb-3 flex-1 line-clamp-2" style={{ color: "rgba(255,255,255,0.48)" }}>{p.description}</p>
+                          <p className="text-[12px] mb-1 font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>by {p.creatorName}</p>
+                          <p className="text-[13px] mb-3 flex-1 line-clamp-2 font-medium" style={{ color: "rgba(255,255,255,0.72)" }}>{p.description}</p>
                           <div className="flex items-center justify-between mb-3">
-                            <span className="flex items-center gap-1 text-[11px]" style={{ color: "rgba(255,255,255,0.38)" }}>
+                            <span className="flex items-center gap-1 text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.60)" }}>
                               <TrendingUp className="w-3 h-3" /> {p.salesCount} sold · ${parseFloat(p.totalRevenue).toFixed(2)} earned
                             </span>
                             <button onClick={() => setShareProduct(p)} className="text-[11px] flex items-center gap-1" style={{ color: ACCENT }}>
