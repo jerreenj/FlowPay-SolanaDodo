@@ -176,6 +176,21 @@ Infrastructure for the autonomous economy. Each AI agent gets its own Solana wal
 
 ---
 
+## 🏆 Judging Criteria
+
+| Criterion | FlowPay |
+|-----------|---------|
+| **Dodo Payments integration** | ✅ Real SDK calls — products, checkout sessions, webhooks, refunds, subscriptions, customer accounts |
+| **Real working product** | ✅ Five fully functional modules, end-to-end |
+| **India-specific** | ✅ UPI delivery, INR conversion, six cross-border corridors |
+| **Solana-native** | ✅ Every payment produces a Solana transaction signature |
+| **AI-ready** | ✅ AgentBank + x402 for fully autonomous agent payments |
+| **Revenue model** | ✅ Fee-based, earns from the first transaction |
+| **Full-stack** | ✅ Backend, frontend, database, OpenAPI spec, codegen |
+| **USDG stablecoin** | ✅ USDG is the base currency across all five modules |
+
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -262,21 +277,6 @@ pnpm --filter @workspace/db run push
 | EscrowX | 0.5% | $5,000/mo |
 | CreatorPay | 2% | $20,000/mo |
 | AgentBank | 1% | $10,000/mo |
-
----
-
-## 🏆 Judging Criteria
-
-| Criterion | FlowPay |
-|-----------|---------|
-| **Dodo Payments integration** | ✅ Real SDK calls — products, checkout sessions, webhooks, refunds, subscriptions, customer accounts |
-| **Real working product** | ✅ Five fully functional modules, end-to-end |
-| **India-specific** | ✅ UPI delivery, INR conversion, six cross-border corridors |
-| **Solana-native** | ✅ Every payment produces a Solana transaction signature |
-| **AI-ready** | ✅ AgentBank + x402 for fully autonomous agent payments |
-| **Revenue model** | ✅ Fee-based, earns from the first transaction |
-| **Full-stack** | ✅ Backend, frontend, database, OpenAPI spec, codegen |
-| **USDG stablecoin** | ✅ USDG is the base currency across all five modules |
 
 ---
 
