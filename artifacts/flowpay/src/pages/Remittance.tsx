@@ -2,9 +2,19 @@ import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
-import { ArrowRightLeft, Plus, CheckCircle, Copy, Globe, X } from "lucide-react";
+import { ArrowRightLeft, CheckCircle, Copy, Globe, ExternalLink, Zap, TrendingDown, Clock, ArrowRight } from "lucide-react";
 
 const ACCENT = "#38bdf8";
+
+const CORRIDORS = [
+  { country: "UAE", flag: "🇦🇪", rate: 83.52, currency: "AED", aed: 3.67, code: "UAE" },
+  { country: "United States", flag: "🇺🇸", rate: 83.52, currency: "USD", code: "US" },
+  { country: "United Kingdom", flag: "🇬🇧", rate: 83.52, currency: "GBP", gbp: 0.79, code: "UK" },
+];
+
+const countryFlags: Record<string, string> = {
+  US: "🇺🇸", UAE: "🇦🇪", UK: "🇬🇧", SG: "🇸🇬", CA: "🇨🇦", AU: "🇦🇺", IN: "🇮🇳",
+};
 
 interface Remittance {
   id: number;
@@ -31,10 +41,6 @@ interface Stats {
   corridors: { country: string; count: number; volume: string }[];
 }
 
-const countryFlags: Record<string, string> = {
-  US: "🇺🇸", UAE: "🇦🇪", UK: "🇬🇧", SG: "🇸🇬", CA: "🇨🇦", AU: "🇦🇺", IN: "🇮🇳",
-};
-
 function StatusPill({ status }: { status: string }) {
   const s = status.toLowerCase();
   const style =
@@ -55,10 +61,15 @@ export default function Remittance() {
   const user = useAuthStore((s) => s.user);
   const [remittances, setRemittances] = useState<Remittance[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({ senderName: user?.name ?? "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
+  const [form, setForm] = useState({
+    senderName: user?.name ?? "",
+    senderCountry: "UAE",
+    recipientName: "",
+    recipientUpiId: "",
+    amountUsdg: "",
+  });
   const [success, setSuccess] = useState<Remittance | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -72,7 +83,7 @@ export default function Remittance() {
       ]);
       setRemittances(r);
       setStats(s);
-    } catch { }
+    } catch {}
     finally { setLoading(false); }
   }
 
@@ -89,220 +100,293 @@ export default function Remittance() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to send remittance");
+      if (!res.ok) throw new Error(data.error ?? "Failed to send");
       setSuccess(data);
-      setShowForm(false);
       setForm({ senderName: user?.name ?? "", senderCountry: "UAE", recipientName: "", recipientUpiId: "", amountUsdg: "" });
       await load();
     } catch (e) {
       setFormError(e instanceof Error ? e.message : "Something went wrong");
-    }
-    finally { setSubmitting(false); }
+    } finally { setSubmitting(false); }
   }
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const inrPreview = form.amountUsdg ? (parseFloat(form.amountUsdg) * 83.52).toLocaleString("en-IN", { maximumFractionDigits: 0 }) : null;
+  const feePreview = form.amountUsdg ? (parseFloat(form.amountUsdg) * 0.0075).toFixed(2) : null;
+  const selectedFlag = countryFlags[form.senderCountry] ?? "🌍";
 
   return (
     <AppLayout>
+      {/* Header */}
       <div className="relative overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 65% 140% at 0% 0%, ${ACCENT}10 0%, transparent 70%)` }} />
-        <div className="relative z-10 flex items-start justify-between px-8 pt-8 pb-7 min-w-0 gap-6">
-          <div className="flex items-start gap-4 min-w-0">
+        <div className="relative z-10 px-8 pt-8 pb-4">
+          <div className="flex items-start gap-4 mb-5">
             <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${ACCENT}15`, border: `1px solid ${ACCENT}28`, boxShadow: `0 0 20px ${ACCENT}18` }}>
               <ArrowRightLeft className="w-5 h-5" style={{ color: ACCENT }} />
             </div>
-            <div className="min-w-0 max-w-[54rem]">
-              <div className="flex flex-wrap items-center gap-2.5 mb-2">
+            <div>
+              <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
                 <h1 className="text-[clamp(1.35rem,2.5vw,2rem)] font-bold text-white tracking-tight">RemitDirect</h1>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}28` }}>0.75% fee</span>
               </div>
-              <p className="text-[13px] sm:text-sm leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.56)" }}>Cross-border remittances to India — Dubai→Mumbai in 2 seconds</p>
+              <p className="text-[13px] sm:text-sm" style={{ color: "rgba(255,255,255,0.56)" }}>
+                Cross-border remittances to India — Dubai → Mumbai in under 3 seconds
+              </p>
             </div>
           </div>
-          <button
-            onClick={() => { setShowForm(true); setSuccess(null); setFormError(null); }}
-            className="flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all shrink-0"
-            style={{ background: ACCENT, color: "#000" }}
-          >
-            <Plus className="w-4 h-4" /> Send Money
-          </button>
+
+          {/* Live rate strip */}
+          <div className="rounded-2xl overflow-hidden mb-5" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${ACCENT}20` }}>
+            <div className="grid grid-cols-3 divide-x" style={{ borderColor: `${ACCENT}15` }}>
+              {CORRIDORS.map((c) => (
+                <div key={c.code} className="px-4 py-3 text-center">
+                  <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "rgba(255,255,255,0.35)" }}>{c.flag} {c.country} → 🇮🇳 India</p>
+                  <p className="text-[15px] font-bold font-mono text-white">₹83.52 <span className="text-xs font-normal" style={{ color: "rgba(255,255,255,0.4)" }}>/ USDG</span></p>
+                  <p className="text-[10px] mt-0.5 font-mono" style={{ color: ACCENT }}>⚡ &lt;3s settlement</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* vs-banks callout */}
+          <div className="grid grid-cols-3 gap-3 pb-7">
+            {[
+              { method: "SWIFT / Wire", time: "3–5 days", fee: "3–7%", bad: true },
+              { method: "Hawala / Cash", time: "1–2 days", fee: "2–4%", bad: true },
+              { method: "FlowPay + Solana", time: "<3 seconds", fee: "0.75%", bad: false },
+            ].map(({ method, time, fee, bad }) => (
+              <div key={method} className="rounded-xl px-4 py-3 relative" style={{ background: bad ? "rgba(255,255,255,0.02)" : `${ACCENT}08`, border: `1px solid ${bad ? "rgba(255,255,255,0.07)" : `${ACCENT}25`}` }}>
+                {!bad && <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: ACCENT, boxShadow: `0 0 6px ${ACCENT}` }} />}
+                <p className="text-[11px] font-semibold mb-1.5" style={{ color: bad ? "rgba(255,255,255,0.45)" : "white" }}>{method}</p>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Time</p>
+                    <p className="text-[13px] font-mono font-bold" style={{ color: bad ? "#f87171" : ACCENT }}>{time}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>Fee</p>
+                    <p className="text-[13px] font-mono font-bold" style={{ color: bad ? "#f87171" : ACCENT }}>{fee}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="p-8">
         {stats && (
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-8">
             {[
-              { label: "Remittances", value: stats.totalRemittances.toString(), colored: true },
-              { label: "Volume (USDG)", value: `$${parseFloat(stats.totalVolume).toLocaleString(undefined, { maximumFractionDigits: 0 })}`, colored: false },
-              { label: "Fees Earned", value: `$${parseFloat(stats.totalFees).toFixed(2)}`, colored: false },
-              { label: "Avg Settlement", value: `${stats.avgSettlementSeconds}s`, colored: false },
-            ].map(({ label, value, colored }) => (
-              <div key={label} className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-[11px] uppercase tracking-widest mb-2.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
-                <p className="text-2xl font-bold font-mono tracking-tight" style={{ color: colored ? ACCENT : "white" }}>{value}</p>
+              { label: "Remittances", value: stats.totalRemittances.toString(), accent: true },
+              { label: "Volume (USDG)", value: `$${parseFloat(stats.totalVolume || "0").toLocaleString(undefined, { maximumFractionDigits: 0 })}`, accent: false },
+              { label: "Fees Collected", value: `$${parseFloat(stats.totalFees || "0").toFixed(2)}`, accent: false },
+              { label: "Avg Settlement", value: stats.avgSettlementSeconds ? `${stats.avgSettlementSeconds}s` : "<3s", accent: false },
+            ].map(({ label, value, accent }) => (
+              <div key={label} className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-[clamp(1.3rem,2vw,1.65rem)] font-bold font-mono leading-none" style={{ color: accent ? ACCENT : "white" }}>{value}</p>
               </div>
             ))}
           </div>
         )}
 
-        {stats?.corridors && stats.corridors.length > 0 && (
-          <div className="rounded-2xl p-5 mb-6" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-            <p className="text-[11px] uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Active Corridors → India</p>
-            <div className="flex flex-wrap gap-2">
-              {stats.corridors.map((c) => (
-                <div key={c.country} className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}18` }}>
-                  <span>{countryFlags[c.country] ?? <Globe className="w-3 h-3" />}</span>
-                  <span className="text-xs text-white font-medium">{c.country}</span>
-                  <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.35)" }}>{c.count} tx</span>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Left — history */}
+          <div className="lg:col-span-3 space-y-5">
+            {success && (
+              <div className="rounded-2xl p-5" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}25` }}>
+                <div className="flex items-start gap-3 mb-4">
+                  <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: ACCENT }} />
+                  <div className="flex-1">
+                    <p className="text-white font-semibold">Remittance settled in {success.settlementSeconds}s</p>
+                    <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      {success.senderName} ({countryFlags[success.senderCountry]} {success.senderCountry}) → {success.recipientName} · ₹{parseFloat(success.amountInr).toLocaleString("en-IN")} to {success.recipientUpiId}
+                    </p>
+                  </div>
+                  <button onClick={() => setSuccess(null)} className="text-white/20 hover:text-white/50 transition-colors text-xs">✕</button>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="rounded-2xl p-5 mb-6 flex items-start gap-4" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}25` }}>
-            <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: ACCENT }} />
-            <div className="flex-1">
-              <p className="text-white font-semibold mb-1">Remittance sent in {success.settlementSeconds}s</p>
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
-                {success.senderName} ({success.senderCountry}) → {success.recipientName} · ₹{parseFloat(success.amountInr).toLocaleString()} to {success.recipientUpiId}
-              </p>
-              {success.dodoPaymentId && (
-                <p className="text-[11px] font-mono mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  Dodo: {success.dodoPaymentId.startsWith("dodo_") ? "mock" : success.dodoPaymentId.slice(0, 16) + "…"}
-                </p>
-              )}
-              {success.dodoCheckoutUrl && (
-                <a href={success.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium mt-1 underline underline-offset-2"
-                  style={{ color: ACCENT }}>
-                  Complete payment via Dodo ↗
-                </a>
-              )}
-            </div>
-            <button onClick={() => setSuccess(null)} className="text-white/20 hover:text-white/50 transition-colors"><X className="w-4 h-4" /></button>
-          </div>
-        )}
-
-        {showForm && (
-          <div className="rounded-2xl p-6 mb-6" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.09)" }}>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-sm font-semibold text-white">Send Remittance</h2>
-              <button onClick={() => setShowForm(false)} className="text-white/25 hover:text-white/60 transition-colors"><X className="w-4 h-4" /></button>
-            </div>
-            <form onSubmit={handleSend} className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Sender Name</label>
-                <input value={form.senderName} onChange={(e) => set("senderName", e.target.value)} required placeholder="Mohammed Al-Rashid"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
-                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
-              </div>
-              <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Sending From</label>
-                <select value={form.senderCountry} onChange={(e) => set("senderCountry", e.target.value)}
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
-                  <option value="UAE">🇦🇪 UAE</option>
-                  <option value="US">🇺🇸 United States</option>
-                  <option value="UK">🇬🇧 United Kingdom</option>
-                  <option value="SG">🇸🇬 Singapore</option>
-                  <option value="CA">🇨🇦 Canada</option>
-                  <option value="AU">🇦🇺 Australia</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Recipient Name</label>
-                <input value={form.recipientName} onChange={(e) => set("recipientName", e.target.value)} required placeholder="Priya Sharma"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
-                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
-              </div>
-              <div>
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Recipient UPI ID</label>
-                <input value={form.recipientUpiId} onChange={(e) => set("recipientUpiId", e.target.value)} required placeholder="priya@okaxis"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
-                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
-              </div>
-              <div className="col-span-2">
-                <label className="text-[11px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Amount (USDG)</label>
-                <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="500.00"
-                  className="w-full mt-1.5 rounded-lg px-3 py-2.5 text-white text-sm outline-none transition-all"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
-                  onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
-                {form.amountUsdg && (
-                  <p className="text-xs mt-1.5" style={{ color: "rgba(255,255,255,0.35)" }}>
-                    Recipient gets ≈ ₹{(parseFloat(form.amountUsdg || "0") * 83.5).toLocaleString()} · Fee: ${(parseFloat(form.amountUsdg || "0") * 0.0075).toFixed(4)} USDG
-                  </p>
+                <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-2" style={{ background: "rgba(0,0,0,0.3)" }}>
+                  {[`${selectedFlag} Sender`, "⚡ Solana", "🇮🇳 UPI"].map((node, i, arr) => (
+                    <div key={i} className="flex items-center gap-2 flex-1">
+                      <div className="flex-1 text-center">
+                        <p className="text-[11px] font-mono font-semibold" style={{ color: ACCENT }}>{node}</p>
+                      </div>
+                      {i < arr.length - 1 && <ArrowRight className="w-3 h-3 shrink-0" style={{ color: `${ACCENT}60` }} />}
+                    </div>
+                  ))}
+                </div>
+                {success.dodoCheckoutUrl && (
+                  <a href={success.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium mt-3 underline underline-offset-2"
+                    style={{ color: ACCENT }}>
+                    Complete payment via Dodo ↗
+                  </a>
                 )}
               </div>
-              {formError && (
-                <div className="col-span-2 rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(248,113,113,0.10)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
-                  {formError}
+            )}
+
+            {stats?.corridors && stats.corridors.length > 0 && (
+              <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] uppercase tracking-widest mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>Active Corridors → India</p>
+                <div className="flex flex-wrap gap-2">
+                  {stats.corridors.map((c) => (
+                    <div key={c.country} className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: `${ACCENT}08`, border: `1px solid ${ACCENT}18` }}>
+                      <span>{countryFlags[c.country] ?? <Globe className="w-3 h-3" />}</span>
+                      <span className="text-xs text-white font-medium">{c.country}</span>
+                      <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.4)" }}>{c.count} tx · ${parseFloat(c.volume).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
+                <h2 className="text-[13px] font-semibold text-white">Transfer History</h2>
+                {remittances.length > 0 && (
+                  <span className="flex items-center gap-1 text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>
+                    <Clock className="w-3 h-3" /> {remittances.length} transfers
+                  </span>
+                )}
+              </div>
+              {loading ? (
+                <div>{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse" style={{ background: "rgba(255,255,255,0.02)" }} />)}</div>
+              ) : remittances.length === 0 ? (
+                <div className="py-16 text-center px-6">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${ACCENT}10`, border: `1px solid ${ACCENT}20` }}>
+                    <ArrowRightLeft className="w-5 h-5" style={{ color: `${ACCENT}80` }} />
+                  </div>
+                  <p className="text-sm font-medium text-white mb-1">No transfers yet</p>
+                  <p className="text-[13px]" style={{ color: "rgba(255,255,255,0.35)" }}>Use the form to send your first cross-border remittance — settles in under 3 seconds.</p>
+                </div>
+              ) : (
+                <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                  {remittances.map((r) => (
+                    <div key={r.id} className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-white/[0.02]">
+                      <div className="text-2xl shrink-0">{countryFlags[r.senderCountry] ?? "🌍"}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] text-white font-medium">{r.senderName} → {r.recipientName}</p>
+                        <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>
+                          {r.senderCountry} → IN · {r.recipientUpiId}{r.settlementSeconds ? ` · ${r.settlementSeconds}s` : ""}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[13px] font-mono font-semibold text-white">${parseFloat(r.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                        <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>₹{parseFloat(r.amountInr).toLocaleString("en-IN")}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StatusPill status={r.status} />
+                        {r.dodoCheckoutUrl && (
+                          <a href={r.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" style={{ color: ACCENT }} title="Pay via Dodo">
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                        {r.solanaSignature && (
+                          <button onClick={() => navigator.clipboard.writeText(r.solanaSignature ?? "")} className="transition-colors hover:text-white/50" style={{ color: "rgba(255,255,255,0.18)" }}>
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              <div className="col-span-2 flex gap-3 pt-1">
-                <button type="submit" disabled={submitting}
-                  className="flex-1 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-50"
-                  style={{ background: ACCENT, color: "#000" }}>
-                  {submitting ? "Processing on Solana…" : "Send Remittance"}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)}
-                  className="px-5 text-sm rounded-xl transition-all"
-                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)" }}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}>
-            <h2 className="text-[13px] font-semibold text-white">Recent Remittances</h2>
-            {remittances.length > 0 && <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.3)" }}>{remittances.length} total</span>}
-          </div>
-          {loading ? (
-            <div>{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse" style={{ background: "rgba(255,255,255,0.02)" }} />)}</div>
-          ) : remittances.length === 0 ? (
-            <div className="px-6 py-12 text-center text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No remittances yet</div>
-          ) : (
-            <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-              {remittances.map((r) => (
-                <div key={r.id} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/[0.02]">
-                  <div className="text-2xl shrink-0">{countryFlags[r.senderCountry] ?? "🌍"}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white font-medium">{r.senderName} → {r.recipientName}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{r.senderCountry} → IN · {r.recipientUpiId} · {new Date(r.createdAt).toLocaleString()}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-mono font-semibold text-white">${parseFloat(r.amountUsdg).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>₹{parseFloat(r.amountInr).toLocaleString()} · {r.settlementSeconds}s</p>
-                    {r.dodoPaymentId && (
-                      <p className="text-[10px] font-mono mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>
-                        {r.dodoPaymentId.startsWith("dodo_") ? "mock" : `Dodo: ${r.dodoPaymentId.slice(0, 10)}…`}
-                      </p>
-                    )}
-                    {r.dodoCheckoutUrl && (
-                      <a href={r.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-[10px] underline underline-offset-2 mt-0.5 inline-block"
-                        style={{ color: ACCENT }}>
-                        Pay via Dodo ↗
-                      </a>
-                    )}
-                  </div>
-                  <StatusPill status={r.status} />
-                </div>
-              ))}
             </div>
-          )}
+          </div>
+
+          {/* Right — form */}
+          <div className="lg:col-span-2">
+            <div className="rounded-2xl sticky top-6" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-[13px] font-semibold text-white">Send Remittance</p>
+                <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>USDG → Solana → INR to UPI</p>
+              </div>
+              <form onSubmit={handleSend} className="p-5 space-y-3.5">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Your Name</label>
+                  <input value={form.senderName} onChange={(e) => set("senderName", e.target.value)} required placeholder="Full name"
+                    className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Sending From</label>
+                  <select value={form.senderCountry} onChange={(e) => set("senderCountry", e.target.value)}
+                    className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+                    <option value="UAE">🇦🇪 UAE</option>
+                    <option value="US">🇺🇸 United States</option>
+                    <option value="UK">🇬🇧 United Kingdom</option>
+                    <option value="SG">🇸🇬 Singapore</option>
+                    <option value="CA">🇨🇦 Canada</option>
+                    <option value="AU">🇦🇺 Australia</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Recipient Name</label>
+                  <input value={form.recipientName} onChange={(e) => set("recipientName", e.target.value)} required placeholder="Full name in India"
+                    className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Recipient UPI ID</label>
+                  <input value={form.recipientUpiId} onChange={(e) => set("recipientUpiId", e.target.value)} required placeholder="handle@bank"
+                    className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)" }}>Amount (USDG)</label>
+                  <input type="number" min="0.01" step="0.01" value={form.amountUsdg} onChange={(e) => set("amountUsdg", e.target.value)} required placeholder="0.00"
+                    className="w-full mt-1 rounded-xl px-3 py-2.5 text-white text-sm outline-none transition-all font-mono"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}
+                    onFocus={(e) => (e.target.style.borderColor = `${ACCENT}50`)}
+                    onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.09)")} />
+                  {inrPreview && (
+                    <div className="flex items-center justify-between mt-1.5 px-1">
+                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>Recipient gets ≈ ₹{inrPreview}</span>
+                      <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Fee: ${feePreview}</span>
+                    </div>
+                  )}
+                </div>
+
+                {formError && (
+                  <div className="rounded-xl px-3 py-2.5 text-sm" style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", color: "#f87171" }}>
+                    {formError}
+                  </div>
+                )}
+
+                <button type="submit" disabled={submitting}
+                  className="w-full flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-60"
+                  style={{ background: ACCENT, color: "#000" }}>
+                  <Zap className="w-4 h-4" />
+                  {submitting ? "Settling on Solana…" : "Send Remittance"}
+                </button>
+
+                <div className="rounded-xl p-3 space-y-1.5" style={{ background: "rgba(255,255,255,0.02)" }}>
+                  {[
+                    `${selectedFlag} → USDG locked on Solana`,
+                    "Dodo processes the fiat conversion",
+                    "🇮🇳 INR delivered to UPI in <3s",
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold" style={{ background: `${ACCENT}20`, color: ACCENT }}>{i + 1}</div>
+                      <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </AppLayout>
