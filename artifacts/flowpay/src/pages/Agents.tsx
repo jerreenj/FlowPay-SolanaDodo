@@ -128,9 +128,9 @@ export default function Agents() {
             <div className="flex items-center gap-2">
               <h1 className="text-[15px] font-bold text-white">AgentBank</h1>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>1% fee</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.09)" }}>x402</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.09)" }}>x402</span>
             </div>
-            <p className="text-[11px] leading-tight" style={{ color: "rgba(255,255,255,0.45)" }}>AI agent wallets on Solana · machine-to-machine payments</p>
+            <p className="text-[11px] leading-tight font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>AI agent wallets on Solana · machine-to-machine payments</p>
           </div>
           <div className="ml-auto flex items-center gap-4">
             {[
@@ -141,7 +141,7 @@ export default function Agents() {
             ].map(({ label, value }) => (
               <div key={label} className="text-center">
                 <p className="text-[14px] font-bold font-mono text-white leading-none">{value}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
+                <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.52)" }}>{label}</p>
               </div>
             ))}
             <button onClick={() => { setShowForm(true); setFormError(null); }} className="flex items-center gap-1.5 text-[12px] font-bold px-3 py-2 rounded-xl ml-2" style={{ background: ACCENT, color: "#000" }}>
@@ -170,11 +170,11 @@ export default function Agents() {
                         <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>→</span>
                         <code className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: `${step.resColor}10`, color: step.resColor, border: `1px solid ${step.resColor}25` }}>{step.res}</code>
                       </div>
-                      <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{step.note}</p>
+                      <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{step.note}</p>
                     </div>
                   </div>
                 ))}
-                <p className="text-[11px] pt-3 mt-1" style={{ color: "rgba(255,255,255,0.28)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-[12px] font-medium pt-3 mt-1" style={{ color: "rgba(255,255,255,0.62)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   Agents with x402 enabled autonomously pay for API access — no human interaction required. Sub-second via Solana.
                 </p>
               </div>
@@ -189,7 +189,7 @@ export default function Agents() {
                 <div className="rounded-2xl py-12 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                   <Bot className="w-10 h-10 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.12)" }} />
                   <p className="text-[15px] font-semibold text-white mb-1">No agents deployed</p>
-                  <p className="text-sm max-w-sm mx-auto" style={{ color: "rgba(255,255,255,0.38)" }}>Deploy an AI agent using the form → — it gets a Solana wallet and can autonomously pay for APIs via x402.</p>
+                  <p className="text-sm max-w-sm mx-auto font-medium" style={{ color: "rgba(255,255,255,0.60)" }}>Deploy an AI agent using the form → — it gets a Solana wallet and can autonomously pay for APIs via x402.</p>
                 </div>
               ) : agents.map((agent) => {
                 const isActive = agent.isActive === "true";
@@ -214,7 +214,7 @@ export default function Agents() {
                                 {isActive ? "● active" : "inactive"}
                               </span>
                             </div>
-                            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.38)" }}>Owner: {agent.ownerName}</p>
+                            <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>Owner: {agent.ownerName}</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -365,7 +365,7 @@ export default function Agents() {
                     </div>
                     <div>
                       <p className="text-[12px] text-white">Enable x402 Protocol</p>
-                      <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>Autonomous API micro-payments</p>
+                      <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>Autonomous API micro-payments</p>
                     </div>
                   </label>
                   {formError && <div className="rounded-xl px-3 py-2 text-[12px]" style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.22)", color: "#f87171" }}>{formError}</div>}
@@ -378,7 +378,7 @@ export default function Agents() {
               <>
                 <div>
                   <p className="text-[13px] font-bold text-white mb-0.5">AgentBank</p>
-                  <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>Deploy AI agents with autonomous payment capabilities</p>
+                  <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>Deploy AI agents with autonomous payment capabilities</p>
                 </div>
                 <button onClick={() => setShowForm(true)} className="w-full flex items-center justify-center gap-2 text-[13px] font-bold py-2.5 rounded-xl" style={{ background: ACCENT, color: "#000" }}>
                   <Plus className="w-4 h-4" /> Deploy New Agent
@@ -396,7 +396,7 @@ export default function Agents() {
                       <span className="text-lg shrink-0">{icon}</span>
                       <div>
                         <p className="text-[12px] font-semibold text-white">{title}</p>
-                        <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.38)" }}>{desc}</p>
+                        <p className="text-[12px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{desc}</p>
                       </div>
                     </div>
                   ))}
@@ -408,7 +408,7 @@ export default function Agents() {
                   ].map(({ name, desc, color }) => (
                     <div key={name} className="rounded-xl px-3 py-2 text-center" style={{ background: `${color}08`, border: `1px solid ${color}18` }}>
                       <p className="text-[11px] font-semibold" style={{ color }}>{name}</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{desc}</p>
+                      <p className="text-[11px] mt-0.5 font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>{desc}</p>
                     </div>
                   ))}
                 </div>
