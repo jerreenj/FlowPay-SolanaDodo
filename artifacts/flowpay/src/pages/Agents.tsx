@@ -130,7 +130,7 @@ export default function Agents() {
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: `${ACCENT}15`, color: ACCENT, border: `1px solid ${ACCENT}25` }}>1% fee</span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.09)" }}>x402</span>
             </div>
-            <p className="text-[11px] leading-tight font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>AI agent wallets on Solana · machine-to-machine payments</p>
+            <p className="text-[13px] leading-tight font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>AI agent wallets on Solana · machine-to-machine payments</p>
           </div>
           <div className="ml-auto flex items-center gap-4">
             {[
@@ -158,7 +158,7 @@ export default function Agents() {
             <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${ACCENT}22` }}>
               <div className="flex items-center gap-2.5 px-5 py-3" style={{ borderBottom: `1px solid ${ACCENT}18`, background: `${ACCENT}06` }}>
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: ACCENT, boxShadow: `0 0 6px ${ACCENT}` }} />
-                <p className="text-[11px] font-semibold" style={{ color: ACCENT }}>x402 Protocol — How Agents Pay APIs Autonomously</p>
+                <p className="text-[13px] font-semibold" style={{ color: ACCENT }}>x402 Protocol — How Agents Pay APIs Autonomously</p>
               </div>
               <div className="p-5 space-y-3">
                 {X402_FLOW.map((step, i) => (
@@ -166,9 +166,9 @@ export default function Agents() {
                     <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5" style={{ background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}30` }}>{i + 1}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <code className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.07)", color: step.reqColor }}>{step.req}</code>
-                        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>→</span>
-                        <code className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ background: `${step.resColor}10`, color: step.resColor, border: `1px solid ${step.resColor}25` }}>{step.res}</code>
+                        <code className="text-[13px] font-mono px-2 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.07)", color: step.reqColor }}>{step.req}</code>
+                        <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.45)" }}>→</span>
+                        <code className="text-[13px] font-mono px-2 py-0.5 rounded" style={{ background: `${step.resColor}10`, color: step.resColor, border: `1px solid ${step.resColor}25` }}>{step.res}</code>
                       </div>
                       <p className="text-[12px] font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{step.note}</p>
                     </div>
@@ -182,7 +182,7 @@ export default function Agents() {
 
             {/* Agent cards */}
             <div>
-              <p className="text-[11px] uppercase tracking-widest mb-3 px-1" style={{ color: "rgba(255,255,255,0.3)" }}>Deployed Agents</p>
+              <p className="text-[13px] uppercase tracking-widest mb-3 px-1 font-semibold" style={{ color: "rgba(255,255,255,0.60)" }}>Deployed Agents</p>
               {loading ? (
                 [...Array(2)].map((_, i) => <div key={i} className="h-48 rounded-2xl mb-3 animate-pulse" style={{ background: "rgba(255,255,255,0.03)" }} />)
               ) : agents.length === 0 ? (
@@ -219,11 +219,11 @@ export default function Agents() {
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold font-mono" style={{ color: ACCENT }}>${parseFloat(agent.usdgBalance).toFixed(2)}</p>
-                          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>USDG balance</p>
+                          <p className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>USDG balance</p>
                         </div>
                       </div>
 
-                      <p className="text-[12px] mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>{agent.description}</p>
+                      <p className="text-[14px] mb-3 font-medium" style={{ color: "rgba(255,255,255,0.68)" }}>{agent.description}</p>
 
                       <div className="grid grid-cols-3 gap-2 mb-3">
                         {[
@@ -232,15 +232,15 @@ export default function Agents() {
                           { label: "Txns", value: agent.transactionCount },
                         ].map(({ label, value }) => (
                           <div key={label} className="rounded-lg p-2 text-center" style={{ background: "rgba(255,255,255,0.04)" }}>
-                            <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{label}</p>
-                            <p className="text-[12px] font-mono font-semibold text-white">{value}</p>
+                            <p className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>{label}</p>
+                            <p className="text-[14px] font-mono font-bold text-white">{value}</p>
                           </div>
                         ))}
                       </div>
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-mono" style={{ color: "rgba(255,255,255,0.25)" }}>{agent.walletAddress.slice(0, 8)}…{agent.walletAddress.slice(-6)}</span>
+                          <span className="text-[12px] font-mono" style={{ color: "rgba(255,255,255,0.45)" }}>{agent.walletAddress.slice(0, 8)}…{agent.walletAddress.slice(-6)}</span>
                           <button onClick={() => navigator.clipboard.writeText(agent.walletAddress)} style={{ color: "rgba(255,255,255,0.18)" }}><Copy className="w-3 h-3" /></button>
                         </div>
                         <div className="flex gap-1.5">
@@ -262,7 +262,7 @@ export default function Agents() {
                     {/* Fund panel */}
                     {sel && action === "fund" && (
                       <div className="px-4 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-                        <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Fund Agent Wallet</p>
+                        <p className="text-[12px] uppercase tracking-widest mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>Fund Agent Wallet</p>
                         <div className="flex gap-2">
                           <input type="number" min="0.01" step="0.01" value={fundAmount} onChange={(e) => setFundAmount(e.target.value)} placeholder="Amount in USDG"
                             className="flex-1 rounded-xl px-3 py-2 text-white text-[13px] outline-none font-mono"
@@ -280,7 +280,7 @@ export default function Agents() {
                     {/* Pay panel */}
                     {sel && action === "pay" && (
                       <div className="px-4 py-3" style={{ borderTop: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
-                        <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "rgba(255,255,255,0.3)" }}>Execute Payment</p>
+                        <p className="text-[12px] uppercase tracking-widest mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>Execute Payment</p>
                         <div className="grid grid-cols-2 gap-2 mb-2">
                           {[
                             { k: "recipientName", ph: "Recipient name" },
@@ -309,7 +309,7 @@ export default function Agents() {
                     {/* History panel */}
                     {sel && action === "history" && txs[agent.id] && (
                       <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-                        <p className="px-4 py-2.5 text-[10px] uppercase tracking-widest" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.01)" }}>Transaction Log</p>
+                        <p className="px-4 py-2.5 text-[12px] uppercase tracking-widest font-semibold" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.55)", background: "rgba(255,255,255,0.01)" }}>Transaction Log</p>
                         <div className="max-h-48 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
                           {txs[agent.id].length === 0 ? (
                             <p className="px-4 py-6 text-[12px] text-center" style={{ color: "rgba(255,255,255,0.3)" }}>No transactions yet</p>
@@ -319,15 +319,15 @@ export default function Agents() {
                                 {tx.type === "fund" ? <ArrowDownLeft className="w-3 h-3" style={{ color: "#4ade80" }} /> : <ArrowUpRight className="w-3 h-3" style={{ color: ACCENT }} />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-[12px] text-white">{tx.purpose}</p>
-                                {tx.recipientName && <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>→ {tx.recipientName}</p>}
-                                {tx.dodoCheckoutUrl && <a href={tx.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] underline underline-offset-2" style={{ color: ACCENT }}>Pay via Dodo ↗</a>}
+                                <p className="text-[13px] font-semibold text-white">{tx.purpose}</p>
+                                {tx.recipientName && <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.55)" }}>→ {tx.recipientName}</p>}
+                                {tx.dodoCheckoutUrl && <a href={tx.dodoCheckoutUrl} target="_blank" rel="noopener noreferrer" className="text-[12px] underline underline-offset-2" style={{ color: ACCENT }}>Pay via Dodo ↗</a>}
                               </div>
                               <div className="text-right shrink-0">
                                 <p className="text-[12px] font-mono font-semibold" style={{ color: tx.type === "fund" ? "#4ade80" : ACCENT }}>
                                   {tx.type === "fund" ? "+" : "-"}${parseFloat(tx.amountUsdg).toFixed(2)}
                                 </p>
-                                {tx.settlementMs && <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>{tx.settlementMs}ms</p>}
+                                {tx.settlementMs && <p className="text-[12px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>{tx.settlementMs}ms</p>}
                               </div>
                               {tx.solanaSignature && <button onClick={() => navigator.clipboard.writeText(tx.solanaSignature ?? "")} style={{ color: "rgba(255,255,255,0.15)" }}><Copy className="w-3 h-3" /></button>}
                             </div>
