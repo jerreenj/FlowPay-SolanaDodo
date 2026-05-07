@@ -31,6 +31,7 @@ import type {
   CreatorSale,
   CreatorStats,
   DashboardStats,
+  DodoWebhookBody,
   Escrow,
   ExchangeRates,
   FundAgentBody,
@@ -2201,6 +2202,92 @@ export function useGetCreatorStats<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Dodo Payments webhook handler — updates sale payment status
+ */
+export const getDodoWebhookUrl = () => {
+  return `/api/webhooks/dodo`;
+};
+
+export const dodoWebhook = async (
+  dodoWebhookBody: DodoWebhookBody,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDodoWebhookUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(dodoWebhookBody),
+  });
+};
+
+export const getDodoWebhookMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dodoWebhook>>,
+    TError,
+    { data: BodyType<DodoWebhookBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof dodoWebhook>>,
+  TError,
+  { data: BodyType<DodoWebhookBody> },
+  TContext
+> => {
+  const mutationKey = ["dodoWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof dodoWebhook>>,
+    { data: BodyType<DodoWebhookBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return dodoWebhook(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DodoWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof dodoWebhook>>
+>;
+export type DodoWebhookMutationBody = BodyType<DodoWebhookBody>;
+export type DodoWebhookMutationError = ErrorType<void>;
+
+/**
+ * @summary Dodo Payments webhook handler — updates sale payment status
+ */
+export const useDodoWebhook = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof dodoWebhook>>,
+    TError,
+    { data: BodyType<DodoWebhookBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof dodoWebhook>>,
+  TError,
+  { data: BodyType<DodoWebhookBody> },
+  TContext
+> => {
+  return useMutation(getDodoWebhookMutationOptions(options));
+};
 
 /**
  * @summary List AI payment agents
