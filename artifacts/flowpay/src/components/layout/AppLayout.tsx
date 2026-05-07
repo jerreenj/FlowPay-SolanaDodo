@@ -12,9 +12,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Starfield
           bgColor="rgba(7,7,7,1)"
-          starColor="rgba(255,255,255,0.85)"
-          speed={0.5}
-          quantity={280}
+          starColor="rgba(255,255,255,1)"
+          speed={0.6}
+          quantity={480}
         />
       </div>
 
