@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuthStore } from "@/lib/auth";
 import { apiFetch } from "@/lib/apiFetch";
 import {
-  TrendingUp, Users, Zap, DollarSign, ArrowRightLeft, ShieldCheck, Sparkles, Bot, Activity,
+  TrendingUp, Users, Zap, DollarSign, ArrowRightLeft, ShieldCheck, Sparkles, Bot, Activity, type LucideIcon,
 } from "lucide-react";
 
 const ACCENT = "#00ff88";
@@ -47,7 +47,7 @@ const TYPE_META: Record<string, { color: string; bg: string }> = {
   agent:      { color: "#fb923c", bg: "#fb923c10" },
 };
 
-const TYPE_ICON: Record<string, React.FC<{ className?: string }>> = {
+const TYPE_ICON: Record<string, LucideIcon> = {
   payroll: Users, remittance: ArrowRightLeft, escrow: ShieldCheck, creator: Sparkles, agent: Bot,
 };
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <p className="text-[13px] sm:text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.56)" }}>
-                {user ? `Welcome back, ${user.name.split(" ")[0]} —` : ""} Real-time Solana payment metrics across all 5 modules
+                {user?.name ? `Welcome back, ${user.name.split(" ")[0]} —` : ""} Real-time Solana payment metrics across all 5 modules
               </p>
             </div>
             <div className="shrink-0 hidden md:flex flex-col items-end gap-1">

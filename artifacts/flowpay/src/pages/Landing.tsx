@@ -1,16 +1,16 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/lib/auth";
 import WalletConnect from "@/components/WalletConnect";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.14 + 0.25, duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: i * 0.14 + 0.25, duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 

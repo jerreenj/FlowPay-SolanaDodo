@@ -11,7 +11,12 @@ export const dodo = new DodoPayments({
 
 export const dodoEnabled = Boolean(apiKey);
 
-export const DODO_RETURN_URL_BASE = "https://flowpay.replit.app";
+const rawReturnUrlBase =
+  process.env.APP_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ??
+  "http://localhost:3000";
+
+export const DODO_RETURN_URL_BASE = rawReturnUrlBase.replace(/\/$/, "");
 
 /**
  * Creates a persistent Dodo customer record and returns the customer_id.
