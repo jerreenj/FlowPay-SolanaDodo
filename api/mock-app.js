@@ -9,6 +9,62 @@ const state = globalThis.__flowpayMockState ??= {
   agentTransactions: [],
 };
 
+let dodoClient;
+
+function getDodoClient() {
+  const apiKey = process.env.DODO_API_KEY;
+  if (!apiKey) return null;
+  if (!dodoClient) {
+    const DodoPayments = require("../artifacts/api-server/node_modules/dodopayments");
+    const Dodo = DodoPayments.default || DodoPayments;
+    dodoClient = new Dodo({ bearerToken: apiKey, webhookKey: process.env.DODO_WEBHOOK_KEY, environment: "test_mode" });
+  }
+  return dodoClient;
+}
+
+async function attachDodoCheckout(item, { name, description, customerName, customerEmail, returnPath = "/" }) {
+  const dodo = getDodoClient();
+  if (!dodo) return item;
+
+  try {
+    const amountInCents = Math.max(1, Math.round(money(item.amountUsdg) * 100));
+    const product = await dodo.products.create({
+      name,
+      description,
+      tax_category: "digital_products",
+      price: {
+        currency: "USD",
+        discount: 0,
+        price: amountInCents,
+        purchasing_power_parity: false,
+        type: "one_time_price",
+      },
+      metadata: {
+        source: "flowpay_vercel_fallback",
+        amount_usdg: item.amountUsdg,
+        solana_sig: item.solanaSignature || "",
+      },
+    });
+
+    const session = await dodo.checkoutSessions.create({
+      product_cart: [{ product_id: product.product_id, quantity: 1 }],
+      customer: {
+        email: customerEmail || "demo@flowpay.in",
+        name: customerName || "FlowPay User",
+      },
+      return_url: `${process.env.APP_URL || "https://flowpay-solana.vercel.app"}${returnPath}`,
+    });
+
+    item.dodoPaymentId = session.session_id || item.dodoPaymentId;
+    item.dodoSessionId = session.session_id || item.dodoSessionId || null;
+    item.dodoCheckoutUrl = session.checkout_url || item.dodoCheckoutUrl || null;
+  } catch (error) {
+    console.warn("Dodo checkout creation failed in fallback API", error?.message || error);
+  }
+
+  return item;
+}
+
 function json(res, status, data) {
   res.statusCode = status;
   res.setHeader("content-type", "application/json; charset=utf-8");
@@ -136,6 +192,13 @@ module.exports = async function mockApp(req, res) {
     const input = await body(req);
     const item = { ...paymentBase(input, "payroll"), ...input };
     item.id = id(state.payroll);
+    await attachDodoCheckout(item, {
+      name: `Payroll: ${item.senderCompany} to ${item.recipientName}`,
+      description: `USDC payroll payment of $${item.amountUsdg} from ${item.senderCompany}.`,
+      customerName: item.recipientName,
+      customerEmail: item.recipientEmail,
+      returnPath: "/payroll",
+    });
     state.payroll.unshift(item);
     return json(res, 201, item);
   }
@@ -145,6 +208,13 @@ module.exports = async function mockApp(req, res) {
   if (method === "POST" && path === "/remittances") {
     const input = await body(req);
     const item = { ...paymentBase(input, "remittance"), ...input, id: id(state.remittances) };
+    await attachDodoCheckout(item, {
+      name: `Remittance: ${item.senderCountry} to India`,
+      description: `Cross-border remittance of $${item.amountUsdg} USDC to ${item.recipientName}.`,
+      customerName: item.senderName,
+      customerEmail: "demo@flowpay.in",
+      returnPath: "/remittance",
+    });
     state.remittances.unshift(item);
     return json(res, 201, item);
   }
@@ -153,6 +223,13 @@ module.exports = async function mockApp(req, res) {
   if (method === "POST" && path === "/escrows") {
     const input = await body(req);
     const item = { ...paymentBase(input, "escrow"), ...input, id: id(state.escrows), status: "funded" };
+    await attachDodoCheckout(item, {
+      name: `Escrow: ${item.projectTitle}`,
+      description: `Milestone escrow of $${item.amountUsdg} USDC for ${item.projectTitle}.`,
+      customerName: item.clientName,
+      customerEmail: item.clientEmail,
+      returnPath: "/escrow",
+    });
     state.escrows.unshift(item);
     return json(res, 201, item);
   }
@@ -178,6 +255,13 @@ module.exports = async function mockApp(req, res) {
     const product = state.products.find((p) => p.id === productId) || { id: productId, title: "FlowPay product", priceUsdg: "1.00" };
     const input = await body(req);
     const sale = { ...paymentBase({ amountUsdg: product.priceUsdg }, "creator"), id: id(state.sales), productId, productTitle: product.title, buyerName: input.buyerName || "Buyer", buyerEmail: input.buyerEmail || "", amountUsdg: product.priceUsdg, creatorReceives: (money(product.priceUsdg) * 0.98).toFixed(4) };
+    await attachDodoCheckout(sale, {
+      name: `CreatorPay: ${product.title}`,
+      description: `Digital product purchase for ${product.title}.`,
+      customerName: sale.buyerName,
+      customerEmail: sale.buyerEmail,
+      returnPath: `/buy/${productId}?status=success`,
+    });
     state.sales.unshift(sale);
     return json(res, 201, sale);
   }
@@ -195,6 +279,13 @@ module.exports = async function mockApp(req, res) {
     const agentId = Number(path.split("/")[2]);
     const agent = state.agents.find((a) => a.id === agentId) || { name: "Agent" };
     const tx = { ...paymentBase({ amountUsdg: input.amountUsdg || "0.01" }, "agent"), id: id(state.agentTransactions), agentId, agentName: agent.name, purpose: input.purpose || (path.endsWith("/fund") ? "Wallet funding" : "x402 API payment") };
+    await attachDodoCheckout(tx, {
+      name: `AgentBank: ${agent.name}`,
+      description: `Autonomous agent payment of $${tx.amountUsdg} USDC via x402.`,
+      customerName: agent.ownerName || "Agent Owner",
+      customerEmail: "demo@flowpay.in",
+      returnPath: "/agents",
+    });
     state.agentTransactions.unshift(tx);
     return json(res, 201, tx);
   }
