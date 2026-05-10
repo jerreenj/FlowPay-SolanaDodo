@@ -29,6 +29,7 @@ function getDodoClient() {
 async function attachDodoCheckout(item, { name, description, customerName, customerEmail, returnPath = "/" }) {
   const dodo = getDodoClient();
   if (!dodo) return item;
+  const liveMode = dodoEnvironment() === "live_mode";
 
   try {
     const amountInCents = Math.max(1, Math.round(money(item.amountUsdg) * 100));
@@ -62,11 +63,29 @@ async function attachDodoCheckout(item, { name, description, customerName, custo
     item.dodoPaymentId = session.session_id || item.dodoPaymentId;
     item.dodoSessionId = session.session_id || item.dodoSessionId || null;
     item.dodoCheckoutUrl = session.checkout_url || item.dodoCheckoutUrl || null;
+    if (liveMode) {
+      item.status = "pending";
+      item.settlementSeconds = null;
+      item.solanaSignature = null;
+    }
   } catch (error) {
-    console.warn("Dodo checkout creation failed in fallback API", error?.message || error);
+    const message = error?.message || String(error);
+    console.warn("Dodo checkout creation failed in fallback API", message);
+    if (liveMode) {
+      item.dodoError = `Dodo live checkout failed: ${message}`;
+    }
   }
 
   return item;
+}
+
+function dodoFailure(res, item) {
+  if (!item.dodoError) return false;
+  json(res, 502, {
+    error: item.dodoError,
+    hint: "Set a live Dodo API key for DODO_API_KEY, or switch DODO_ENVIRONMENT back to test_mode for test checkout links.",
+  });
+  return true;
 }
 
 function json(res, status, data) {
@@ -208,6 +227,7 @@ module.exports = async function mockApp(req, res) {
       customerEmail: item.recipientEmail,
       returnPath: "/payroll",
     });
+    if (dodoFailure(res, item)) return;
     state.payroll.unshift(item);
     return json(res, 201, item);
   }
@@ -224,6 +244,7 @@ module.exports = async function mockApp(req, res) {
       customerEmail: "demo@flowpay.in",
       returnPath: "/remittance",
     });
+    if (dodoFailure(res, item)) return;
     state.remittances.unshift(item);
     return json(res, 201, item);
   }
@@ -239,6 +260,7 @@ module.exports = async function mockApp(req, res) {
       customerEmail: item.clientEmail,
       returnPath: "/escrow",
     });
+    if (dodoFailure(res, item)) return;
     state.escrows.unshift(item);
     return json(res, 201, item);
   }
@@ -271,6 +293,7 @@ module.exports = async function mockApp(req, res) {
       customerEmail: sale.buyerEmail,
       returnPath: `/buy/${productId}?status=success`,
     });
+    if (dodoFailure(res, sale)) return;
     state.sales.unshift(sale);
     return json(res, 201, sale);
   }
@@ -295,6 +318,7 @@ module.exports = async function mockApp(req, res) {
       customerEmail: "demo@flowpay.in",
       returnPath: "/agents",
     });
+    if (dodoFailure(res, tx)) return;
     state.agentTransactions.unshift(tx);
     return json(res, 201, tx);
   }
