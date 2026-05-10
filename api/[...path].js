@@ -1,7 +1,7 @@
 let appPromise;
 
 module.exports = async (req, res) => {
-  if (!process.env.DATABASE_URL) {
+  if (process.env.FLOWPAY_STATELESS_API === "1" || !process.env.DATABASE_URL) {
     return require("./mock-app")(req, res);
   }
 

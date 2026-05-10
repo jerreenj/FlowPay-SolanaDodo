@@ -11,13 +11,17 @@ const state = globalThis.__flowpayMockState ??= {
 
 let dodoClient;
 
+function dodoEnvironment() {
+  return process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
+}
+
 function getDodoClient() {
   const apiKey = process.env.DODO_API_KEY;
   if (!apiKey) return null;
   if (!dodoClient) {
     const DodoPayments = require("../artifacts/api-server/node_modules/dodopayments");
     const Dodo = DodoPayments.default || DodoPayments;
-    dodoClient = new Dodo({ bearerToken: apiKey, webhookKey: process.env.DODO_WEBHOOK_KEY, environment: "test_mode" });
+    dodoClient = new Dodo({ bearerToken: apiKey, webhookKey: process.env.DODO_WEBHOOK_KEY, environment: dodoEnvironment() });
   }
   return dodoClient;
 }
@@ -163,7 +167,12 @@ module.exports = async function mockApp(req, res) {
   const path = url.pathname.replace(/^\/api/, "") || "/health";
   const method = req.method || "GET";
 
-  if (method === "GET" && path === "/health") return json(res, 200, { ok: true, mode: "serverless-mock" });
+  if (method === "GET" && path === "/health") return json(res, 200, {
+    ok: true,
+    mode: "stateless-dodo",
+    dodo: process.env.DODO_API_KEY ? dodoEnvironment() : "not_configured",
+    storage: "memory",
+  });
   if (method === "GET" && path === "/rates") return json(res, 200, { INR: 83.5, USD: 1, AED: 3.67, GBP: 0.79, usdgToInr: 83.5, usdgToUsd: 1, usdgToAed: 3.67, usdgToGbp: 0.79 });
   if (method === "GET" && path === "/dashboard/stats") return json(res, 200, dashboardStats());
   if (method === "GET" && path === "/dashboard/activity") return json(res, 200, activity());

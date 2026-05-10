@@ -2,11 +2,12 @@ import DodoPayments from "dodopayments";
 
 const apiKey = process.env.DODO_API_KEY ?? "";
 export const dodoWebhookKey = process.env.DODO_WEBHOOK_KEY ?? null;
+const dodoEnvironment = process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
 
 export const dodo = new DodoPayments({
   bearerToken: apiKey || "not_configured",
   webhookKey: dodoWebhookKey ?? undefined,
-  environment: "test_mode",
+  environment: dodoEnvironment,
 });
 
 export const dodoEnabled = Boolean(apiKey);
