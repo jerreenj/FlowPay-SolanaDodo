@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @workspace/flowpay run build",
+  "buildCommand": "pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/flowpay run build",
   "outputDirectory": "artifacts/flowpay/dist",
   "installCommand": "pnpm install",
   "framework": null,
