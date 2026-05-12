@@ -15,6 +15,30 @@ function dodoEnvironment() {
   return process.env.DODO_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
 }
 
+function integrationStatus() {
+  const dodo = process.env.DODO_API_KEY
+    ? { configured: true, mode: dodoEnvironment(), realCheckout: true }
+    : { configured: false, mode: "not_configured", realCheckout: false };
+
+  return {
+    dodo,
+    solana: {
+      configured: Boolean(process.env.SOLANA_RPC_URL && process.env.SOLANA_TREASURY_PRIVATE_KEY),
+      network: process.env.SOLANA_NETWORK || "not_configured",
+      realSettlement: Boolean(process.env.SOLANA_RPC_URL && process.env.SOLANA_TREASURY_PRIVATE_KEY),
+    },
+    bankDelivery: {
+      configured: Boolean(process.env.UPI_PROVIDER_API_KEY),
+      provider: process.env.UPI_PROVIDER || "not_configured",
+      realDelivery: Boolean(process.env.UPI_PROVIDER_API_KEY),
+    },
+    storage: {
+      mode: "memory",
+      durable: false,
+    },
+  };
+}
+
 function getDodoClient() {
   const apiKey = process.env.DODO_API_KEY;
   if (!apiKey) return null;
@@ -63,11 +87,10 @@ async function attachDodoCheckout(item, { name, description, customerName, custo
     item.dodoPaymentId = session.session_id || item.dodoPaymentId;
     item.dodoSessionId = session.session_id || item.dodoSessionId || null;
     item.dodoCheckoutUrl = session.checkout_url || item.dodoCheckoutUrl || null;
-    if (liveMode) {
-      item.status = "pending";
-      item.settlementSeconds = null;
-      item.solanaSignature = null;
-    }
+    item.status = "pending_payment";
+    item.dodoPaymentStatus = "pending";
+    item.settlementSeconds = null;
+    item.solanaSignature = null;
   } catch (error) {
     const message = error?.message || String(error);
     console.warn("Dodo checkout creation failed in fallback API", message);
@@ -134,17 +157,19 @@ function money(value, fallback = "0") {
 function paymentBase(input, type) {
   const amountUsdg = String(input.amountUsdg ?? input.priceUsdg ?? "1.00");
   const amount = money(amountUsdg);
+  const status = integrationStatus();
   return {
     id: 0,
     type,
     amountUsdg,
     feeUsdg: (amount * 0.005).toFixed(4),
     amountInr: (amount * 83.5).toFixed(2),
-    status: "completed",
-    solanaSignature: signature(),
-    settlementSeconds: (1.8 + Math.random()).toFixed(1),
+    status: status.solana.realSettlement ? "processing" : "demo_simulated",
+    solanaSignature: status.solana.realSettlement ? null : `demo_${signature()}`,
+    settlementSeconds: status.solana.realSettlement ? null : (1.8 + Math.random()).toFixed(1),
     dodoPaymentId: `mock_dodo_${Date.now()}`,
     dodoCheckoutUrl: null,
+    railStatus: status,
     createdAt: new Date().toISOString(),
   };
 }
@@ -191,7 +216,9 @@ module.exports = async function mockApp(req, res) {
     mode: "stateless-dodo",
     dodo: process.env.DODO_API_KEY ? dodoEnvironment() : "not_configured",
     storage: "memory",
+    integrations: integrationStatus(),
   });
+  if (method === "GET" && path === "/integrations/status") return json(res, 200, integrationStatus());
   if (method === "GET" && path === "/rates") return json(res, 200, { INR: 83.5, USD: 1, AED: 3.67, GBP: 0.79, usdgToInr: 83.5, usdgToUsd: 1, usdgToAed: 3.67, usdgToGbp: 0.79 });
   if (method === "GET" && path === "/dashboard/stats") return json(res, 200, dashboardStats());
   if (method === "GET" && path === "/dashboard/activity") return json(res, 200, activity());
